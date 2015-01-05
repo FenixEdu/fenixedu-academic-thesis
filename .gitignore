@@ -5,6 +5,20 @@
 *.war
 *.ear
 
+# Eclipse #
+.settings/
 .project
 .classpath
-.settings/
+output/
+
+# IntelliJ #
+
+.idea/
+*.iml
+
+# Maven #
+target/
+bin/
+
+/target
+/target/
