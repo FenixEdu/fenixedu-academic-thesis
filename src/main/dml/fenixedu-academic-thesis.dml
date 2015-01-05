@@ -59,7 +59,7 @@ relation DegreeThesisManager {
  // root relationships definition
 relation ThesisProposalsSystemBennuRoot {
 	public ThesisProposalsSystem playsRole thesisProposalsSystem {
-		multiplicity 1..1;
+		multiplicity 0..1;
 	}
 	public .org.fenixedu.bennu.core.domain.Bennu playsRole bennu {
 		multiplicity 1..1;
