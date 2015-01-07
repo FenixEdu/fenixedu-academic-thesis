@@ -5,7 +5,7 @@ import java.util.Comparator;
 
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
-import org.fenixedu.academic.thesis.domain.exception.MaxNumberStudentThesisCandidacies;
+import org.fenixedu.academic.thesis.domain.exception.MaxNumberStudentThesisCandidaciesException;
 import org.fenixedu.academic.thesis.domain.exception.OutOfCandidacyPeriodException;
 import org.joda.time.DateTime;
 
@@ -20,7 +20,7 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
     };
 
     public StudentThesisCandidacy(Registration registration, Integer preferenceNumber, ThesisProposal thesisProposal)
-	    throws MaxNumberStudentThesisCandidacies, OutOfCandidacyPeriodException {
+	    throws MaxNumberStudentThesisCandidaciesException, OutOfCandidacyPeriodException {
 
 	ThesisProposalsConfiguration thesisProposalsConfiguration = thesisProposal.getSingleThesisProposalsConfiguration();
 
@@ -30,7 +30,7 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 	    if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
 		    && registration.getStudentThesisCandidacySet().size() >= thesisProposalsConfiguration
 		    .getMaxThesisCandidaciesByStudent()) {
-		throw new MaxNumberStudentThesisCandidacies(registration.getStudent());
+		throw new MaxNumberStudentThesisCandidaciesException(registration.getStudent());
 	    } else {
 		setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
 		setPreferenceNumber(preferenceNumber);

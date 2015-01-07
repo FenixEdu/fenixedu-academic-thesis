@@ -1,6 +1,7 @@
 package org.fenixedu.academic.thesis.ui.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -18,7 +19,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.thesisCandidacy.management", accessGroup = "thesisSystemManagers | thesisCreators")
 @RequestMapping("/thesisCandidacies")

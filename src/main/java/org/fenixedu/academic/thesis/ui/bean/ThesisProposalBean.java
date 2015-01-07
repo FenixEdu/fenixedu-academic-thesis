@@ -11,7 +11,6 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
-import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.bennu.core.domain.User;
 
 import pt.ist.fenixframework.Atomic;
@@ -152,7 +151,8 @@ public class ThesisProposalBean {
 	}
 
 	@Atomic(mode = TxMode.WRITE)
-	public ThesisProposal build() throws MaxNumberThesisProposalsException, OutOfProposalPeriodException {
+	public ThesisProposal build() throws MaxNumberThesisProposalsException,
+		org.fenixedu.academic.thesis.domain.ThesisProposal.OutOfProposalPeriodException {
 	    ArrayList<ThesisProposalParticipant> participants = new ArrayList<ThesisProposalParticipant>();
 
 	    for (ThesisProposalParticipantBean participantBean : thesisProposalParticipantsBean) {

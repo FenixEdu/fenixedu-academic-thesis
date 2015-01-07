@@ -11,7 +11,6 @@ import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
-import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.bennu.core.domain.User;
 
 import com.google.common.collect.Sets;
@@ -29,6 +28,12 @@ public class ThesisProposal extends ThesisProposal_Base {
 	    }
 	}
     };
+
+    public class OutOfProposalPeriodException extends DomainException {
+
+	private static final long serialVersionUID = 7294240729086538046L;
+
+    }
 
     @Override
     public Set<StudentThesisCandidacy> getStudentThesisCandidacySet() {
