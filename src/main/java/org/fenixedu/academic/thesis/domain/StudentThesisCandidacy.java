@@ -5,7 +5,7 @@ import java.util.Comparator;
 
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
-import org.fenixedu.academic.thesis.domain.exception.MaxNumberStudentThesisCandidacies;
+import org.fenixedu.academic.thesis.domain.exception.MaxNumberStudentThesisCandidaciesException;
 import org.fenixedu.academic.thesis.domain.exception.OutOfCandidacyPeriodException;
 import org.joda.time.DateTime;
 
@@ -20,18 +20,17 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
     };
 
     public StudentThesisCandidacy(Registration registration, Integer preferenceNumber, ThesisProposal thesisProposal)
-	    throws MaxNumberStudentThesisCandidacies, OutOfCandidacyPeriodException {
+	    throws MaxNumberStudentThesisCandidaciesException, OutOfCandidacyPeriodException {
 
-	ThesisProposalsConfiguration thesisProposalsConfiguration = thesisProposal.getSingleExecutionDegree()
-		.getThesisProposalsConfiguration();
+	ThesisProposalsConfiguration thesisProposalsConfiguration = thesisProposal.getSingleThesisProposalsConfiguration();
 
 	if (!thesisProposalsConfiguration.getCandidacyPeriod().containsNow()) {
 	    throw new OutOfCandidacyPeriodException();
 	} else {
-	    if (thesisProposalsConfiguration.getMaxThesisProposalsByUser() != -1
+	    if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
 		    && registration.getStudentThesisCandidacySet().size() >= thesisProposalsConfiguration
-		    .getMaxThesisProposalsByUser()) {
-		throw new MaxNumberStudentThesisCandidacies(registration.getStudent());
+		    .getMaxThesisCandidaciesByStudent()) {
+		throw new MaxNumberStudentThesisCandidaciesException(registration.getStudent());
 	    } else {
 		setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
 		setPreferenceNumber(preferenceNumber);
@@ -57,8 +56,7 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 	super.checkForDeletionBlockers(blockers);
 
 	if (getAcceptedByAdvisor()
-		|| !(getThesisProposal().getSingleExecutionDegree().getThesisProposalsConfiguration().getCandidacyPeriod()
-			.contains(DateTime.now()))) {
+		|| !getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod().contains(DateTime.now())) {
 	    blockers.add("org.fenixedu.thesisProposals.domain.ThesisProposal cannot be deleted");
 	}
     }

@@ -1,18 +1,21 @@
 package org.fenixedu.academic.thesis.ui.controller;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.student.Student;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
-import org.fenixedu.academic.thesis.domain.exception.MaxNumberStudentThesisCandidacies;
+import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
+import org.fenixedu.academic.thesis.domain.exception.MaxNumberStudentThesisCandidaciesException;
 import org.fenixedu.academic.thesis.domain.exception.OutOfCandidacyPeriodException;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -30,8 +33,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.studentThesisCandidacy.management", accessGroup = "activeStudents")
 @RequestMapping("/studentCandidacies")
 public class StudentCandidaciesController {
@@ -41,9 +42,12 @@ public class StudentCandidaciesController {
 
 	Student student = Authenticate.getUser().getPerson().getStudent();
 
-	List<StudentThesisCandidacy> candidacies = student.getActiveRegistrations().stream()
+	List<StudentThesisCandidacy> candidacies = student
+		.getActiveRegistrations()
+		.stream()
 		.flatMap((Registration registration) -> registration.getStudentThesisCandidacySet().stream())
-		.collect(Collectors.toList());
+		.filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod()
+			.containsNow()).collect(Collectors.toList());
 
 	Collections.sort(candidacies, StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
 
@@ -53,14 +57,22 @@ public class StudentCandidaciesController {
 	}
 
 	HashMap<Registration, Set<ThesisProposal>> proposals = new HashMap<Registration, Set<ThesisProposal>>();
-	student.getActiveRegistrations().forEach(
-		(Registration elem) -> {
-		    proposals.put(
-			    elem,
-			    elem.getDegree().getExecutionDegreesForExecutionYear(ExecutionYear.readCurrentExecutionYear())
-				    .stream().flatMap((x) -> x.getThesisProposalSet().stream())
-			    .filter((x) -> !thesisProposalCandidacies.contains(x)).collect(Collectors.toSet()));
 
+	student.getActiveRegistrations().forEach(
+		reg -> {
+		    proposals.put(
+			    reg,
+			    reg.getDegree()
+				    .getExecutionDegrees()
+				    .stream()
+				    .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
+					    ExecutionYear.readCurrentExecutionYear()))
+				    .flatMap(
+					    (ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet()
+						    .stream()).filter(config -> config.getCandidacyPeriod().containsNow())
+					    .flatMap((ThesisProposalsConfiguration config) -> config.getThesisProposalSet().stream())
+					    .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal))
+					    .collect(Collectors.toSet()));
 		});
 
 	model.addAttribute("proposals", proposals);
@@ -71,13 +83,13 @@ public class StudentCandidaciesController {
 
     @RequestMapping(value = "/candidate/{oid}", method = RequestMethod.POST)
     public String createThesisCandidacyForm(@PathVariable("oid") ThesisProposal thesisProposal,
-	    @RequestParam Registration registration, Model model) throws MaxNumberStudentThesisCandidacies,
+	    @RequestParam Registration registration, Model model) throws MaxNumberStudentThesisCandidaciesException,
 	    OutOfCandidacyPeriodException {
 
 	try {
 	    createStudentThesisCandidacy(registration, thesisProposal);
-	} catch (MaxNumberStudentThesisCandidacies exception) {
-	    model.addAttribute("maxNumberStudentThesisCandidacies", exception);
+	} catch (MaxNumberStudentThesisCandidaciesException exception) {
+	    model.addAttribute("maxNumberStudentThesisCandidaciesException", exception);
 	    return listProposals(model);
 	} catch (OutOfCandidacyPeriodException exception) {
 	    model.addAttribute("outOfCandidacyPeriodException", exception);
@@ -92,7 +104,7 @@ public class StudentCandidaciesController {
 
     @Atomic(mode = TxMode.WRITE)
     public void createStudentThesisCandidacy(Registration registration, ThesisProposal thesisProposal)
-	    throws MaxNumberStudentThesisCandidacies, OutOfCandidacyPeriodException {
+	    throws MaxNumberStudentThesisCandidaciesException, OutOfCandidacyPeriodException {
 	StudentThesisCandidacy studentThesisCandidacy = new StudentThesisCandidacy(registration, registration
 		.getStudentThesisCandidacySet().size(), thesisProposal);
 	registration.getStudentThesisCandidacySet().add(studentThesisCandidacy);

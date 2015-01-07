@@ -43,7 +43,7 @@ ${portal.toolkit()}
 <p>
    <div class="row">
       <div class="col-sm-8">
-      <form role="form" method="GET" action="/proposals/create" class="form-horizontal" id="thesisProposalCreateForm">
+      <form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/create" class="form-horizontal" id="thesisProposalCreateForm">
          <button type="submit" class="btn btn-primary"><spring:message code="button.create"/></button>
          </form>
       </div>
@@ -64,6 +64,9 @@ ${portal.toolkit()}
    <table class="table">
       <thead>
          <tr>
+					<th>
+						<spring:message code='label.thesis.id'/>
+					</th>
             <th>
                <spring:message code='label.title'/>
             </th>
@@ -76,6 +79,7 @@ ${portal.toolkit()}
       <tbody>
          <c:forEach items="${thesisProposalsList}" var="thesisProposal">
          <tr>
+						<td>${thesisProposal.identifier}</td>
             <td>${thesisProposal.title}</td>
             <td>
                <c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
@@ -83,7 +87,7 @@ ${portal.toolkit()}
                </c:forEach>
          </td>
             <td>
-               <form:form method="GET" action="/proposals/edit/${thesisProposal.externalId}">
+               <form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">
                 <div class="btn-group btn-group-xs">
                <button type="submit" class="btn btn-default" id="editButton">
                   <spring:message code='button.edit'/>

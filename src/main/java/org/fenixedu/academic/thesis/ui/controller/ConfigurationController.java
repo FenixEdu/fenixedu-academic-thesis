@@ -10,11 +10,12 @@ import jvstm.cps.ConsistencyException;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
+import org.fenixedu.academic.domain.degreeStructure.CycleType;
 import org.fenixedu.academic.domain.exceptions.DomainException;
-import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
+import org.fenixedu.academic.thesis.domain.exception.OverlappingIntervalsException;
 import org.fenixedu.academic.thesis.ui.bean.ConfigurationBean;
 import org.fenixedu.academic.thesis.ui.bean.ParticipantTypeBean;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -52,7 +53,7 @@ import com.google.gson.JsonParser;
 public class ConfigurationController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public String listThesisProposalsConfigurationForm(Model model) {
+    public String listConfigurations(Model model) {
 
 	TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
 	executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
@@ -69,14 +70,6 @@ public class ConfigurationController {
 
 	model.addAttribute("configurationsList", configurationsList);
 
-	List<ExecutionDegree> executionDegreeList = Bennu.getInstance().getExecutionDegreesSet().stream()
-		.filter((x) -> ThesisProposalsSystem.canManage(x.getDegree(), Authenticate.getUser()))
-		.collect(Collectors.toList());
-
-	Collections.sort(executionDegreeList, ExecutionDegree.COMPARATOR_BY_DEGREE_NAME);
-
-	model.addAttribute("executionDegreeList", executionDegreeList);
-
 	List<ThesisProposalParticipantType> participantTypeList = ThesisProposalsSystem.getInstance()
 		.getThesisProposalParticipantTypeSet().stream().collect(Collectors.toList());
 
@@ -90,8 +83,7 @@ public class ConfigurationController {
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.GET)
-    public ModelAndView createThesisProposalsConfigurationForm(Model model,
-	    @RequestParam ConfigurationBean thesisProposalsConfigurationBean) {
+    public ModelAndView createConfigurationForm(Model model, @RequestParam ConfigurationBean thesisProposalsConfigurationBean) {
 
 	ModelAndView mav = new ModelAndView("/configuration/create", "command", thesisProposalsConfigurationBean);
 
@@ -108,19 +100,18 @@ public class ConfigurationController {
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public ModelAndView createThesisProposals(@ModelAttribute ConfigurationBean configurationBean, Model model) {
+    public ModelAndView createConfiguration(@ModelAttribute ConfigurationBean configurationBean, Model model) {
 
 	try {
 	    if (configurationBean.getExecutionDegree() == null) {
 		model.addAttribute("unselectedExecutionDegreeException", true);
-		return createThesisProposalsConfigurationForm(model, configurationBean);
+		return createConfigurationForm(model, configurationBean);
 	    }
 
 	    new ConfigurationBean.Builder(configurationBean).build();
 	} catch (ConsistencyException exception) {
 	    model.addAttribute("createException", true);
 	    model.addAttribute("command", configurationBean);
-	    model.addAttribute("executionDegreeList", ThesisProposal.getThesisExecutionDegrees());
 
 	    TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
 	    executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
@@ -130,7 +121,15 @@ public class ConfigurationController {
 	} catch (IllegalArgumentException exception) {
 	    model.addAttribute("illegalArgumentException", true);
 	    model.addAttribute("command", configurationBean);
-	    model.addAttribute("executionDegreeList", ThesisProposal.getThesisExecutionDegrees());
+
+	    TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
+	    executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
+	    model.addAttribute("executionYearsList", executionYearsList);
+
+	    return new ModelAndView("/configuration/create", model.asMap());
+	} catch (OverlappingIntervalsException e) {
+	    model.addAttribute("overlappingIntervalsException", true);
+	    model.addAttribute("command", configurationBean);
 
 	    TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
 	    executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
@@ -143,7 +142,7 @@ public class ConfigurationController {
     }
 
     @RequestMapping(value = "/delete/{oid}", method = RequestMethod.POST)
-    public ModelAndView deleteThesisProposals(@PathVariable("oid") ThesisProposalsConfiguration thesisProposalsConfiguration,
+    public ModelAndView deleteConfiguration(@PathVariable("oid") ThesisProposalsConfiguration thesisProposalsConfiguration,
 	    Model model) {
 
 	try {
@@ -153,7 +152,7 @@ public class ConfigurationController {
 	    return editConfigurationForm(thesisProposalsConfiguration, model);
 	}
 
-	return new ModelAndView(listThesisProposalsConfigurationForm(model));
+	return new ModelAndView(listConfigurations(model));
     }
 
     @Atomic(mode = TxMode.WRITE)
@@ -182,11 +181,11 @@ public class ConfigurationController {
 	} catch (IllegalArgumentException exception) {
 	    model.addAttribute("illegalArgumentException", true);
 	    model.addAttribute("command", configurationBean);
-	    model.addAttribute("executionDegreeList", ThesisProposal.getThesisExecutionDegrees());
 
-	    TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
-	    executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
-	    model.addAttribute("executionYearsList", executionYearsList);
+	    return new ModelAndView("/configuration/edit", model.asMap());
+	} catch (OverlappingIntervalsException e) {
+	    model.addAttribute("overlappingIntervalsException", true);
+	    model.addAttribute("command", configurationBean);
 
 	    return new ModelAndView("/configuration/edit", model.asMap());
 	}
@@ -195,7 +194,8 @@ public class ConfigurationController {
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void edit(ConfigurationBean configurationBean) {
+    private void edit(ConfigurationBean configurationBean) throws OverlappingIntervalsException {
+
 	ThesisProposalsConfiguration thesisProposalsConfiguration = FenixFramework.getDomainObject(configurationBean
 		.getExternalId());
 
@@ -208,6 +208,21 @@ public class ConfigurationController {
 
 	Interval proposalPeriod = new Interval(proposalPeriodStartDT, proposalPeriodEndDT);
 	Interval candidacyPeriod = new Interval(candidacyPeriodStartDT, candidacyPeriodEndDT);
+
+	if (proposalPeriod.overlaps(candidacyPeriod)) {
+	    throw new OverlappingIntervalsException();
+	}
+
+	for (ThesisProposalsConfiguration config : thesisProposalsConfiguration.getExecutionDegree()
+		.getThesisProposalsConfigurationSet()) {
+	    if (!config.equals(thesisProposalsConfiguration)
+		    && (config.getProposalPeriod().overlaps(proposalPeriod)
+			    || config.getCandidacyPeriod().overlaps(candidacyPeriod)
+			    || config.getProposalPeriod().overlaps(candidacyPeriod) || config.getCandidacyPeriod().overlaps(
+				    proposalPeriod))) {
+		throw new OverlappingIntervalsException();
+	    }
+	}
 
 	thesisProposalsConfiguration.setProposalPeriod(proposalPeriod);
 	thesisProposalsConfiguration.setCandidacyPeriod(candidacyPeriod);
@@ -223,6 +238,7 @@ public class ConfigurationController {
 	JsonArray response = new JsonArray();
 
 	List<ExecutionDegree> executionDegreeList = ExecutionDegree.getAllByExecutionYear(executionYear).stream()
+		.filter(executionDegree -> executionDegree.getDegree().getCycleTypes().contains(CycleType.SECOND_CYCLE))
 		.filter((x) -> ThesisProposalsSystem.canManage(x.getDegree(), Authenticate.getUser()))
 		.collect(Collectors.toList());
 

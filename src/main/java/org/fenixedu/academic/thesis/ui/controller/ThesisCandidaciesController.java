@@ -1,6 +1,7 @@
 package org.fenixedu.academic.thesis.ui.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -18,7 +19,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.thesisCandidacy.management", accessGroup = "thesisSystemManagers | thesisCreators")
 @RequestMapping("/thesisCandidacies")
@@ -28,7 +28,7 @@ public class ThesisCandidaciesController {
     public String listProposals(Model model) {
 
 	ArrayList<ThesisProposal> thesisProposalsList = new ArrayList<ThesisProposal>(
-		ThesisProposal.readByParticipant(Authenticate.getUser()));
+		ThesisProposal.readCurrentByParticipant(Authenticate.getUser()));
 	Collections.sort(thesisProposalsList, ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
 	model.addAttribute("thesisProposalsList", thesisProposalsList);
 
@@ -63,8 +63,8 @@ public class ThesisCandidaciesController {
     @Atomic(mode = TxMode.WRITE)
     private String accept(StudentThesisCandidacy studentThesisCandidacy, Model model) {
 	try {
-	    if (!studentThesisCandidacy.getThesisProposal().getSingleExecutionDegree().getThesisProposalsConfiguration()
-		    .getCandidacyPeriod().containsNow()) {
+	    if (!studentThesisCandidacy.getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod()
+		    .containsNow()) {
 		throw new OutOfCandidacyPeriodException();
 	    }
 
@@ -91,8 +91,8 @@ public class ThesisCandidaciesController {
     @Atomic(mode = TxMode.WRITE)
     private String reject(StudentThesisCandidacy studentThesisCandidacy, Model model) {
 	try {
-	    if (!studentThesisCandidacy.getThesisProposal().getSingleExecutionDegree().getThesisProposalsConfiguration()
-		    .getCandidacyPeriod().containsNow()) {
+	    if (!studentThesisCandidacy.getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod()
+		    .containsNow()) {
 		throw new OutOfCandidacyPeriodException();
 	    }
 	    studentThesisCandidacy.setAcceptedByAdvisor(false);

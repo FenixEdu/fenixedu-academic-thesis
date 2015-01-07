@@ -9,7 +9,6 @@ import org.fenixedu.bennu.core.domain.User;
 public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
 
     public final static Comparator<ThesisProposalParticipant> COMPARATOR_BY_WEIGHT = new Comparator<ThesisProposalParticipant>() {
-
 	@Override
 	public int compare(ThesisProposalParticipant arg0, ThesisProposalParticipant arg1) {
 	    return arg1.getThesisProposalParticipantType().getWeight() - arg0.getThesisProposalParticipantType().getWeight();

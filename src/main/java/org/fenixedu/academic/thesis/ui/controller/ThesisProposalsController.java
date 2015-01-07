@@ -5,21 +5,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
+import org.fenixedu.academic.thesis.domain.ThesisProposal.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
-import org.fenixedu.academic.thesis.domain.exception.CannotEditUsedThesisProposalsException;
-import org.fenixedu.academic.thesis.domain.exception.IllegalParticipantTypeException;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
-import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
-import org.fenixedu.academic.thesis.domain.exception.ThesisProposalExecutionDegreeRequiredException;
-import org.fenixedu.academic.thesis.domain.exception.UnequivalentThesisConfigurations;
-import org.fenixedu.academic.thesis.domain.exception.UnexistentConfigurationException;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.bennu.core.domain.User;
@@ -48,10 +43,91 @@ import com.google.gson.JsonParser;
 @RequestMapping("/proposals")
 public class ThesisProposalsController {
 
+    public class UnexistentThesisParticipantException extends DomainException {
+
+    }
+
+    public class CannotEditUsedThesisProposalsException extends Exception {
+
+	private static final long serialVersionUID = -4965296880371661815L;
+	private ThesisProposal thesisProposal;
+
+	public CannotEditUsedThesisProposalsException(ThesisProposal thesisProposal) {
+	    this.thesisProposal = thesisProposal;
+	}
+
+	public ThesisProposal getThesisProposal() {
+	    return thesisProposal;
+	}
+
+	public void setThesisProposal(ThesisProposal thesisProposal) {
+	    this.thesisProposal = thesisProposal;
+	}
+
+    }
+
+    public class IllegalParticipantTypeException extends DomainException {
+
+	private static final long serialVersionUID = -3114050449816099494L;
+	private User user;
+
+	public IllegalParticipantTypeException(User user) {
+	    this.user = user;
+	}
+
+	public User getUser() {
+	    return user;
+	}
+
+	public void setUser(User user) {
+	    this.user = user;
+	}
+
+    }
+
+    public class UnequivalentThesisConfigurations extends DomainException {
+
+	private static final long serialVersionUID = -4270028206922579262L;
+	private ThesisProposalsConfiguration configuration0;
+	private ThesisProposalsConfiguration configuration1;
+
+	public ThesisProposalsConfiguration getConfiguration0() {
+	    return configuration0;
+	}
+
+	public void setConfiguration0(ThesisProposalsConfiguration configuration0) {
+	    this.configuration0 = configuration0;
+	}
+
+	public ThesisProposalsConfiguration getConfiguration1() {
+	    return configuration1;
+	}
+
+	public void setConfiguration1(ThesisProposalsConfiguration configuration1) {
+	    this.configuration1 = configuration1;
+	}
+
+	public UnequivalentThesisConfigurations(ThesisProposalsConfiguration configuration0,
+		ThesisProposalsConfiguration configuration1) {
+	    this.configuration0 = configuration0;
+	    this.configuration1 = configuration1;
+	}
+
+    }
+
+    public class UnexistentConfigurationException extends DomainException {
+
+	private static final long serialVersionUID = -85534820603380001L;
+
+	public UnexistentConfigurationException() {
+	}
+
+    }
+
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String listProposals(Model model) {
 
-	Set<ThesisProposal> thesisProposalsList = ThesisProposal.readByParticipant(Authenticate.getUser());
+	Set<ThesisProposal> thesisProposalsList = ThesisProposal.readCurrentByParticipant(Authenticate.getUser());
 
 	model.addAttribute("thesisProposalsList", thesisProposalsList);
 
@@ -63,8 +139,9 @@ public class ThesisProposalsController {
 
 	ModelAndView mav = new ModelAndView("proposals/create", "command", new ThesisProposalBean());
 
-	List<ExecutionDegree> executionDegreeList = ThesisProposal.getThesisExecutionDegrees();
-	mav.addObject("executionDegreeList", executionDegreeList);
+	Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		.stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	mav.addObject("configurations", configs);
 
 	List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 	participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -76,28 +153,15 @@ public class ThesisProposalsController {
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ModelAndView createThesisProposals(@ModelAttribute ThesisProposalBean proposalBean,
-	    @RequestParam String participantsJson, @RequestParam Set<ExecutionDegree> executionDegrees, Model model)
-	    throws ThesisProposalExecutionDegreeRequiredException {
+	    @RequestParam String participantsJson, @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations,
+	    Model model) {
 
-	if (executionDegrees == null || executionDegrees.isEmpty()) {
-	    throw new ThesisProposalExecutionDegreeRequiredException();
-	}
-	ThesisProposalsConfiguration base = ((ExecutionDegree) executionDegrees.toArray()[0]).getThesisProposalsConfiguration();
-
-	try {
-	    for (ExecutionDegree executionDegree : executionDegrees) {
-		if (executionDegree.getThesisProposalsConfiguration() == null) {
-		    throw new UnexistentConfigurationException(executionDegree);
-		}
-		if (!base.isEquivalent(executionDegree.getThesisProposalsConfiguration())) {
-		    throw new UnequivalentThesisConfigurations(base, executionDegree.getThesisProposalsConfiguration());
-		}
-	    }
-	} catch (UnexistentConfigurationException exception) {
+	if (thesisProposalsConfigurations == null || thesisProposalsConfigurations.isEmpty()) {
 	    model.addAttribute("unexistentConfigurationException", true);
 
-	    List<ExecutionDegree> executionDegreeList = ThesisProposal.getThesisExecutionDegrees();
-	    model.addAttribute("executionDegreeList", executionDegreeList);
+	    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		    .stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	    model.addAttribute("configurations", configs);
 
 	    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 	    participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -106,11 +170,22 @@ public class ThesisProposalsController {
 
 	    model.addAttribute("command", proposalBean);
 	    return new ModelAndView("proposals/create", model.asMap());
+	}
+
+	ThesisProposalsConfiguration base = (ThesisProposalsConfiguration) thesisProposalsConfigurations.toArray()[0];
+
+	try {
+	    for (ThesisProposalsConfiguration configuration : thesisProposalsConfigurations) {
+		if (!base.isEquivalent(configuration)) {
+		    throw new UnequivalentThesisConfigurations(base, configuration);
+		}
+	    }
 	} catch (UnequivalentThesisConfigurations exception) {
 	    model.addAttribute("unequivalentThesisConfigurationsException", exception);
 
-	    List<ExecutionDegree> executionDegreeList = ThesisProposal.getThesisExecutionDegrees();
-	    model.addAttribute("executionDegreeList", executionDegreeList);
+	    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		    .stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	    model.addAttribute("configurations", configs);
 
 	    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 	    participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -121,7 +196,7 @@ public class ThesisProposalsController {
 	    return new ModelAndView("proposals/create", model.asMap());
 	}
 
-	proposalBean.setExecutionDegree(executionDegrees);
+	proposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
 
 	try {
 	    JsonParser parser = new JsonParser();
@@ -140,13 +215,18 @@ public class ThesisProposalsController {
 		participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType));
 	    }
 
+	    if (participants.isEmpty()) {
+		throw new UnexistentThesisParticipantException();
+	    }
+
 	    createThesisProposal(proposalBean, participants);
 
 	} catch (OutOfProposalPeriodException exception) {
 	    model.addAttribute("createOutOfProposalPeriodException", exception);
 
-	    List<ExecutionDegree> executionDegreeList = ThesisProposal.getThesisExecutionDegrees();
-	    model.addAttribute("executionDegreeList", executionDegreeList);
+	    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		    .stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	    model.addAttribute("configurations", configs);
 
 	    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 	    participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -158,8 +238,9 @@ public class ThesisProposalsController {
 	} catch (MaxNumberThesisProposalsException exception) {
 	    model.addAttribute("createMaxNumberThesisProposalsException", exception);
 
-	    List<ExecutionDegree> executionDegreeList = ThesisProposal.getThesisExecutionDegrees();
-	    model.addAttribute("executionDegreeList", executionDegreeList);
+	    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		    .stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	    model.addAttribute("configurations", configs);
 
 	    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 	    participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -171,8 +252,23 @@ public class ThesisProposalsController {
 	} catch (IllegalParticipantTypeException exception) {
 	    model.addAttribute("illegalParticipantTypeException", exception);
 
-	    List<ExecutionDegree> executionDegreeList = ThesisProposal.getThesisExecutionDegrees();
-	    model.addAttribute("executionDegreeList", executionDegreeList);
+	    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		    .stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	    model.addAttribute("configurations", configs);
+
+	    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
+	    participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
+	    Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
+	    model.addAttribute("participantTypeList", participantTypeList);
+
+	    model.addAttribute("command", proposalBean);
+	    return new ModelAndView("proposals/create", model.asMap());
+	} catch (UnexistentThesisParticipantException exception) {
+	    model.addAttribute("unexistentThesisParticipantException", exception);
+
+	    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		    .stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	    model.addAttribute("configurations", configs);
 
 	    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 	    participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -218,9 +314,8 @@ public class ThesisProposalsController {
     public ModelAndView editConfigurationForm(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
 
 	try {
-	    if (!thesisProposal.getSingleExecutionDegree().getThesisProposalsConfiguration().getProposalPeriod()
-		    .contains(DateTime.now())) {
-		throw new OutOfProposalPeriodException();
+	    if (!thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
+		throw thesisProposal.new OutOfProposalPeriodException();
 	    } else {
 		if (!thesisProposal.getStudentThesisCandidacySet().isEmpty()) {
 		    throw new CannotEditUsedThesisProposalsException(thesisProposal);
@@ -239,15 +334,16 @@ public class ThesisProposalsController {
 
 		    ThesisProposalBean thesisProposalBean = new ThesisProposalBean(thesisProposal.getTitle(),
 			    thesisProposal.getObservations(), thesisProposal.getRequirements(), thesisProposal.getGoals(),
-			    thesisProposal.getLocalization(), thesisProposal.getExecutionDegreeSet(),
+			    thesisProposal.getLocalization(), thesisProposal.getThesisConfigurationSet(),
 			    thesisProposal.getStudentThesisCandidacySet(), thesisProposalParticipantsBean,
 			    thesisProposal.getExternalId());
 
 		    ModelAndView mav = new ModelAndView("proposals/edit", "command", thesisProposalBean);
 
-		    List<ExecutionDegree> executionDegreeList = ThesisProposal.getThesisExecutionDegrees();
-
-		    mav.addObject("executionDegreeList", executionDegreeList);
+		    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance()
+			    .getThesisProposalsConfigurationSet().stream()
+			    .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+		    mav.addObject("configurations", configs);
 
 		    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 		    participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -269,9 +365,10 @@ public class ThesisProposalsController {
 
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
     public ModelAndView editConfiguration(@ModelAttribute ThesisProposalBean thesisProposalBean,
-	    @RequestParam String participantsJson, @RequestParam Set<ExecutionDegree> executionDegrees, Model model) {
+	    @RequestParam String participantsJson, @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations,
+	    Model model) {
 
-	thesisProposalBean.setExecutionDegree(executionDegrees);
+	thesisProposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
 
 	ThesisProposal thesisProposal = FenixFramework.getDomainObject(thesisProposalBean.getExternalId());
 
@@ -292,13 +389,20 @@ public class ThesisProposalsController {
 	} catch (UnexistentConfigurationException exception) {
 	    model.addAttribute("unexistentConfigurationException", exception);
 	    return editConfigurationForm(thesisProposal, model);
+	} catch (UnexistentThesisParticipantException exception) {
+	    model.addAttribute("unexistentThesisParticipantException", exception);
+	    return editConfigurationForm(thesisProposal, model);
+	} catch (UnequivalentThesisConfigurations exception) {
+	    model.addAttribute("unequivalentThesisConfigurations", exception);
+	    return editConfigurationForm(thesisProposal, model);
 	}
     }
 
     @Atomic(mode = TxMode.WRITE)
     private ModelAndView editThesisProposal(ThesisProposalBean thesisProposalBean, ThesisProposal thesisProposal,
 	    JsonArray jsonArray) throws MaxNumberThesisProposalsException, OutOfProposalPeriodException,
-	    IllegalParticipantTypeException, UnexistentConfigurationException {
+	    IllegalParticipantTypeException, UnexistentConfigurationException, UnexistentThesisParticipantException,
+	    UnequivalentThesisConfigurations {
 	ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
 
 	for (JsonElement elem : jsonArray) {
@@ -315,6 +419,16 @@ public class ThesisProposalsController {
 	    participantsBean.add(participantBean);
 	}
 
+	if (participantsBean.isEmpty()) {
+	    throw new UnexistentThesisParticipantException();
+	}
+
+	for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
+	    participant.delete();
+	}
+
+	thesisProposal.getThesisProposalParticipantSet().clear();
+
 	ArrayList<ThesisProposalParticipant> participants = new ArrayList<ThesisProposalParticipant>();
 
 	for (ThesisProposalParticipantBean participantBean : participantsBean) {
@@ -325,9 +439,9 @@ public class ThesisProposalsController {
 
 	    ThesisProposalParticipant participant = new ThesisProposalParticipant(user, participantType);
 
-	    if (thesisProposal.getSingleExecutionDegree().getThesisProposalsConfiguration().getMaxThesisProposalsByUser() != -1
-		    && user.getThesisProposalParticipantSet().size() >= thesisProposal.getSingleExecutionDegree()
-			    .getThesisProposalsConfiguration().getMaxThesisProposalsByUser()) {
+	    if (thesisProposal.getSingleThesisProposalsConfiguration().getMaxThesisProposalsByUser() != -1
+		    && user.getThesisProposalParticipantSet().size() >= thesisProposal.getSingleThesisProposalsConfiguration()
+		    .getMaxThesisProposalsByUser()) {
 		throw new MaxNumberThesisProposalsException(participant);
 	    } else {
 		participant.setThesisProposal(thesisProposal);
@@ -339,19 +453,24 @@ public class ThesisProposalsController {
 	thesisProposal.setObservations(thesisProposalBean.getObservations());
 	thesisProposal.setRequirements(thesisProposalBean.getRequirements());
 	thesisProposal.setGoals(thesisProposalBean.getGoals());
-	thesisProposal.getExecutionDegreeSet().clear();
-	thesisProposal.getExecutionDegreeSet().addAll(thesisProposalBean.getExecutionDegrees());
-	thesisProposal.getThesisProposalParticipantSet().clear();
+	thesisProposal.getThesisConfigurationSet().clear();
+	thesisProposal.getThesisConfigurationSet().addAll(thesisProposalBean.getThesisProposalsConfigurations());
+
 	thesisProposal.getThesisProposalParticipantSet().addAll(participants);
 
-	ThesisProposalsConfiguration config = thesisProposal.getSingleExecutionDegree().getThesisProposalsConfiguration();
+	ThesisProposalsConfiguration base = (ThesisProposalsConfiguration) thesisProposalBean.getThesisProposalsConfigurations()
+		.toArray()[0];
 
-	if (config == null) {
-	    throw new UnexistentConfigurationException(thesisProposal.getSingleExecutionDegree());
+	for (ThesisProposalsConfiguration configuration : thesisProposalBean.getThesisProposalsConfigurations()) {
+	    if (!base.isEquivalent(configuration)) {
+		throw new UnequivalentThesisConfigurations(base, configuration);
+	    }
 	}
 
+	ThesisProposalsConfiguration config = thesisProposal.getSingleThesisProposalsConfiguration();
+
 	if (!config.getProposalPeriod().containsNow() || !config.getProposalPeriod().containsNow()) {
-	    throw new OutOfProposalPeriodException();
+	    throw thesisProposal.new OutOfProposalPeriodException();
 	}
 	thesisProposal.setLocalization(thesisProposalBean.getLocalization());
 

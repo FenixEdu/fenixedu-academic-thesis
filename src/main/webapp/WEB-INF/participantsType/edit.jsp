@@ -13,7 +13,7 @@ ${portal.toolkit()}
 </div>
 
 <div class="row">
-	<form role="form" method="POST" action="/configuration/editParticipantType" class="form-horizontal" commandname="participantTypeBean" id="participantTypeBean">
+	<form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/editParticipantType" class="form-horizontal" commandname="participantTypeBean" id="participantTypeBean">
 		<div class="form-group">
 			<spring:message code='label.participantType.name' var="participantTypeName"/>
 			<div class="form-group">
@@ -37,7 +37,7 @@ ${portal.toolkit()}
 		</div>
 	</form>
 
-	<form method="POST" action="/configuration/deleteParticipantType/${participantType.externalId}" id="deleteForm">
+	<form method="POST" action="${pageContext.request.contextPath}/configuration/deleteParticipantType/${participantType.externalId}" id="deleteForm">
 	</form>
 
 	<script type="text/javascript">

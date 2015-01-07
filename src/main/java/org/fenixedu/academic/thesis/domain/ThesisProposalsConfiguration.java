@@ -9,20 +9,6 @@ import org.joda.time.Interval;
 
 public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_Base {
 
-    static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_YEAR = new Comparator<ThesisProposalsConfiguration>() {
-	@Override
-	public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
-	    return o1.getExecutionDegree().getExecutionYear().compareTo(o2.getExecutionDegree().getExecutionYear());
-	}
-    };
-
-    static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_EXECUTION_DEGREE = new Comparator<ThesisProposalsConfiguration>() {
-	@Override
-	public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
-	    return o1.getExecutionDegree().compareTo(o2.getExecutionDegree());
-	}
-    };
-
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE = new Comparator<ThesisProposalsConfiguration>() {
 	@Override
 	public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
@@ -62,16 +48,16 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
     @Override
     protected void checkForDeletionBlockers(Collection<String> blockers) {
 	super.checkForDeletionBlockers(blockers);
-	if (getExecutionDegree() != null && !getExecutionDegree().getThesisProposalSet().isEmpty()) {
+	if (getExecutionDegree() != null && !getThesisProposalSet().isEmpty()) {
 	    blockers.add("ThesisProposalsConfiguration cannot be deleted");
 	}
     }
 
     public boolean isEquivalent(ThesisProposalsConfiguration configuration) {
-	return getMaxThesisCandidaciesByStudent().equals(configuration.getMaxThesisCandidaciesByStudent())
-		&& getMaxThesisProposalsByUser().equals(configuration.getMaxThesisProposalsByUser())
-		&& getProposalPeriod().equals(configuration.getProposalPeriod())
-		&& getCandidacyPeriod().equals(configuration.getCandidacyPeriod());
+	return getMaxThesisCandidaciesByStudent() == configuration.getMaxThesisCandidaciesByStudent()
+		&& getMaxThesisProposalsByUser() == configuration.getMaxThesisProposalsByUser()
+		&& getProposalPeriod().isEqual(configuration.getProposalPeriod())
+		&& getCandidacyPeriod().isEqual(configuration.getCandidacyPeriod());
     }
 
     @Override

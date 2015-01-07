@@ -2,6 +2,7 @@ package org.fenixedu.academic.thesis.ui.bean;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
+import org.fenixedu.academic.thesis.domain.exception.OverlappingIntervalsException;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormatter;
@@ -100,9 +101,9 @@ public class ConfigurationBean {
     public ConfigurationBean() {
     }
 
-    public ConfigurationBean(DateTime proposalPeriodStart, DateTime proposalPeriodEnd,
-	    DateTime candidacyPeriodStart, DateTime candidacyPeriodEnd, ExecutionDegree executionDegree, String externalId,
-	    int maxThesisCandidaciesByStudent, int maxThesisProposalsByUser) {
+    public ConfigurationBean(DateTime proposalPeriodStart, DateTime proposalPeriodEnd, DateTime candidacyPeriodStart,
+	    DateTime candidacyPeriodEnd, ExecutionDegree executionDegree, String externalId, int maxThesisCandidaciesByStudent,
+	    int maxThesisProposalsByUser) {
 
 	this.proposalPeriodStart = proposalPeriodStart.toString();
 	this.proposalPeriodEnd = proposalPeriodEnd.toString();
@@ -135,7 +136,7 @@ public class ConfigurationBean {
 	}
 
 	@Atomic(mode = TxMode.WRITE)
-	public ThesisProposalsConfiguration build() {
+	public ThesisProposalsConfiguration build() throws OverlappingIntervalsException {
 
 	    DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
 
@@ -146,6 +147,19 @@ public class ConfigurationBean {
 
 	    Interval proposalPeriod = new Interval(proposalPeriodStartDT, proposalPeriodEndDT);
 	    Interval candidacyPeriod = new Interval(candidacyPeriodStartDT, candidacyPeriodEndDT);
+
+	    if (proposalPeriod.overlaps(candidacyPeriod)) {
+		throw new OverlappingIntervalsException();
+	    }
+
+	    for (ThesisProposalsConfiguration config : executionDegree.getThesisProposalsConfigurationSet()) {
+
+		if (config.getProposalPeriod().overlaps(proposalPeriod) || config.getCandidacyPeriod().overlaps(candidacyPeriod)
+			|| config.getProposalPeriod().overlaps(candidacyPeriod)
+			|| config.getCandidacyPeriod().overlaps(proposalPeriod)) {
+		    throw new OverlappingIntervalsException();
+		}
+	    }
 
 	    return new ThesisProposalsConfiguration(proposalPeriod, candidacyPeriod, executionDegree,
 		    maxThesisCandidaciesByStudent, maxThesisProposalsByUser);

@@ -16,6 +16,8 @@ import org.joda.time.DateTime;
 @GroupOperator(ThesisSystemManagerGroup.THESIS_SYSTEM_MANAGERS)
 public class ThesisSystemManagerGroup extends FenixGroupStrategy {
 
+    private static final long serialVersionUID = -2075610613209268241L;
+
     public static final String THESIS_SYSTEM_MANAGERS = "thesisSystemManagers";
 
     @Override

@@ -32,11 +32,11 @@
             <tr>
                 <td>
 									<a href="${fr:checksumLink(pageContext.request, '/teacher/viewStudentCurriculum.do?method=prepare&registrationOID='.concat(studentThesisCandidacy.registration.externalId))}">
-                    ${studentThesisCandidacy.registration.student.name}</a> - <b># ${studentThesisCandidacy.preferenceNumber + 1} 
+                    ${studentThesisCandidacy.registration.student.name}</a> - <b># ${studentThesisCandidacy.preferenceNumber + 1}
   			</td>
   			<td>
   				<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
-                                    <form:form role="form" method="POST" action="/thesisCandidacies/accept/${studentThesisCandidacy.externalId}" class="form-horizontal">
+                                    <form:form role="form" method="POST" action="${pageContext.request.contextPath}/thesisCandidacies/accept/${studentThesisCandidacy.externalId}" class="form-horizontal">
 
                                         <c:if test="${bestAccepted.get(studentThesisCandidacy.student.externalId) < studentThesisCandidacy.preferenceNumber}">
                                             <button type="submit" class="btn btn-success acceptButton" disabled="true">
@@ -54,7 +54,7 @@
                                 </c:if>
 
                                 <c:if test="${studentThesisCandidacy.acceptedByAdvisor}">
-                                    <form:form role="form" method="POST" action="/thesisCandidacies/reject/${studentThesisCandidacy.externalId}" class="form-horizontal">
+                                    <form:form role="form" method="POST" action="${pageContext.request.contextPath}/thesisCandidacies/reject/${studentThesisCandidacy.externalId}" class="form-horizontal">
                                         <button type="submit" class="btn btn-danger removeButton">
                                             <spring:message code='button.candidacy.reject' />
                                         </button>

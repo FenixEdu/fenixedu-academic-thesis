@@ -19,6 +19,9 @@
 		<thead>
 			<tr>
 				<th>
+					<spring:message code='label.thesis.id' />
+				</th>
+				<th>
 					<spring:message code='label.title' />
 				</th>
 				<th>
@@ -31,6 +34,7 @@
 		<tbody>
 			<c:forEach items="${thesisProposalsList}" var="thesisProposal">
 			<tr>
+				<td>${thesisProposal.identifier}</td>
 				<td>${thesisProposal.title}</td>
 				<td>
 					<c:forEach items="${thesisProposal.thesisProposalParticipantSet}" var="participant">
@@ -41,7 +45,7 @@
 			</td>
 			<td>
 				<div class="btn-group btn-group-xs">
-					<form role="form" method="GET" action="/thesisCandidacies/manage/${thesisProposal.externalId}" class="form-horizontal">
+					<form role="form" method="GET" action="${pageContext.request.contextPath}/thesisCandidacies/manage/${thesisProposal.externalId}" class="form-horizontal">
 						<input type='button' class='detailsButton btn btn-default' data-observations="${thesisProposal.observations}" data-requirements="${thesisProposal.requirements}" data-goals="${thesisProposal.goals}" data-localization="${thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
 
 						<button type="submit" class="btn btn-default"><spring:message code="label.candidacies.manage"/></button>

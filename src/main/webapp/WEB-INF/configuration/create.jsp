@@ -22,12 +22,16 @@ ${ portal.toolkit() }
 <p class="text-danger"><spring:message code="error.thesisProposal.configuration.create.interval"/></p>
 </c:if>
 
+<c:if test="${!empty overlappingIntervalsException}">
+<p class="text-danger"><spring:message code="error.thesisProposal.configuration.interval.overlapping"/></p>
+</c:if>
+
 <c:if test="${!empty unselectedExecutionDegreeException}">
 <p class="text-danger"><spring:message code="error.thesisProposal.configuration.create.unselected.executionDegree"/></p>
 </c:if>
 
 <div class="row">
-  <form:form role="form" method="POST" action="/configuration/create" class="form-horizontal" commandname="thesisProposalsConfigurationBean" id="thesisProposalCreateForm">
+  <form:form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/create" class="form-horizontal" commandname="thesisProposalsConfigurationBean" id="thesisProposalCreateForm">
 
   <div class="form-group">
     <label for="proposalPeriodEnd" class="col-sm-4 control-label"><spring:message code='label.proposalPeriod'/></label>
@@ -41,7 +45,6 @@ ${ portal.toolkit() }
     </div>
   </div>
 
-
   <div class="form-group">
     <label for="candidacyPeriodStart" class="col-sm-4 control-label"><spring:message code='label.candidacies'/></label>
     <div class="col-sm-4">
@@ -53,7 +56,6 @@ ${ portal.toolkit() }
       <input type="text" bennu-datetime name="candidacyPeriodEnd" class="form-control" id="candidacyPeriodEnd" placeholder="<spring:message code='label.start'/>" required="required" value='${command.candidacyPeriodEnd}'/>
     </div>
   </div>
-
 
   <div class="form-group">
     <label class="col-sm-4 control-label"><spring:message code='label.executionDegree.select'/></label>
@@ -74,7 +76,6 @@ ${ portal.toolkit() }
   </c:forEach>
 </select>
 
-
 </div>
 </div>
 
@@ -86,17 +87,9 @@ ${ portal.toolkit() }
     <select name="executionDegree" class="form-control" id="executionDegreeSelect">
       <option value="NONE" label="<spring:message code='label.executionDegree.select'/>" id="executionDegreeDefaultOption"/>
       <c:forEach items="${executionDegreeList}" var="executionDegree">
-
-      <c:if test="${command.executionDegree != executionDegree}">
       <option value="${executionDegree.externalId}" label="${executionDegree.presentationName}" data-execution-year="${executionDegree.executionYear.year}"/>
-    </c:if>
-
-    <c:if test="${command.executionDegree == executionDegree}">
-    <option value="${executionDegree.externalId}" label="${executionDegree.presentationName}" data-execution-year="${executionDegree.executionYear.year}" selected/>
-  </c:if>
-
-</c:forEach>
-</select>
+    </c:forEach>
+  </select>
 </c:if>
 
 <c:if test="${command.executionDegree == null}">
@@ -139,7 +132,7 @@ ${ portal.toolkit() }
 
 <div class="form-group">
   <div class="col-sm-offset-4 col-sm-8">
-    <button type="submit" class="btn btn-primary" id="submitButton"><spring:message code="button.create"/></button>
+    <button type="submit" class="btn btn-primary" id="submitButton" disabled=true><spring:message code="button.create"/></button>
   </div>
 </div>
 
@@ -147,25 +140,45 @@ ${ portal.toolkit() }
 </div>
 
 <script type="text/javascript">
-  $("#executionYearSelect").change(function() {
+function populateExecutionDegrees(){
+  $("#executionDegreeSelect").empty()
+  $("#executionDegreeSelect").append($("<option></option>").attr("value", "NONE").attr("label", "<spring:message code='label.executionDegree.select'/>").attr("id", "executionDegreeDefaultOption"));
 
-    $("#executionDegreeSelect").empty()
-    $("#executionDegreeSelect").append($("<option></option>").attr("value", "NONE").attr("label", "<spring:message code='label.executionDegree.select'/>").attr("id", "executionDegreeDefaultOption"));
+  var year = $("#executionYearSelect").val();
 
-    var year = $("#executionYearSelect").val();
+  if(year === "NONE") {
+    $('#executionDegreeSelect').attr("disabled","disabled")
+  }
+  else {
+    $('#executionDegreeSelect').removeAttr("disabled");
 
-    if(year === "NONE") {
-      $('#executionDegreeSelect').attr("disabled","disabled")
-    }
-    else {
-      $('#executionDegreeSelect').removeAttr("disabled");
+    $.get("${pageContext.request.contextPath}/configuration/execution-year/" + year + "/execution-degrees", function(response) {
 
-      $.get("${pageContext.request.contextPath}/configuration/execution-year/" + year + "/execution-degrees", function(response) {
-
-        response.forEach(function(elem) {
-          $("#executionDegreeSelect").append($("<option></option>").attr("value", elem.externalId).attr("label", elem.name));
-        });
+      response.forEach(function(elem) {
+        if("${command.executionDegree.externalId}" == elem.externalId) {
+          $("#executionDegreeSelect").append($("<option></option>").attr("value", elem.externalId).attr("label", elem.name).attr("selected", true));
+        }
+        else {
+        $("#executionDegreeSelect").append($("<option></option>").attr("value", elem.externalId).attr("label", elem.name));
+        }
       });
-    }
-  })
+    });
+  }
+}
+
+
+$("#executionYearSelect").change(populateExecutionDegrees);
+
+$("#executionDegreeSelect").change(function(){
+  var selected = $("#executionDegreeSelect").val() != "NONE";
+
+  if(selected) {
+    $("#submitButton").attr("disabled", false);
+  }
+  else {
+    $("#submitButton").attr("disabled", true);
+  }
+});
+
+
 </script>
