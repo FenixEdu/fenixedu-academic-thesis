@@ -9,9 +9,9 @@ ${ portal.toolkit() }
 
 <div role="tabpanel">
 	<ul class="nav nav-tabs" role="tablist">
-		<li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Regras</a></li>
+		<li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab"><spring:message code="label.configuration.rules"/></a></li>
 		<c:if test="${!empty isManager && isManager == true}">
-		<li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Tipos de Participantes</a></li>
+		<li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab"><spring:message code="label.configuration.participant.types"/></a></li>
 	</c:if>
 </ul>
 
@@ -84,7 +84,7 @@ ${ portal.toolkit() }
 					<td>${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}</td>
 					<td>${configuration.maxThesisCandidaciesByStudent}</td>
 					<td>${configuration.maxThesisProposalsByUser}</td>
-					<td class=""><form:form method="GET" action="/configuration/edit/${configuration.externalId}">
+					<td class=""><form:form method="GET" action="${pageContext.request.contextPath}/configuration/edit/${configuration.externalId}">
 						<button type="submit" class="btn btn-xs btn-default" id="editButton"><spring:message code="button.edit"/></button>
 					</form:form></td>
 				</tr>
@@ -120,7 +120,7 @@ $(".deleteConfiguration").on("click", function() {
 
 <!-- Modal -->
 <div class="modal fade" id="create" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<form role="form" method="POST" action="/configuration/create" class="form-horizontal" id="thesisProposalCreateForm">
+	<form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/create" class="form-horizontal" id="thesisProposalCreateForm">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -194,7 +194,7 @@ $(".deleteConfiguration").on("click", function() {
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="button.close"/></button>
-				<button type="submit" class="btn btn-primary" id="submitButton"><spring:message code="button.create"/></button>
+				<button type="submit" class="btn btn-primary" id="submitButton" disabled=true><spring:message code="button.create"/></button>
 			</div>
 		</div>
 	</div>
@@ -236,6 +236,18 @@ $("#submitButton").on("click", function(){
 		}
 	};
 })
+
+
+$("#executionDegreeSelect").change(function(){
+	var selected = $("#executionDegreeSelect").val() != "NONE";
+
+	if(selected) {
+		$("#submitButton").attr("disabled", false);
+	}
+	else {
+		$("#submitButton").attr("disabled", true);
+	}
+});
 </script>
 </div>
 
@@ -243,7 +255,7 @@ $("#submitButton").on("click", function(){
 <c:if test="${!empty isManager && isManager == true}">
 <div role="tabpanel" class="tab-pane" id="profile">
 
-<script src="/js/jquery.tablednd.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/js/jquery.tablednd.js" type="text/javascript"></script>
 
 <style type="text/css">
 .tDnD_whileDrag{
@@ -273,7 +285,7 @@ $("#submitButton").on("click", function(){
 	<div class="row">
 		<div class="col-sm-8">
 
-			<form:form role="form" method="POST" action="/configuration/updateWeights" class="form-horizontal">
+			<form:form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/updateWeights" class="form-horizontal">
 			<button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#createParticipantType"><spring:message code="button.create"/></button>
 			<input type="hidden" name="json" id="json"/>
 			<button type="submit" class="btn btn-default" style="display:none;" id="saveButton"><spring:message code="button.order.save"/> </button>
@@ -304,7 +316,7 @@ $("#submitButton").on("click", function(){
 					<td>${participantType.name.content}</td>
 					<td>
 						<c:if test="${participantType.thesisProposalParticipantSet.size() == 0}">
-						<a class="btn btn-xs btn-default" href="/configuration/editParticipantType/${participantType.externalId}"><spring:message code='button.edit'/></a>
+						<a class="btn btn-xs btn-default" href="${pageContext.request.contextPath}/configuration/editParticipantType/${participantType.externalId}"><spring:message code='button.edit'/></a>
 					</c:if>
 					<c:if test="${participantType.thesisProposalParticipantSet.size() > 0}">
 					<button class="btn disabled btn-disabled btn-xs btn-default" data-toggle="tooltip" data-placement="right" title="<spring:message code="error.thesisProposal.participantType.edit.used"/>"><spring:message code='button.edit'/></button>
@@ -318,7 +330,7 @@ $("#submitButton").on("click", function(){
 
 <!-- Modal -->
 <div class="modal fade" id="createParticipantType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<form role="form" method="POST" action="/configuration/createParticipantType" class="form-horizontal" commandname="participantTypeBean" id="participantTypeBean">
+	<form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/createParticipantType" class="form-horizontal" commandname="participantTypeBean" id="participantTypeBean">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">

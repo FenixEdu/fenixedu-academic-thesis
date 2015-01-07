@@ -15,7 +15,7 @@ ${ portal.toolkit() }
 </div>
 
 <div class="row">
-  <form:form role="form" method="POST" action="/configuration/edit" class="form-horizontal" commandname="thesisProposalsConfigurationBean" id="thesisProposalCreateForm">
+  <form:form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/edit" class="form-horizontal" commandname="thesisProposalsConfigurationBean" id="thesisProposalCreateForm">
 
   <c:if test="${!empty editException}">
   <p class="text-danger"><spring:message code="error.thesisProposal.configuration.create.used"/></p>
@@ -27,6 +27,10 @@ ${ portal.toolkit() }
 
 <c:if test="${!empty deleteException}">
 <p class="text-danger"><spring:message code="error.thesisProposal.configuration.delete.used"/></p>
+</c:if>
+
+<c:if test="${!empty overlappingIntervalsException}">
+<p class="text-danger"><spring:message code="error.thesisProposal.configuration.interval.overlapping"/></p>
 </c:if>
 
 <spring:message code='label.proposalPeriod.start' var="proposalPeriodStart"/>
@@ -63,9 +67,8 @@ ${ portal.toolkit() }
 </div>
 
 <div class="form-group hidden">
-  <form:input type="hidden" class="form-control" id="executionDegree" path="executionDegree" placeholder="${executionDegree}" required="required" value="${command.executionDegree}"/>
+  <input type="hidden" class="form-control" id="executionDegree" path="executionDegree" name="executionDegree" placeholder="${executionDegree}" required="required" value="${command.executionDegree}"/>
 </div>
-
 
 <div class="form-group">
   <form:label for="maxThesisCandidaciesByStudent" path="maxThesisCandidaciesByStudent" class="col-sm-4 control-label"><spring:message code='label.maxThesisCandidaciesByStudent.create'/></form:label>
@@ -96,7 +99,7 @@ ${ portal.toolkit() }
 
 </form:form>
 </div>
-<form method="POST" action="/configuration/delete/${command.externalId}" id="deleteForm"></form>
+<form method="POST" action="${pageContext.request.contextPath}/configuration/delete/${command.externalId}" id="deleteForm"></form>
 
 <script type="text/javascript">
 $("#deleteButton").on("click", function(){ $("#deleteForm").submit(); })

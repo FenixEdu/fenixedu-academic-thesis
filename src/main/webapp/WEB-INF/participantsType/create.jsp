@@ -5,8 +5,6 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<script src="/js/jquery.tablednd.js" type="text/javascript"></script>
-
 ${portal.toolkit()}
 
 <style type="text/css">
@@ -29,7 +27,7 @@ ${portal.toolkit()}
 <div class="well">
 	<p>
 	<spring:message code="label.dragAndDrop.hint"/>
-	<spring:message code="label.dragAndDrop.increasing.hint"/> 
+	<spring:message code="label.dragAndDrop.increasing.hint"/>
 	</p>
 </div>
 
@@ -37,8 +35,8 @@ ${portal.toolkit()}
 	<div class="row">
 		<div class="col-sm-8">
 
-<form:form role="form" method="POST" action="/participantsType/updateWeights" class="form-horizontal">
-<button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#create"><spring:message code="button.create"/></button>  
+<form:form role="form" method="POST" action="${pageContext.request.contextPath}/participantsType/updateWeights" class="form-horizontal">
+<button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#create"><spring:message code="button.create"/></button>
 <input type="hidden" name="json" id="json"/>
 <button type="submit" class="btn btn-default" style="display:none;" id="saveButton"><spring:message code="button.order.save"/> </button>
 </form:form>
@@ -57,7 +55,7 @@ ${portal.toolkit()}
 	</colgroup>
 		<thead>
 			<tr>
-				<th><spring:message code='label.participantType.name'/></th> 
+				<th><spring:message code='label.participantType.name'/></th>
 				<th></th>
 			</tr>
 		</thead>
@@ -75,7 +73,7 @@ ${portal.toolkit()}
 						</c:if>
 				</tr>
 			</div>
-		</c:forEach>	
+		</c:forEach>
 	</tbody>
 </table>
 </div>
@@ -129,7 +127,7 @@ ${portal.toolkit()}
 		participantTypesJSON = {
 			participantTypes: []
 		}
-		for (index=0; index < rows.length; index++) { 
+		for (index=0; index < rows.length; index++) {
 			var row = rows.eq(index)
 			var externalId = row.data("participanttype-id")
 			participantTypesJSON.participantTypes.push({

@@ -1,10 +1,6 @@
 package org.fenixedu.academic.thesis.ui.bean;
 
-import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.commons.i18n.LocalizedString;
-
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
 
 public class ParticipantTypeBean {
 
@@ -48,22 +44,6 @@ public class ParticipantTypeBean {
     }
 
     public ParticipantTypeBean() {
-    }
-
-    public static class Builder {
-	private final LocalizedString name;
-	private final int weight;
-
-	public Builder(ParticipantTypeBean thesisProposalParticipantTypeBean) {
-	    this.name = thesisProposalParticipantTypeBean.getName();
-	    this.weight = thesisProposalParticipantTypeBean.getWeight();
-	}
-
-	@Atomic(mode = TxMode.WRITE)
-	public ThesisProposalParticipantType build() {
-
-	    return new ThesisProposalParticipantType(name, weight);
-	}
     }
 
 }

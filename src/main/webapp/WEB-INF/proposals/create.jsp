@@ -20,7 +20,6 @@ ${portal.toolkit()}
 <p class="text-danger"><spring:message code="error.thesisProposal.create.unexistentConfigurationException"/></p>
 </c:if>
 
-
 <c:if test="${!empty unequivalentThesisConfigurationsException}">
 <p class="text-danger"><spring:message code="error.thesisProposal.create.unequivalentThesisConfigurationsException"/></p>
 </c:if>
@@ -33,8 +32,11 @@ ${portal.toolkit()}
 <p class="text-danger"><spring:message code="error.thesisProposal.create.maxNumberThesisProposalsException"/></p>
 </c:if>
 
+<c:if test="${!empty unexistentThesisParticipantException}">
+<p class="text-danger"><spring:message code="error.thesisProposal.unexistentThesisParticipantException"/></p>
+</c:if>
 
-<form:form role="form" method="POST" action="/proposals/create" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalCreateForm">
+<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/create" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalCreateForm">
 
 <spring:message code='label.title' var='title'/>
 <spring:message code='label.observations' var='observations'/>
@@ -50,31 +52,31 @@ ${portal.toolkit()}
 <spring:message code='button.create' var='createButton'/>
 
 <div class="form-group">
- <form:label for="thesisProposalTitle" path="title" class="col-sm-2 control-label">${title}</form:label> 
+ <form:label for="thesisProposalTitle" path="title" class="col-sm-2 control-label">${title}</form:label>
  <div class="col-sm-10">
    <form:input type="text" class="form-control" id="thesisProposalTitle" path="title" placeholder="${title}" required="required"/>
  </div>
 </div>
 <div class="form-group">
-  <form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label> 
+  <form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label>
   <div class="col-sm-10">
     <form:input type="text" class="form-control" id="thesisProposalObservations" path="observations" placeholder="${observations}"/>
   </div>
 </div>
 <div class="form-group">
-  <form:label for="thesisProposalRequirements" path="requirements" class="col-sm-2 control-label">${requirements}</form:label> 
+  <form:label for="thesisProposalRequirements" path="requirements" class="col-sm-2 control-label">${requirements}</form:label>
   <div class="col-sm-10">
     <form:input type="text" class="form-control" id="thesisProposalRequirements" path="requirements" placeholder="${requirements}"/>
   </div>
 </div>
 <div class="form-group">
-  <form:label for="thesisProposalGoals" path="goals" class="col-sm-2 control-label">${goals}</form:label> 
+  <form:label for="thesisProposalGoals" path="goals" class="col-sm-2 control-label">${goals}</form:label>
   <div class="col-sm-10">
     <form:input type="text" class="form-control" id="thesisProposalGoals" path="goals" placeholder="${goals}"/>
   </div>
 </div>
 <div class="form-group">
-  <form:label for="thesisProposalLocalization" path="localization" class="col-sm-2 control-label">${localization}</form:label> 
+  <form:label for="thesisProposalLocalization" path="localization" class="col-sm-2 control-label">${localization}</form:label>
   <div class="col-sm-10">
     <form:input type="text" class="form-control" id="thesisProposalLocalization" path="localization" placeholder="${localization}"/>
   </div>
@@ -83,7 +85,7 @@ ${portal.toolkit()}
 <input type="hidden" name="participantsJson" id="participantsJson"/>
 
 <div class="form-inline">
-  <label class="col-sm-2 control-label">${participants}</label> 
+  <label class="col-sm-2 control-label">${participants}</label>
   <div id="tableBody">
     <div class="col-sm-offset-2 col-sm-10">
       <div class="tableRow">
@@ -118,9 +120,9 @@ ${portal.toolkit()}
 
 <div class="form-group">
   <label class="col-sm-2 control-label">${executionDegrees}</label>
-  <div class="col-sm-10" id="executionDegreesSelect">
-    <c:forEach items="${executionDegreeList}" var="executionDegree">
-    <form:checkbox path="executionDegrees" value="${executionDegree.externalId}" onClick="checkboxListener(this)"/>${executionDegree.presentationName}
+  <div class="col-sm-10" id="configurationsSelect">
+    <c:forEach items="${configurations}" var="configuration">
+    <form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
     <br>
   </c:forEach>
 </div>
@@ -175,12 +177,12 @@ ${portal.toolkit()}
       participants: []
     };
     var participants = $("#tableBody").find(".tableRow");
-    
-    for (index=0; index < participants.length; index++) { 
+
+    for (index=0; index < participants.length; index++) {
       participant = participants.eq(index)
       user = participant.find("#UserExternalId").val()
       participantType = participant.find("#selectParticipantType").val()
-      participantsJSON.participants.push({ 
+      participantsJSON.participants.push({
         "userId" : user,
         "userType" : participantType
       });
@@ -188,7 +190,7 @@ ${portal.toolkit()}
     $("#participantsJson").val(JSON.stringify(participantsJSON.participants));
   });
   function checkboxListener(e) {
-    if($("#executionDegreesSelect").children(":checked").size() > 0) {
+    if($("#configurationsSelect").children(":checked").size() > 0) {
       $("#submitButton").attr("disabled", false);
     }
     else {

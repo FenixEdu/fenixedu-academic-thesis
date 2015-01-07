@@ -3,16 +3,18 @@ package org.fenixedu.academic.thesis.domain;
  // class definition
 
 class ThesisProposalsSystem {
+    	protected int proposalsCounter;
 }
 
 class ThesisProposalsConfiguration {
 	public Interval proposalPeriod;
 	public Interval candidacyPeriod;
-	public Integer maxThesisCandidaciesByStudent;
-	public Integer maxThesisProposalsByUser;
+	public int maxThesisCandidaciesByStudent;
+	public int maxThesisProposalsByUser;
 }
 
 class ThesisProposal {
+    	public String identifier;
  	public String title;
  	public String observations;
  	public String requirements;
@@ -21,7 +23,7 @@ class ThesisProposal {
  }
 
 class StudentThesisCandidacy {
- 	public Integer preferenceNumber;
+ 	public int preferenceNumber;
  	public boolean acceptedByAdvisor;
  }
 
@@ -30,7 +32,7 @@ class ThesisProposalParticipant {
 
 class ThesisProposalParticipantType {
     public LocalizedString name;
-    public Integer weight;
+    public int weight;
 }
 
 // access groups relationships definition
@@ -106,7 +108,7 @@ relation ThesisProposalsSystemStudentThesisCandidacy {
 
 relation ThesisProposalsSystemExecutionDegree {
  	public ThesisProposalsConfiguration playsRole thesisProposalsConfiguration {
- 		multiplicity 0..1;
+ 		multiplicity 0..*;
  	}
   	public .org.fenixedu.academic.domain.ExecutionDegree playsRole executionDegree {
  		multiplicity 1..1;
@@ -115,21 +117,21 @@ relation ThesisProposalsSystemExecutionDegree {
 
 relation ThesisProposalParticipant {
  	public ThesisProposal playsRole thesisProposal {
- 		multiplicity 0..1;
+ 		multiplicity 1..1;
  	}
 	public ThesisProposalParticipant playsRole thesisProposalParticipant  {
  		multiplicity 1..*;
  	}
  }
 
-relation ThesisProposalExecutionDegree {
-    	public ThesisProposal playsRole thesisProposal {
- 		multiplicity 0..*;
- 	}
-  	public .org.fenixedu.academic.domain.ExecutionDegree playsRole executionDegree {
- 		multiplicity 1..*;
- 	}
- }
+relation ThesisProposalConfiguration {
+	public ThesisProposal playsRole thesisProposal {
+		multiplicity 0..*;
+	}
+	public ThesisProposalsConfiguration playsRole thesisConfiguration {
+		multiplicity 1..*;
+	}
+}
 
 relation ThesisProposalParticipantUser {
     public .org.fenixedu.bennu.core.domain.User playsRole user {

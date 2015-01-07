@@ -5,7 +5,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<script src="/js/jquery.tablednd.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/js/jquery.tablednd.js" type="text/javascript"></script>
 
 <style type="text/css">
 .tDnD_whileDrag{
@@ -22,8 +22,13 @@
 </div>
 
 
+
 <c:if test="${!empty outOfCandidacyPeriodException}">
 <p class="text-danger"><spring:message code="error.thesisProposal.candidacy.confirm.outOfCandidacyPeriodException"/></p>
+</c:if>
+
+<c:if test="${!empty maxNumberStudentThesisCandidaciesException}">
+<p class="text-danger"><spring:message code="error.thesisProposal.candidacy.create.maxNumberStudentThesisCandidacies"/></p>
 </c:if>
 
 <c:if test="${!empty nullPointerException}">
@@ -33,7 +38,6 @@
 <c:if test="${!empty deleteException}">
 <p class="text-danger"><spring:message code="error.thesisProposal.candidacy.remove.accepted"/></p>
 </c:if>
-
 
 <div role="tabpanel">
 	<!-- Nav tabs -->
@@ -56,7 +60,7 @@
 				</p>
 			</div>
 
-			<form:form role="form" method="POST" action="/studentCandidacies/updatePreferences" class="form-horizontal">
+			<form:form role="form" method="POST" action="${pageContext.request.contextPath}/studentCandidacies/updatePreferences" class="form-horizontal">
 			<input type="hidden" name="json" id="json" />
 			<button type="submit" class="btn btn-default" id="savePreferencesButton" style="display:none;"><spring:message code="button.preferences.save"/></button>
 		</form:form>
@@ -64,6 +68,9 @@
 			<table class="table" id="candidaciesTable">
 				<thead>
 					<tr>
+						<th>
+							<spring:message code='label.thesis.id' />
+						</th>
 						<th>
 							<spring:message code='label.title' />
 						</th>
@@ -76,6 +83,7 @@
 				<tbody>
 					<c:forEach items="${studentThesisCandidacies}" var="studentThesisCandidacy">
 					<tr class="studentThesisCandidacyRow sortableRow" data-studentThesisCandidacy-id="${studentThesisCandidacy.externalId}">
+						<td>${studentThesisCandidacy.thesisProposal.identifier}</td>
 						<td>${studentThesisCandidacy.thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${studentThesisCandidacy.thesisProposal.getSortedParticipants()}" var="participant">
@@ -84,7 +92,7 @@
 						</c:forEach>
 					</td>
 					<td>
-						<form:form method="GET" action="/studentCandidacies/delete/${studentThesisCandidacy.externalId}">
+						<form:form method="GET" action="${pageContext.request.contextPath}/studentCandidacies/delete/${studentThesisCandidacy.externalId}">
 						<div class="btn-group btn-group-xs">
 
 							<button type="submit" class="btn btn-default" id="removeCandidacyButton"><spring:message code="button.proposal.unapply"/></button>
@@ -149,6 +157,9 @@ $(function(){
 			<thead>
 				<tr>
 					<th>
+						<spring:message code='label.thesis.id' />
+					</th>
+					<th>
 						<spring:message code='label.title' />
 					</th>
 					<th>
@@ -163,6 +174,7 @@ $(function(){
 				<c:forEach items="${node.value}" var="proposal">
 
 				<tr>
+					<td>${proposal.identifier}</td>
 					<td>${proposal.title}</td>
 					<td>
 						<c:forEach items="${proposal.getSortedParticipants()}" var="participant">
@@ -171,7 +183,7 @@ $(function(){
 					</c:forEach>
 				</td>
 				<td>
-					<form:form method="POST" action="/studentCandidacies/candidate/${proposal.externalId}">
+					<form:form method="POST" action="${pageContext.request.contextPath}/studentCandidacies/candidate/${proposal.externalId}">
 					<div class="btn-group btn-group-xs">
 						<button type="submit" class="btn btn-default" id="applyButton"><spring:message code="button.proposal.apply"/></button>
 

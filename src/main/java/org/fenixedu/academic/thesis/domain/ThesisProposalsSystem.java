@@ -1,10 +1,7 @@
 package org.fenixedu.academic.thesis.domain;
 
-import java.util.stream.Stream;
-
 import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.DegreeHelper;
-import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
@@ -20,6 +17,7 @@ public class ThesisProposalsSystem extends ThesisProposalsSystem_Base {
 	setBennu(Bennu.getInstance());
 	setCanManageGroup(DynamicGroup.get("managers"));
 	setCanCreateThesisGroup(DynamicGroup.get("thesisCreators"));
+	setProposalsCounter(0);
     }
 
     public static ThesisProposalsSystem getInstance() {
@@ -35,11 +33,6 @@ public class ThesisProposalsSystem extends ThesisProposalsSystem_Base {
 	    return new ThesisProposalsSystem();
 	}
 	return Bennu.getInstance().getThesisProposalsSystem();
-    }
-
-    public Stream<ThesisProposalsConfiguration> getThesisProposalsConfigurationByExecutionYear(ExecutionYear executionYear) {
-	return getThesisProposalsConfigurationSet().stream().filter(
-		p -> p.getExecutionDegree().getExecutionYear() == executionYear);
     }
 
     public Group getCanCreateThesisGroup() {
@@ -63,5 +56,14 @@ public class ThesisProposalsSystem extends ThesisProposalsSystem_Base {
     public static boolean canManage(Degree degree, User user) {
 	return DegreeHelper.getCanManageThesis(degree).isMember(user)
 		|| ThesisProposalsSystem.getInstance().getCanManageThesisGroup().isMember(user);
+    }
+
+    public String generateProposalIdentifier() {
+	int counter = getProposalsCounter();
+	counter++;
+
+	this.setProposalsCounter(counter);
+
+	return "" + counter;
     }
 }

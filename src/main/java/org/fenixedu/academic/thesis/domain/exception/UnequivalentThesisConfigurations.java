@@ -4,6 +4,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 
 public class UnequivalentThesisConfigurations extends Exception {
 
+    private static final long serialVersionUID = -4270028206922579262L;
     private ThesisProposalsConfiguration configuration0;
     private ThesisProposalsConfiguration configuration1;
 

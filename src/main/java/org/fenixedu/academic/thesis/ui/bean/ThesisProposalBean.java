@@ -2,12 +2,14 @@ package org.fenixedu.academic.thesis.ui.bean;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
+import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.bennu.core.domain.User;
@@ -23,7 +25,7 @@ public class ThesisProposalBean {
     private String requirements;
     private String goals;
     private String localization;
-    private Set<ExecutionDegree> executionDegrees;
+    private Set<ThesisProposalsConfiguration> thesisProposalsConfigurations;
     private Set<StudentThesisCandidacy> studentThesisCandidacy;
     private Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean;
     private String externalId;
@@ -68,12 +70,12 @@ public class ThesisProposalBean {
 	this.localization = localization;
     }
 
-    public Set<ExecutionDegree> getExecutionDegrees() {
-	return executionDegrees;
+    public Set<ThesisProposalsConfiguration> getThesisProposalsConfigurations() {
+	return thesisProposalsConfigurations;
     }
 
-    public void setExecutionDegree(Set<ExecutionDegree> executionDegrees) {
-	this.executionDegrees = executionDegrees;
+    public void setThesisProposalsConfigurations(Set<ThesisProposalsConfiguration> thesisProposalsConfigurations) {
+	this.thesisProposalsConfigurations = thesisProposalsConfigurations;
     }
 
     public Set<StudentThesisCandidacy> getStudentThesisCandidacy() {
@@ -101,27 +103,27 @@ public class ThesisProposalBean {
     }
 
     public ThesisProposalBean(String title, String observations, String requirements, String goals, String localization,
-	    Set<ExecutionDegree> executionDegrees, Set<StudentThesisCandidacy> studentThesisCandidacy,
+	    Set<ThesisProposalsConfiguration> configurations, Set<StudentThesisCandidacy> studentThesisCandidacy,
 	    Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean) {
 	this.title = title;
 	this.observations = observations;
 	this.requirements = requirements;
 	this.goals = goals;
 	this.localization = localization;
-	this.executionDegrees = executionDegrees;
+	this.setThesisProposalsConfigurations(configurations);
 	this.studentThesisCandidacy = studentThesisCandidacy;
 	this.thesisProposalParticipantsBean = thesisProposalParticipantsBean;
     }
 
     public ThesisProposalBean(String title, String observations, String requirements, String goals, String localization,
-	    Set<ExecutionDegree> executionDegrees, Set<StudentThesisCandidacy> studentThesisCandidacy,
+	    Set<ThesisProposalsConfiguration> configurations, Set<StudentThesisCandidacy> studentThesisCandidacy,
 	    Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean, String externalId) {
 	this.title = title;
 	this.observations = observations;
 	this.requirements = requirements;
 	this.goals = goals;
 	this.localization = localization;
-	this.executionDegrees = executionDegrees;
+	this.setThesisProposalsConfigurations(configurations);
 	this.studentThesisCandidacy = studentThesisCandidacy;
 	this.thesisProposalParticipantsBean = thesisProposalParticipantsBean;
 	this.externalId = externalId;
@@ -136,7 +138,7 @@ public class ThesisProposalBean {
 	private final String requirements;
 	private final String goals;
 	private final String localization;
-	private final Set<ExecutionDegree> executionDegrees;
+	private final Set<ThesisProposalsConfiguration> configurations;
 	private final Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean;
 
 	public Builder(ThesisProposalBean proposalBean) {
@@ -145,7 +147,7 @@ public class ThesisProposalBean {
 	    this.requirements = proposalBean.getRequirements();
 	    this.goals = proposalBean.getGoals();
 	    this.localization = proposalBean.getLocalization();
-	    this.executionDegrees = proposalBean.getExecutionDegrees();
+	    this.configurations = proposalBean.getThesisProposalsConfigurations();
 	    this.thesisProposalParticipantsBean = proposalBean.getThesisProposalParticipantsBean();
 	}
 
@@ -164,8 +166,13 @@ public class ThesisProposalBean {
 		participants.add(participant);
 	    }
 
-	    return new ThesisProposal(title, observations, requirements, goals, localization, participants, executionDegrees);
+	    return new ThesisProposal(title, observations, requirements, goals, localization, participants, configurations);
 	}
+    }
+
+    public Set<ExecutionDegree> getExecutionDegreeSet() {
+	return this.getThesisProposalsConfigurations().stream().map(config -> config.getExecutionDegree())
+		.collect(Collectors.toSet());
     }
 
 }

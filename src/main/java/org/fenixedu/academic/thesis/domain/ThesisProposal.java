@@ -1,21 +1,20 @@
 package org.fenixedu.academic.thesis.domain;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
-import org.fenixedu.academic.domain.degreeStructure.CycleType;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.bennu.core.domain.User;
+
+import com.google.common.collect.Sets;
 
 public class ThesisProposal extends ThesisProposal_Base {
 
@@ -31,54 +30,44 @@ public class ThesisProposal extends ThesisProposal_Base {
 	}
     };
 
-    public final static Comparator<ThesisProposal> COMPARATOR_BY_TITLE = new Comparator<ThesisProposal>() {
-
-	@Override
-	public int compare(ThesisProposal arg0, ThesisProposal arg1) {
-	    return arg1.getTitle().compareToIgnoreCase(arg0.getTitle());
-	}
-    };
-
     @Override
     public Set<StudentThesisCandidacy> getStudentThesisCandidacySet() {
 	return super.getStudentThesisCandidacySet();
     }
 
-    public ExecutionDegree getSingleExecutionDegree() {
-	return (ExecutionDegree) getExecutionDegreeSet().toArray()[0];
+    public ThesisProposalsConfiguration getSingleThesisProposalsConfiguration() {
+	return (ThesisProposalsConfiguration) getThesisConfigurationSet().toArray()[0];
     }
 
     public ThesisProposal(String title, String observations, String requirements, String goals, String localization,
-	    List<ThesisProposalParticipant> participants, Set<ExecutionDegree> executionDegrees)
-		    throws MaxNumberThesisProposalsException, OutOfProposalPeriodException {
+	    List<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations)
+	    throws MaxNumberThesisProposalsException, OutOfProposalPeriodException {
 
-	ArrayList<ThesisProposalsConfiguration> thesisProposalsConfigurations = new ArrayList<ThesisProposalsConfiguration>();
-	executionDegrees.stream().forEach((ExecutionDegree e) -> {
-	    thesisProposalsConfigurations.add(e.getThesisProposalsConfiguration());
-	});
-
-	for (ThesisProposalsConfiguration thesisProposalsConfiguration : thesisProposalsConfigurations) {
+	for (ThesisProposalsConfiguration thesisProposalsConfiguration : configurations) {
 	    if (!thesisProposalsConfiguration.getProposalPeriod().containsNow()) {
 		throw new OutOfProposalPeriodException();
 	    }
 	}
 
 	for (ThesisProposalParticipant participant : participants) {
-	    if (thesisProposalsConfigurations.get(0).getMaxThesisProposalsByUser() != -1
-		    && participant.getUser().getThesisProposalParticipantSet().size() >= thesisProposalsConfigurations.get(0)
-			    .getMaxThesisProposalsByUser()) {
-		throw new MaxNumberThesisProposalsException(participant);
+	    for (ThesisProposalsConfiguration configuration : configurations) {
+		if (configuration.getMaxThesisProposalsByUser() != -1
+			&& participant.getUser().getThesisProposalParticipantSet().size() >= configuration
+				.getMaxThesisProposalsByUser()) {
+		    throw new MaxNumberThesisProposalsException(participant);
+		}
 	    }
 	}
 
 	setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
+	setIdentifier(ThesisProposalsSystem.getInstance().generateProposalIdentifier());
 	setTitle(title);
 	setObservations(observations);
 	setRequirements(requirements);
 	setGoals(goals);
 	setLocalization(localization);
 	getThesisProposalParticipantSet().addAll(participants);
-	getExecutionDegreeSet().addAll((executionDegrees));
+	getThesisConfigurationSet().addAll(configurations);
     }
 
     public int getNumberOfStudentCandidacies() {
@@ -89,7 +78,7 @@ public class ThesisProposal extends ThesisProposal_Base {
 
 	DomainException.throwWhenDeleteBlocked(getDeletionBlockers());
 
-	this.getExecutionDegreeSet().clear();
+	this.getThesisConfigurationSet().clear();
 	this.getStudentThesisCandidacySet().clear();
 
 	for (ThesisProposalParticipant thesisProposalParticipant : getThesisProposalParticipantSet()) {
@@ -108,7 +97,7 @@ public class ThesisProposal extends ThesisProposal_Base {
 	super.checkForDeletionBlockers(blockers);
 
 	if (!getStudentThesisCandidacySet().isEmpty()
-		|| !getSingleExecutionDegree().getThesisProposalsConfiguration().getProposalPeriod().containsNow()) {
+		|| !getSingleThesisProposalsConfiguration().getProposalPeriod().containsNow()) {
 	    blockers.add("org.fenixedu.thesisProposals.domain.ThesisProposal cannot be deleted");
 	}
     }
@@ -122,40 +111,23 @@ public class ThesisProposal extends ThesisProposal_Base {
 	return sortedParticipants;
     }
 
-    public static Set<ThesisProposal> readByExecutionDegrees(List<ExecutionDegree> executionDegrees) {
+    public static Set<ThesisProposal> readCurrentByParticipant(User user) {
 
-	Set<ThesisProposal> thesisProposals = new HashSet<ThesisProposal>();
-
-	executionDegrees.forEach((ExecutionDegree executionDegree) -> thesisProposals.addAll(executionDegree
-		.getThesisProposalSet()));
-
-	return thesisProposals;
+	return ThesisProposalsSystem
+		.getInstance()
+		.getThesisProposalsSet()
+		.stream()
+		.filter(proposal -> proposal
+			.getThesisConfigurationSet()
+			.stream()
+			.anyMatch(
+				configuration -> configuration.getExecutionDegree().getExecutionYear()
+				.isAfterOrEquals(ExecutionYear.readCurrentExecutionYear())))
+				.filter(proposal -> !Sets.intersection(proposal.getThesisProposalParticipantSet(),
+					user.getThesisProposalParticipantSet()).isEmpty()).collect(Collectors.toSet());
     }
 
-    public static Set<ThesisProposal> readByParticipant(User user) {
-	Set<ThesisProposal> thesisProposals = new HashSet<ThesisProposal>();
-
-	ThesisProposalsSystem.getInstance().getThesisProposalsSet().forEach((ThesisProposal thesisProposal) -> {
-	    for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
-		if (participant.getUser().equals(user)) {
-		    thesisProposals.add(thesisProposal);
-		}
-	    }
-	});
-
-	return thesisProposals;
-    }
-
-    public static List<ExecutionDegree> getThesisExecutionDegrees() {
-
-	List<ExecutionDegree> executionDegreeList = ExecutionDegree
-		.getAllByExecutionYear(ExecutionYear.readCurrentExecutionYear()).stream()
-		.filter((ExecutionDegree executionDegree) -> {
-		    return executionDegree.getDegree().getCycleTypes().contains(CycleType.SECOND_CYCLE);
-		}).collect(Collectors.toList());
-	Collections.sort(executionDegreeList,
-		ExecutionDegree.EXECUTION_DEGREE_COMPARATORY_BY_DEGREE_TYPE_AND_NAME_AND_EXECUTION_YEAR);
-
-	return executionDegreeList;
+    public Set<ExecutionDegree> getExecutionDegreeSet() {
+	return this.getThesisConfigurationSet().stream().map(config -> config.getExecutionDegree()).collect(Collectors.toSet());
     }
 }

@@ -22,15 +22,14 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
     public StudentThesisCandidacy(Registration registration, Integer preferenceNumber, ThesisProposal thesisProposal)
 	    throws MaxNumberStudentThesisCandidacies, OutOfCandidacyPeriodException {
 
-	ThesisProposalsConfiguration thesisProposalsConfiguration = thesisProposal.getSingleExecutionDegree()
-		.getThesisProposalsConfiguration();
+	ThesisProposalsConfiguration thesisProposalsConfiguration = thesisProposal.getSingleThesisProposalsConfiguration();
 
 	if (!thesisProposalsConfiguration.getCandidacyPeriod().containsNow()) {
 	    throw new OutOfCandidacyPeriodException();
 	} else {
-	    if (thesisProposalsConfiguration.getMaxThesisProposalsByUser() != -1
+	    if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
 		    && registration.getStudentThesisCandidacySet().size() >= thesisProposalsConfiguration
-		    .getMaxThesisProposalsByUser()) {
+		    .getMaxThesisCandidaciesByStudent()) {
 		throw new MaxNumberStudentThesisCandidacies(registration.getStudent());
 	    } else {
 		setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
@@ -57,8 +56,7 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 	super.checkForDeletionBlockers(blockers);
 
 	if (getAcceptedByAdvisor()
-		|| !(getThesisProposal().getSingleExecutionDegree().getThesisProposalsConfiguration().getCandidacyPeriod()
-			.contains(DateTime.now()))) {
+		|| !getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod().contains(DateTime.now())) {
 	    blockers.add("org.fenixedu.thesisProposals.domain.ThesisProposal cannot be deleted");
 	}
     }

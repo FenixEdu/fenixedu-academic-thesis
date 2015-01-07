@@ -15,14 +15,10 @@ ${portal.toolkit()}
 	</h1>
 </div>
 
-<form:form role="form" method="POST" action="/proposals/edit" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalBean">
+<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/edit" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalBean">
 
 <c:if test="${!empty editMaxNumberThesisProposalsException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.edit.maxNumberThesisProposalsException"/> ${editMaxNumberThesisProposalsException.participant}</p>
-</c:if>
-
-<c:if test="${!empty outOfProposalPeriodException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.edit.outOfProposalPeriodException"/></p>
+<p class="text-danger"><spring:message code="error.thesisProposal.edit.maxNumberThesisProposalsException"/></p>
 </c:if>
 
 <c:if test="${!empty illegalParticipantTypeException}">
@@ -33,6 +29,13 @@ ${portal.toolkit()}
 <p class="text-danger"><spring:message code="error.thesisProposal.create.unexistentConfigurationException"/></p>
 </c:if>
 
+<c:if test="${!empty unexistentThesisParticipantException}">
+<p class="text-danger"><spring:message code="error.thesisProposal.unexistentThesisParticipantException"/></p>
+</c:if>
+
+<c:if test="${!empty unequivalentThesisConfigurations}">
+<p class="text-danger"><spring:message code="error.thesisProposal.create.unequivalentThesisConfigurationsException"/></p>
+</c:if>
 
 <spring:message code='label.title' var='title'/>
 <spring:message code='label.observations' var='observations'/>
@@ -124,16 +127,16 @@ ${portal.toolkit()}
 	<form:input type="hidden" class="form-control" id="ExternalId" placeholder="ExternalId" path="externalId" required="required"/>
 </div>
 
+
 <div class="form-group">
 	<label class="col-sm-2 control-label">${executionDegrees}</label>
-	<div class="col-sm-10" id="executionDegreesSelect">
-		<c:forEach items="${executionDegreeList}" var="executionDegree">
-		<form:checkbox path="executionDegrees" value="${executionDegree.externalId}" onClick="checkboxListener(this)"/>${executionDegree.presentationName}
+	<div class="col-sm-10" id="configurationsSelect">
+		<c:forEach items="${configurations}" var="configuration">
+		<form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
 		<br>
 	</c:forEach>
 </div>
 </div>
-
 
 <div class="col-sm-offset-3 col-sm-8">
 	<button type="submit" class="btn btn-default" id="submitButton">${saveButton}</button>
@@ -143,9 +146,8 @@ ${portal.toolkit()}
 </div>
 </form:form>
 
-<form method="POST" action="/proposals/delete/${command.externalId}" id="deleteForm">
+<form method="POST" action="${pageContext.request.contextPath}/proposals/delete/${command.externalId}" id="deleteForm">
 </form>
-
 
 
 <script type="text/html" id="participantRowTemplate">
@@ -210,7 +212,7 @@ $("#submitButton").on("click", function(e) {
 });
 
 function checkboxListener(e) {
-	if($("#executionDegreesSelect").children(":checked").size() > 0) {
+	if($("#configurationsSelect").children(":checked").size() > 0) {
 		$("#submitButton").attr("disabled", false);
 	}
 	else {
