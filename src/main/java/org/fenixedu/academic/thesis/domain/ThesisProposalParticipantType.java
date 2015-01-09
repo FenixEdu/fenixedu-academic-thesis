@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Comparator;
 
 import org.fenixedu.academic.domain.exceptions.DomainException;
+import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.fenixedu.commons.i18n.LocalizedString;
 
 public class ThesisProposalParticipantType extends ThesisProposalParticipantType_Base {
@@ -41,7 +42,7 @@ public class ThesisProposalParticipantType extends ThesisProposalParticipantType
     protected void checkForDeletionBlockers(Collection<String> blockers) {
 	super.checkForDeletionBlockers(blockers);
 	if (!getThesisProposalParticipantSet().isEmpty()) {
-	    blockers.add("org.fenixedu.thesisProposals.domain.ThesisProposalParticipantType cannot be deleted");
+	    blockers.add(BundleUtil.getString("resources.ThesisProposalsResources", "error.participants.type.cant.delete"));
 	}
     }
 }

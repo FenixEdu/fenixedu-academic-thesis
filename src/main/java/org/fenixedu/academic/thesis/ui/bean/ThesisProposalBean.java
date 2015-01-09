@@ -11,6 +11,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
+import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.bennu.core.domain.User;
 
 import pt.ist.fenixframework.Atomic;
@@ -132,6 +133,7 @@ public class ThesisProposalBean {
     }
 
     public static class Builder {
+
 	private final String title;
 	private final String observations;
 	private final String requirements;
@@ -151,8 +153,7 @@ public class ThesisProposalBean {
 	}
 
 	@Atomic(mode = TxMode.WRITE)
-	public ThesisProposal build() throws MaxNumberThesisProposalsException,
-		org.fenixedu.academic.thesis.domain.ThesisProposal.OutOfProposalPeriodException {
+	public ThesisProposal build() throws MaxNumberThesisProposalsException, OutOfProposalPeriodException {
 	    ArrayList<ThesisProposalParticipant> participants = new ArrayList<ThesisProposalParticipant>();
 
 	    for (ThesisProposalParticipantBean participantBean : thesisProposalParticipantsBean) {
@@ -164,6 +165,22 @@ public class ThesisProposalBean {
 		ThesisProposalParticipant participant = new ThesisProposalParticipant(username, participantType);
 
 		participants.add(participant);
+	    }
+
+	    for (ThesisProposalsConfiguration thesisProposalsConfiguration : configurations) {
+		if (!thesisProposalsConfiguration.getProposalPeriod().containsNow()) {
+		    throw new OutOfProposalPeriodException();
+		}
+	    }
+
+	    for (ThesisProposalParticipant participant : participants) {
+		for (ThesisProposalsConfiguration configuration : configurations) {
+		    if (configuration.getMaxThesisProposalsByUser() != -1
+			    && participant.getUser().getThesisProposalParticipantSet().size() >= configuration
+			    .getMaxThesisProposalsByUser()) {
+			throw new MaxNumberThesisProposalsException(participant);
+		    }
+		}
 	    }
 
 	    return new ThesisProposal(title, observations, requirements, goals, localization, participants, configurations);

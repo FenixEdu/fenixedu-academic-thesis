@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.exceptions.DomainException;
-import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.i18n.BundleUtil;
 
 import com.google.common.collect.Sets;
 
@@ -29,12 +29,6 @@ public class ThesisProposal extends ThesisProposal_Base {
 	}
     };
 
-    public class OutOfProposalPeriodException extends DomainException {
-
-	private static final long serialVersionUID = 7294240729086538046L;
-
-    }
-
     @Override
     public Set<StudentThesisCandidacy> getStudentThesisCandidacySet() {
 	return super.getStudentThesisCandidacySet();
@@ -45,24 +39,7 @@ public class ThesisProposal extends ThesisProposal_Base {
     }
 
     public ThesisProposal(String title, String observations, String requirements, String goals, String localization,
-	    List<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations)
-	    throws MaxNumberThesisProposalsException, OutOfProposalPeriodException {
-
-	for (ThesisProposalsConfiguration thesisProposalsConfiguration : configurations) {
-	    if (!thesisProposalsConfiguration.getProposalPeriod().containsNow()) {
-		throw new OutOfProposalPeriodException();
-	    }
-	}
-
-	for (ThesisProposalParticipant participant : participants) {
-	    for (ThesisProposalsConfiguration configuration : configurations) {
-		if (configuration.getMaxThesisProposalsByUser() != -1
-			&& participant.getUser().getThesisProposalParticipantSet().size() >= configuration
-				.getMaxThesisProposalsByUser()) {
-		    throw new MaxNumberThesisProposalsException(participant);
-		}
-	    }
-	}
+	    List<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations) {
 
 	setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
 	setIdentifier(ThesisProposalsSystem.getInstance().generateProposalIdentifier());
@@ -103,7 +80,7 @@ public class ThesisProposal extends ThesisProposal_Base {
 
 	if (!getStudentThesisCandidacySet().isEmpty()
 		|| !getSingleThesisProposalsConfiguration().getProposalPeriod().containsNow()) {
-	    blockers.add("org.fenixedu.thesisProposals.domain.ThesisProposal cannot be deleted");
+	    blockers.add(BundleUtil.getString("resources.ThesisProposalsResources", "error.proposals.cant.delete"));
 	}
     }
 

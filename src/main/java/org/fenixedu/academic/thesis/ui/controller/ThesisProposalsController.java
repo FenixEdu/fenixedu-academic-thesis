@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
-import org.fenixedu.academic.thesis.domain.ThesisProposal.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
+import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.bennu.core.domain.User;
@@ -43,7 +43,7 @@ import com.google.gson.JsonParser;
 @RequestMapping("/proposals")
 public class ThesisProposalsController {
 
-    public class UnexistentThesisParticipantException extends DomainException {
+    public class UnexistentThesisParticipantException extends Exception {
 
     }
 
@@ -66,7 +66,7 @@ public class ThesisProposalsController {
 
     }
 
-    public class IllegalParticipantTypeException extends DomainException {
+    public class IllegalParticipantTypeException extends Exception {
 
 	private static final long serialVersionUID = -3114050449816099494L;
 	private User user;
@@ -85,7 +85,7 @@ public class ThesisProposalsController {
 
     }
 
-    public class UnequivalentThesisConfigurations extends DomainException {
+    public class UnequivalentThesisConfigurations extends Exception {
 
 	private static final long serialVersionUID = -4270028206922579262L;
 	private ThesisProposalsConfiguration configuration0;
@@ -115,7 +115,7 @@ public class ThesisProposalsController {
 
     }
 
-    public class UnexistentConfigurationException extends DomainException {
+    public class UnexistentConfigurationException extends Exception {
 
 	private static final long serialVersionUID = -85534820603380001L;
 
@@ -315,7 +315,7 @@ public class ThesisProposalsController {
 
 	try {
 	    if (!thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
-		throw thesisProposal.new OutOfProposalPeriodException();
+		throw new OutOfProposalPeriodException();
 	    } else {
 		if (!thesisProposal.getStudentThesisCandidacySet().isEmpty()) {
 		    throw new CannotEditUsedThesisProposalsException(thesisProposal);
@@ -441,7 +441,7 @@ public class ThesisProposalsController {
 
 	    if (thesisProposal.getSingleThesisProposalsConfiguration().getMaxThesisProposalsByUser() != -1
 		    && user.getThesisProposalParticipantSet().size() >= thesisProposal.getSingleThesisProposalsConfiguration()
-		    .getMaxThesisProposalsByUser()) {
+			    .getMaxThesisProposalsByUser()) {
 		throw new MaxNumberThesisProposalsException(participant);
 	    } else {
 		participant.setThesisProposal(thesisProposal);
@@ -470,7 +470,7 @@ public class ThesisProposalsController {
 	ThesisProposalsConfiguration config = thesisProposal.getSingleThesisProposalsConfiguration();
 
 	if (!config.getProposalPeriod().containsNow() || !config.getProposalPeriod().containsNow()) {
-	    throw thesisProposal.new OutOfProposalPeriodException();
+	    throw new OutOfProposalPeriodException();
 	}
 	thesisProposal.setLocalization(thesisProposalBean.getLocalization());
 

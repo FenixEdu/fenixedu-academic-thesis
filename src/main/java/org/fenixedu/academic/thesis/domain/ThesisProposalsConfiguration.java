@@ -5,6 +5,7 @@ import java.util.Comparator;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.exceptions.DomainException;
+import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.joda.time.Interval;
 
 public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_Base {
@@ -49,7 +50,7 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
     protected void checkForDeletionBlockers(Collection<String> blockers) {
 	super.checkForDeletionBlockers(blockers);
 	if (getExecutionDegree() != null && !getThesisProposalSet().isEmpty()) {
-	    blockers.add("ThesisProposalsConfiguration cannot be deleted");
+	    blockers.add(BundleUtil.getString("resources.ThesisProposalsResources", "error.configurations.cant.delete"));
 	}
     }
 
