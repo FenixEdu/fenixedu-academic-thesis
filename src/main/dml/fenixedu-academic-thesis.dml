@@ -14,7 +14,7 @@ class ThesisProposalsConfiguration {
 }
 
 class ThesisProposal {
-    	public String identifier;
+    	protected String identifier;
  	public String title;
  	public String observations;
  	public String requirements;
@@ -164,7 +164,7 @@ relation ThesisProposalParticipantParticipantType {
 
  relation StudentThesisCandidacyStudent {
  	public StudentThesisCandidacy playsRole studentThesisCandidacy {
- 		multiplicity *;
+ 		multiplicity 0..*;
  	}
  	public .org.fenixedu.academic.domain.student.Registration playsRole registration {
  		multiplicity 1..1;

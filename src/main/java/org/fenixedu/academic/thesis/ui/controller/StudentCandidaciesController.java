@@ -63,16 +63,16 @@ public class StudentCandidaciesController {
 		    proposals.put(
 			    reg,
 			    reg.getDegree()
-				    .getExecutionDegrees()
-				    .stream()
-				    .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
-					    ExecutionYear.readCurrentExecutionYear()))
+			    .getExecutionDegrees()
+			    .stream()
+			    .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
+				    ExecutionYear.readCurrentExecutionYear()))
 				    .flatMap(
 					    (ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet()
-						    .stream()).filter(config -> config.getCandidacyPeriod().containsNow())
-					    .flatMap((ThesisProposalsConfiguration config) -> config.getThesisProposalSet().stream())
-					    .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal))
-					    .collect(Collectors.toSet()));
+					    .stream()).filter(config -> config.getCandidacyPeriod().containsNow())
+				    .flatMap((ThesisProposalsConfiguration config) -> config.getThesisProposalSet().stream())
+				    .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal))
+				    .collect(Collectors.toSet()));
 		});
 
 	model.addAttribute("proposals", proposals);
@@ -105,9 +105,23 @@ public class StudentCandidaciesController {
     @Atomic(mode = TxMode.WRITE)
     public void createStudentThesisCandidacy(Registration registration, ThesisProposal thesisProposal)
 	    throws MaxNumberStudentThesisCandidaciesException, OutOfCandidacyPeriodException {
-	StudentThesisCandidacy studentThesisCandidacy = new StudentThesisCandidacy(registration, registration
-		.getStudentThesisCandidacySet().size(), thesisProposal);
-	registration.getStudentThesisCandidacySet().add(studentThesisCandidacy);
+
+	ThesisProposalsConfiguration thesisProposalsConfiguration = thesisProposal.getSingleThesisProposalsConfiguration();
+
+	if (!thesisProposalsConfiguration.getCandidacyPeriod().containsNow()) {
+	    throw new OutOfCandidacyPeriodException();
+	} else {
+	    if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
+		    && registration.getStudentThesisCandidacySet().size() >= thesisProposalsConfiguration
+		    .getMaxThesisCandidaciesByStudent()) {
+		throw new MaxNumberStudentThesisCandidaciesException(registration.getStudent());
+	    } else {
+		StudentThesisCandidacy studentThesisCandidacy = new StudentThesisCandidacy(registration, registration
+			.getStudentThesisCandidacySet().size(), thesisProposal);
+		registration.getStudentThesisCandidacySet().add(studentThesisCandidacy);
+	    }
+	}
+
     }
 
     @RequestMapping(value = "/delete/{oid}", method = RequestMethod.GET)

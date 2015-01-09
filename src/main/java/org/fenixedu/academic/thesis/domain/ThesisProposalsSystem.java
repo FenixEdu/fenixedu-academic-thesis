@@ -66,4 +66,5 @@ public class ThesisProposalsSystem extends ThesisProposalsSystem_Base {
 
 	return "" + counter;
     }
+
 }
