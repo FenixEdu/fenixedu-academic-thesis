@@ -57,24 +57,54 @@ ${portal.toolkit()}
    <form:input type="text" class="form-control" id="thesisProposalTitle" path="title" placeholder="${title}" required="required"/>
  </div>
 </div>
-<div class="form-group">
-  <form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label>
-  <div class="col-sm-10">
-    <form:input type="text" class="form-control" id="thesisProposalObservations" path="observations" placeholder="${observations}"/>
+
+<div class="form-inline">
+  <label class="col-sm-2 control-label">${participants}</label>
+  <div id="tableBody">
+    <div class="col-sm-offset-2 col-sm-10">
+      <div class="tableRow">
+        <div class="form-group">
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="UserExternalId" bennu-user-autocomplete placeholder="${user}" required="required"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-10">
+            <select id="selectParticipantType" class="form-control">
+              <option value="" label="${selectParticipantType}"/>
+              <c:forEach var="participantType" items="${participantTypeList}">
+              <option value="${participantType.externalId}" label="${participantType.name.content}"/>
+            </c:forEach>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-12">
+          <a href="#" class="removeParticipant">${removeParticipant}</a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-<div class="form-group">
-  <form:label for="thesisProposalRequirements" path="requirements" class="col-sm-2 control-label">${requirements}</form:label>
-  <div class="col-sm-10">
-    <form:input type="text" class="form-control" id="thesisProposalRequirements" path="requirements" placeholder="${requirements}"/>
-  </div>
+<div class="col-sm-offset-2 col-sm-10">
+  <a href="#" id="addParticipant">${addParticipant}</a>
 </div>
+</div>
+
 <div class="form-group">
   <form:label for="thesisProposalGoals" path="goals" class="col-sm-2 control-label">${goals}</form:label>
   <div class="col-sm-10">
-    <form:input type="text" class="form-control" id="thesisProposalGoals" path="goals" placeholder="${goals}"/>
+    <form:textarea rows="5" class="form-control" id="thesisProposalGoals" path="goals" placeholder="${goals}"/>
   </div>
 </div>
+
+<div class="form-group">
+  <form:label for="thesisProposalRequirements" path="requirements" class="col-sm-2 control-label">${requirements}</form:label>
+  <div class="col-sm-10">
+    <form:textarea rows="5" class="form-control" id="thesisProposalRequirements" path="requirements" placeholder="${requirements}"/>
+  </div>
+</div>
+
 <div class="form-group">
   <form:label for="thesisProposalLocalization" path="localization" class="col-sm-2 control-label">${localization}</form:label>
   <div class="col-sm-10">
@@ -84,39 +114,12 @@ ${portal.toolkit()}
 
 <input type="hidden" name="participantsJson" id="participantsJson"/>
 
-<div class="form-inline">
-  <label class="col-sm-2 control-label">${participants}</label>
-  <div id="tableBody">
-    <div class="col-sm-offset-2 col-sm-10">
-      <div class="tableRow">
-       <div class="form-group">
-         <div class="col-sm-10">
-           <input type="text" class="form-control" id="UserExternalId" bennu-user-autocomplete placeholder="${user}" required="required"/>
-         </div>
-       </div>
-       <div class="form-group">
-         <div class="col-sm-10">
-          <select id="selectParticipantType" class="form-control">
-            <option value="" label="${selectParticipantType}"/>
-            <c:forEach var="participantType" items="${participantTypeList}">
-            <option value="${participantType.externalId}" label="${participantType.name.content}"/>
-          </c:forEach>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-sm-12">
-        <a href="#" class="removeParticipant">${removeParticipant}</a>
-      </div>
-    </div>
+<div class="form-group">
+  <form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label>
+  <div class="col-sm-10">
+    <form:textarea rows="5" class="form-control" id="thesisProposalObservations" path="observations" placeholder="${observations}"/>
   </div>
 </div>
-</div>
-<div class="col-sm-offset-2 col-sm-10">
-  <a href="#" id="addParticipant">${addParticipant}</a>
-</div>
-</div>
-
 
 <div class="form-group">
   <label class="col-sm-2 control-label">${executionDegrees}</label>

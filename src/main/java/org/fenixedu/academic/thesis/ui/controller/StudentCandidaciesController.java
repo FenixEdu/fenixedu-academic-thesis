@@ -111,13 +111,19 @@ public class StudentCandidaciesController {
 	if (!thesisProposalsConfiguration.getCandidacyPeriod().containsNow()) {
 	    throw new OutOfCandidacyPeriodException();
 	} else {
+
+	    long candidaciesCount = registration
+		    .getStudentThesisCandidacySet()
+		    .stream()
+		    .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
+			    .getCandidacyPeriod().containsNow()).count();
+
 	    if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
-		    && registration.getStudentThesisCandidacySet().size() >= thesisProposalsConfiguration
-		    .getMaxThesisCandidaciesByStudent()) {
+		    && candidaciesCount >= thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent()) {
 		throw new MaxNumberStudentThesisCandidaciesException(registration.getStudent());
 	    } else {
-		StudentThesisCandidacy studentThesisCandidacy = new StudentThesisCandidacy(registration, registration
-			.getStudentThesisCandidacySet().size(), thesisProposal);
+		StudentThesisCandidacy studentThesisCandidacy = new StudentThesisCandidacy(registration, (int) candidaciesCount,
+			thesisProposal);
 		registration.getStudentThesisCandidacySet().add(studentThesisCandidacy);
 	    }
 	}

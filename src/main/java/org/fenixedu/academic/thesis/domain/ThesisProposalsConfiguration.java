@@ -14,10 +14,10 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
 	@Override
 	public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
 
-	    int yearComp = o1.getExecutionDegree().getExecutionYear().compareTo(o2.getExecutionDegree().getExecutionYear());
+	    int yearComp = o2.getExecutionDegree().getExecutionYear().compareTo(o1.getExecutionDegree().getExecutionYear());
 
-	    return yearComp != 0 ? yearComp : o1.getExecutionDegree().getDegreeName()
-		    .compareTo(o2.getExecutionDegree().getDegreeName());
+	    return yearComp != 0 ? yearComp : o2.getExecutionDegree().getPresentationName()
+		    .compareTo(o1.getExecutionDegree().getPresentationName());
 	}
     };
 

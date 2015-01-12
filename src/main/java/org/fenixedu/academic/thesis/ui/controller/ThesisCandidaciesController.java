@@ -3,7 +3,6 @@ package org.fenixedu.academic.thesis.ui.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
 
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
@@ -25,7 +24,7 @@ import pt.ist.fenixframework.Atomic.TxMode;
 public class ThesisCandidaciesController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public String listProposals(Model model) {
+    public String listCandidaciesProposals(Model model) {
 
 	ArrayList<ThesisProposal> thesisProposalsList = new ArrayList<ThesisProposal>(
 		ThesisProposal.readCurrentByParticipant(Authenticate.getUser()));
@@ -77,7 +76,7 @@ public class ThesisCandidaciesController {
 	    return "redirect:/thesisCandidacies/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
 	} catch (OutOfCandidacyPeriodException exception) {
 	    model.addAttribute("outOfCandidacyPeriodException", true);
-	    return listProposals(model);
+	    return listCandidaciesProposals(model);
 	}
     }
 
@@ -100,7 +99,7 @@ public class ThesisCandidaciesController {
 	    return "redirect:/thesisCandidacies/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
 	} catch (OutOfCandidacyPeriodException exception) {
 	    model.addAttribute("outOfCandidacyPeriodException", true);
-	    return listProposals(model);
+	    return listCandidaciesProposals(model);
 	}
     }
 
@@ -109,7 +108,10 @@ public class ThesisCandidaciesController {
 
 	ModelAndView mav = new ModelAndView("thesisCandidacies/manage");
 
-	Set<StudentThesisCandidacy> candidacies = thesisProposal.getStudentThesisCandidacySet();
+	ArrayList<StudentThesisCandidacy> candidacies = new ArrayList<StudentThesisCandidacy>(
+		thesisProposal.getStudentThesisCandidacySet());
+
+	Collections.sort(candidacies, StudentThesisCandidacy.COMPARATOR_BY_DATETIME);
 
 	mav.addObject("candidaciesList", candidacies);
 

@@ -139,9 +139,11 @@ public class ThesisProposalsController {
 
 	ModelAndView mav = new ModelAndView("proposals/create", "command", new ThesisProposalBean());
 
-	Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
-		.stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	List<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		.stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toList());
 	mav.addObject("configurations", configs);
+
+	Collections.sort(configs, ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE);
 
 	List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 	participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -314,6 +316,7 @@ public class ThesisProposalsController {
     public ModelAndView editConfigurationForm(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
 
 	try {
+
 	    if (!thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
 		throw new OutOfProposalPeriodException();
 	    } else {
@@ -476,4 +479,5 @@ public class ThesisProposalsController {
 
 	return new ModelAndView("redirect:/proposals");
     }
+
 }

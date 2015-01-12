@@ -56,30 +56,6 @@ ${portal.toolkit()}
 		<form:input type="text" class="form-control" id="thesisProposalTitle" path="title" placeholder="${title}" required="required"/>
 	</div>
 </div>
-<div class="form-group">
-	<form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label>
-	<div class="col-sm-10">
-		<form:input type="text" class="form-control" id="thesisProposalObservations" path="observations" placeholder="${observations}"/>
-	</div>
-</div>
-<div class="form-group">
-	<form:label for="thesisProposalRequirements" path="requirements" class="col-sm-2 control-label">${requirements}</form:label>
-	<div class="col-sm-10">
-		<form:input type="text" class="form-control" id="thesisProposalRequirements" path="requirements" placeholder="${requirements}"/>
-	</div>
-</div>
-<div class="form-group">
-	<form:label for="thesisProposalGoals" path="goals" class="col-sm-2 control-label">${goals}</form:label>
-	<div class="col-sm-10">
-		<form:input type="text" class="form-control" id="thesisProposalGoals" path="goals" placeholder="${goals}"/>
-	</div>
-</div>
-<div class="form-group">
-	<form:label for="thesisProposalLocalization" path="localization" class="col-sm-2 control-label">${localization}</form:label>
-	<div class="col-sm-10">
-		<form:input type="text" class="form-control" id="thesisProposalLocalization" path="localization" placeholder="${localization}"/>
-	</div>
-</div>
 
 <input type="hidden" name="participantsJson" id="participantsJson"/>
 
@@ -121,6 +97,34 @@ ${portal.toolkit()}
 <div class="col-sm-offset-2 col-sm-10">
 	<a href="#" id="addParticipant">${addParticipant}</a>
 </div>
+</div>
+
+<div class="form-group">
+	<form:label for="thesisProposalGoals" path="goals" class="col-sm-2 control-label">${goals}</form:label>
+	<div class="col-sm-10">
+		<form:textarea rows="5" class="form-control" id="thesisProposalGoals" path="goals" placeholder="${goals}"/>
+	</div>
+</div>
+
+<div class="form-group">
+	<form:label for="thesisProposalRequirements" path="requirements" class="col-sm-2 control-label">${requirements}</form:label>
+	<div class="col-sm-10">
+		<form:textarea rows="5" class="form-control" id="thesisProposalRequirements" path="requirements" placeholder="${requirements}"/>
+	</div>
+</div>
+
+<div class="form-group">
+	<form:label for="thesisProposalLocalization" path="localization" class="col-sm-2 control-label">${localization}</form:label>
+	<div class="col-sm-10">
+		<form:input type="text" class="form-control" id="thesisProposalLocalization" path="localization" placeholder="${localization}"/>
+	</div>
+</div>
+
+<div class="form-group">
+	<form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label>
+	<div class="col-sm-10">
+		<form:textarea rows="5" class="form-control" id="thesisProposalObservations" path="observations" placeholder="${observations}"/>
+	</div>
 </div>
 
 <div class="form-group">

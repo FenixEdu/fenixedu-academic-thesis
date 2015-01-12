@@ -13,8 +13,6 @@ import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 
-import com.google.common.collect.Sets;
-
 public class ThesisProposal extends ThesisProposal_Base {
 
     public final static Comparator<ThesisProposal> COMPARATOR_BY_NUMBER_OF_CANDIDACIES = new Comparator<ThesisProposal>() {
@@ -95,21 +93,24 @@ public class ThesisProposal extends ThesisProposal_Base {
 
     public static Set<ThesisProposal> readCurrentByParticipant(User user) {
 
-	return ThesisProposalsSystem
-		.getInstance()
-		.getThesisProposalsSet()
+	return user
+		.getThesisProposalParticipantSet()
 		.stream()
+		.map(participant -> participant.getThesisProposal())
 		.filter(proposal -> proposal
 			.getThesisConfigurationSet()
 			.stream()
 			.anyMatch(
 				configuration -> configuration.getExecutionDegree().getExecutionYear()
-				.isAfterOrEquals(ExecutionYear.readCurrentExecutionYear())))
-				.filter(proposal -> !Sets.intersection(proposal.getThesisProposalParticipantSet(),
-					user.getThesisProposalParticipantSet()).isEmpty()).collect(Collectors.toSet());
+				.isAfterOrEquals(ExecutionYear.readCurrentExecutionYear()))).collect(Collectors.toSet());
     }
 
     public Set<ExecutionDegree> getExecutionDegreeSet() {
 	return this.getThesisConfigurationSet().stream().map(config -> config.getExecutionDegree()).collect(Collectors.toSet());
+    }
+
+    @Override
+    public String getIdentifier() {
+	return super.getIdentifier();
     }
 }
