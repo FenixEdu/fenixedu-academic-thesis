@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.fenixedu.academic.domain.Degree;
+import org.fenixedu.academic.domain.ExecutionYear;
+import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
@@ -22,6 +25,7 @@ import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodExceptio
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -134,6 +138,26 @@ public class ThesisProposalsController {
 	Set<ThesisProposal> thesisProposalsList = ThesisProposal.readCurrentByParticipant(Authenticate.getUser());
 
 	model.addAttribute("thesisProposalsList", thesisProposalsList);
+
+	HashMap<Degree, Set<ThesisProposal>> coordinatorProposals = new HashMap<Degree, Set<ThesisProposal>>();
+
+	for (Degree degree : Degree.readBolonhaDegrees()) {
+
+	    Set<ThesisProposal> proposals = degree
+		    .getExecutionDegrees()
+		    .stream()
+		    .filter(executionDegree -> CoordinatorGroup.get(executionDegree.getDegree()).isMember(Authenticate.getUser()))
+		    .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
+			    ExecutionYear.readCurrentExecutionYear()))
+		    .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream())
+		    .flatMap(config -> config.getThesisProposalSet().stream()).collect(Collectors.toSet());
+
+	    if (!proposals.isEmpty()) {
+		coordinatorProposals.put(degree, proposals);
+	    }
+	}
+
+	model.addAttribute("coordinatorProposals", coordinatorProposals);
 
 	return "proposals/list";
     }
@@ -319,9 +343,13 @@ public class ThesisProposalsController {
     @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)
     public ModelAndView editConfigurationForm(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
 
-	try {
+	boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
+	boolean isDegreeCoordinator = thesisProposal.getExecutionDegreeSet().stream()
+		.anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));
 
-	    if (!thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
+	try {
+	    if (!(isManager || isDegreeCoordinator)
+		    && !thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
 		throw new OutOfProposalPeriodException();
 	    } else {
 		if (!thesisProposal.getStudentThesisCandidacySet().isEmpty()) {
@@ -347,9 +375,14 @@ public class ThesisProposalsController {
 
 		    ModelAndView mav = new ModelAndView("proposals/edit", "command", thesisProposalBean);
 
-		    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance()
-			    .getThesisProposalsConfigurationSet().stream()
-			    .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+		    Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem
+			    .getInstance()
+			    .getThesisProposalsConfigurationSet()
+			    .stream()
+			    .filter(config -> config.getProposalPeriod().overlaps(
+				    thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod()))
+				    .collect(Collectors.toSet());
+
 		    mav.addObject("configurations", configs);
 
 		    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
@@ -410,6 +443,7 @@ public class ThesisProposalsController {
 	    JsonArray jsonArray) throws MaxNumberThesisProposalsException, OutOfProposalPeriodException,
 	    IllegalParticipantTypeException, UnexistentConfigurationException, UnexistentThesisParticipantException,
 	    UnequivalentThesisConfigurations {
+
 	ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
 
 	for (JsonElement elem : jsonArray) {
@@ -446,13 +480,22 @@ public class ThesisProposalsController {
 
 	    ThesisProposalParticipant participant = new ThesisProposalParticipant(user, participantType);
 
-	    if (thesisProposal.getSingleThesisProposalsConfiguration().getMaxThesisProposalsByUser() != -1
-		    && user.getThesisProposalParticipantSet().size() >= thesisProposal.getSingleThesisProposalsConfiguration()
-		    .getMaxThesisProposalsByUser()) {
-		throw new MaxNumberThesisProposalsException(participant);
-	    } else {
-		participant.setThesisProposal(thesisProposal);
-		participants.add(participant);
+	    for (ThesisProposalsConfiguration configuration : thesisProposal.getThesisConfigurationSet()) {
+		int proposalsCount = configuration
+			.getThesisProposalSet()
+			.stream()
+			.filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser())
+				.collect(Collectors.toSet()).contains(participant.getUser())).collect(Collectors.toSet()).size();
+
+		if (configuration.getMaxThesisProposalsByUser() != -1
+			&& proposalsCount >= configuration.getMaxThesisProposalsByUser()) {
+		    throw new MaxNumberThesisProposalsException(participant);
+		}
+
+		else {
+		    participant.setThesisProposal(thesisProposal);
+		    participants.add(participant);
+		}
 	    }
 	}
 
@@ -476,7 +519,11 @@ public class ThesisProposalsController {
 
 	ThesisProposalsConfiguration config = thesisProposal.getSingleThesisProposalsConfiguration();
 
-	if (!config.getProposalPeriod().containsNow() || !config.getProposalPeriod().containsNow()) {
+	boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
+	boolean isDegreeCoordinator = thesisProposal.getExecutionDegreeSet().stream()
+		.anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));
+
+	if (!(isManager || isDegreeCoordinator) && !config.getProposalPeriod().containsNow()) {
 	    throw new OutOfProposalPeriodException();
 	}
 	thesisProposal.setLocalization(thesisProposalBean.getLocalization());
