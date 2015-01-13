@@ -2,18 +2,22 @@ package org.fenixedu.academic.thesis.ui.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.exceptions.DomainException;
+import org.fenixedu.academic.domain.student.Registration;
+import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
+import org.fenixedu.academic.thesis.domain.exception.OutOfCandidacyPeriodException;
 import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
@@ -39,7 +43,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 @SpringApplication(group = "thesisCreators | activeStudents | #managers", path = "thesisProposals", title = "application.title.thesis", hint = "Thesis")
-@SpringFunctionality(app = ThesisProposalsController.class, title = "title.thesisProposal.management", accessGroup = "thesisCreators")
+@SpringFunctionality(app = ThesisProposalsController.class, title = "title.thesisProposal.management", accessGroup = "thesisSystemManagers | thesisCreators")
 @RequestMapping("/proposals")
 public class ThesisProposalsController {
 
@@ -139,9 +143,11 @@ public class ThesisProposalsController {
 
 	ModelAndView mav = new ModelAndView("proposals/create", "command", new ThesisProposalBean());
 
-	Set<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
-		.stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+	List<ThesisProposalsConfiguration> configs = ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet()
+		.stream().filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toList());
 	mav.addObject("configurations", configs);
+
+	Collections.sort(configs, ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE);
 
 	List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
 	participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
@@ -314,6 +320,7 @@ public class ThesisProposalsController {
     public ModelAndView editConfigurationForm(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
 
 	try {
+
 	    if (!thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
 		throw new OutOfProposalPeriodException();
 	    } else {
@@ -441,7 +448,7 @@ public class ThesisProposalsController {
 
 	    if (thesisProposal.getSingleThesisProposalsConfiguration().getMaxThesisProposalsByUser() != -1
 		    && user.getThesisProposalParticipantSet().size() >= thesisProposal.getSingleThesisProposalsConfiguration()
-			    .getMaxThesisProposalsByUser()) {
+		    .getMaxThesisProposalsByUser()) {
 		throw new MaxNumberThesisProposalsException(participant);
 	    } else {
 		participant.setThesisProposal(thesisProposal);
@@ -476,4 +483,100 @@ public class ThesisProposalsController {
 
 	return new ModelAndView("redirect:/proposals");
     }
+
+    @RequestMapping(value = "/candidacies", method = RequestMethod.GET)
+    public String listCandidaciesProposals(Model model) {
+
+	ArrayList<ThesisProposal> thesisProposalsList = new ArrayList<ThesisProposal>(
+		ThesisProposal.readCurrentByParticipant(Authenticate.getUser()));
+	Collections.sort(thesisProposalsList, ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
+	model.addAttribute("thesisProposalsList", thesisProposalsList);
+
+	HashMap<String, Integer> bestAccepted = new HashMap<String, Integer>();
+	for (ThesisProposal thesisProposal : thesisProposalsList) {
+	    for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
+		Registration registration = candidacy.getRegistration();
+		if (!bestAccepted.containsKey(registration.getExternalId())) {
+		    for (StudentThesisCandidacy studentCandidacy : registration.getStudentThesisCandidacySet()) {
+			if (studentCandidacy.getAcceptedByAdvisor()
+				&& studentCandidacy.getPreferenceNumber() < bestAccepted.getOrDefault(
+					registration.getExternalId(), Integer.MAX_VALUE)) {
+			    bestAccepted.put(registration.getExternalId(), studentCandidacy.getPreferenceNumber());
+			}
+		    }
+		}
+	    }
+	}
+
+	model.addAttribute("bestAccepted", bestAccepted);
+
+	return "thesisCandidacies/list";
+    }
+
+    @RequestMapping(value = "/accept/{studentThesisCandidacy}", method = RequestMethod.POST)
+    public String acceptStudentThesisCandidacy(
+	    @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy, Model model) {
+
+	return accept(studentThesisCandidacy, model);
+    }
+
+    @Atomic(mode = TxMode.WRITE)
+    private String accept(StudentThesisCandidacy studentThesisCandidacy, Model model) {
+	try {
+	    if (!studentThesisCandidacy.getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod()
+		    .containsNow()) {
+		throw new OutOfCandidacyPeriodException();
+	    }
+
+	    for (StudentThesisCandidacy candidacy : studentThesisCandidacy.getThesisProposal().getStudentThesisCandidacySet()) {
+		candidacy.setAcceptedByAdvisor(false);
+	    }
+
+	    studentThesisCandidacy.setAcceptedByAdvisor(true);
+
+	    return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
+	} catch (OutOfCandidacyPeriodException exception) {
+	    model.addAttribute("outOfCandidacyPeriodException", true);
+	    return listCandidaciesProposals(model);
+	}
+    }
+
+    @RequestMapping(value = "/reject/{studentThesisCandidacy}", method = RequestMethod.POST)
+    public String rejectStudentThesisCandidacy(
+	    @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy, Model model) {
+
+	return reject(studentThesisCandidacy, model);
+    }
+
+    @Atomic(mode = TxMode.WRITE)
+    private String reject(StudentThesisCandidacy studentThesisCandidacy, Model model) {
+	try {
+	    if (!studentThesisCandidacy.getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod()
+		    .containsNow()) {
+		throw new OutOfCandidacyPeriodException();
+	    }
+	    studentThesisCandidacy.setAcceptedByAdvisor(false);
+
+	    return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
+	} catch (OutOfCandidacyPeriodException exception) {
+	    model.addAttribute("outOfCandidacyPeriodException", true);
+	    return listCandidaciesProposals(model);
+	}
+    }
+
+    @RequestMapping(value = "/manage/{oid}", method = RequestMethod.GET)
+    public ModelAndView manageCandidacies(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
+
+	ModelAndView mav = new ModelAndView("thesisCandidacies/manage");
+
+	ArrayList<StudentThesisCandidacy> candidacies = new ArrayList<StudentThesisCandidacy>(
+		thesisProposal.getStudentThesisCandidacySet());
+
+	Collections.sort(candidacies, StudentThesisCandidacy.COMPARATOR_BY_DATETIME);
+
+	mav.addObject("candidaciesList", candidacies);
+
+	return mav;
+    }
+
 }

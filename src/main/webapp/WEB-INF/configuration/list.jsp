@@ -76,14 +76,28 @@ ${ portal.toolkit() }
 			</thead>
 			<tbody>
 				<c:forEach items="${configurationsList}" var="configuration">
-				<tr data-execution-year="${configuration.executionDegree.executionYear.year}" data-configuration-id="${configuration.externalId}">
+				<tr data-execution-year="${configuration.executionDegree.executionYear.name}" data-configuration-id="${configuration.externalId}">
 					<td>${configuration.executionDegree.degree.presentationName} - ${configuration.executionDegree.executionYear.year}</td>
 					<td>${configuration.proposalPeriod.start.toString('dd-MM-YYY HH:mm')}</td>
 					<td>${configuration.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}</td>
 					<td>${configuration.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')}</td>
 					<td>${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}</td>
-					<td>${configuration.maxThesisCandidaciesByStudent}</td>
-					<td>${configuration.maxThesisProposalsByUser}</td>
+					<td>
+						<c:if test="${configuration.maxThesisCandidaciesByStudent != -1}">
+						${configuration.maxThesisCandidaciesByStudent}
+					</c:if>
+					<c:if test="${configuration.maxThesisCandidaciesByStudent == -1}">
+					<spring:message code='label.configuration.unlimited'/>
+				</c:if>
+						</td>
+						<td>
+							<c:if test="${configuration.maxThesisProposalsByUser != -1}">
+							${configuration.maxThesisProposalsByUser}
+						</c:if>
+						<c:if test="${configuration.maxThesisProposalsByUser == -1}">
+						<spring:message code='label.configuration.unlimited'/>
+					</c:if>
+				</td>
 					<td class=""><form:form method="GET" action="${pageContext.request.contextPath}/configuration/edit/${configuration.externalId}">
 						<button type="submit" class="btn btn-xs btn-default" id="editButton"><spring:message code="button.edit"/></button>
 					</form:form></td>
@@ -315,12 +329,12 @@ $("#executionDegreeSelect").change(function(){
 				<tr data-participantType-id="${participantType.externalId}" class="sortableRow">
 					<td>${participantType.name.content}</td>
 					<td>
-						<c:if test="${participantType.thesisProposalParticipantSet.size() == 0}">
+						<%--			<c:if test="${participantType.thesisProposalParticipantSet.size() == 0}">  --%>
 						<a class="btn btn-xs btn-default" href="${pageContext.request.contextPath}/configuration/editParticipantType/${participantType.externalId}"><spring:message code='button.edit'/></a>
-					</c:if>
+						<%--		</c:if>
 					<c:if test="${participantType.thesisProposalParticipantSet.size() > 0}">
 					<button class="btn disabled btn-disabled btn-xs btn-default" data-toggle="tooltip" data-placement="right" title="<spring:message code="error.thesisProposal.participantType.edit.used"/>"><spring:message code='button.edit'/></button>
-				</c:if>
+				</c:if>  --%>
 			</tr>
 		</div>
 	</c:forEach>

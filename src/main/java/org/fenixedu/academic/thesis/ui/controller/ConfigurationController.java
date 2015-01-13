@@ -219,7 +219,7 @@ public class ConfigurationController {
 		    && (config.getProposalPeriod().overlaps(proposalPeriod)
 			    || config.getCandidacyPeriod().overlaps(candidacyPeriod)
 			    || config.getProposalPeriod().overlaps(candidacyPeriod) || config.getCandidacyPeriod().overlaps(
-				    proposalPeriod))) {
+			    proposalPeriod))) {
 		throw new OverlappingIntervalsException();
 	    }
 	}
@@ -308,16 +308,11 @@ public class ConfigurationController {
     public ModelAndView editParticipantTypeForm(@PathVariable("participantType") ThesisProposalParticipantType participantType,
 	    Model model) {
 
-	if (participantType.getThesisProposalParticipantSet().size() > 0) {
-	    model.addAttribute("editException", true);
-	    return new ModelAndView(createParticipantTypeForm(model));
-	} else {
-	    ParticipantTypeBean thesisProposalParticipantTypeBean = new ParticipantTypeBean(participantType.getName(),
-		    participantType.getWeight(), participantType.getExternalId());
+	ParticipantTypeBean thesisProposalParticipantTypeBean = new ParticipantTypeBean(participantType.getName(),
+		participantType.getWeight(), participantType.getExternalId());
 
-	    ModelAndView mav = new ModelAndView("participantsType/edit", "command", thesisProposalParticipantTypeBean);
-	    return mav;
-	}
+	ModelAndView mav = new ModelAndView("participantsType/edit", "command", thesisProposalParticipantTypeBean);
+	return mav;
     }
 
     @RequestMapping(value = "editParticipantType", method = RequestMethod.POST)

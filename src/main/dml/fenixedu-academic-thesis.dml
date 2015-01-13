@@ -25,6 +25,7 @@ class ThesisProposal {
 class StudentThesisCandidacy {
  	public int preferenceNumber;
  	public boolean acceptedByAdvisor;
+ 	protected DateTime timestamp;
  }
 
 class ThesisProposalParticipant {

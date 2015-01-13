@@ -18,6 +18,14 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 	}
     };
 
+    public final static Comparator<StudentThesisCandidacy> COMPARATOR_BY_DATETIME = new Comparator<StudentThesisCandidacy>() {
+
+	@Override
+	public int compare(StudentThesisCandidacy arg0, StudentThesisCandidacy arg1) {
+	    return arg0.getTimestamp().compareTo(arg1.getTimestamp());
+	}
+    };
+
     public StudentThesisCandidacy(Registration registration, Integer preferenceNumber, ThesisProposal thesisProposal) {
 	super();
 	setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
@@ -25,6 +33,7 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 	setAcceptedByAdvisor(false);
 	setThesisProposal(thesisProposal);
 	setRegistration(registration);
+	setTimestamp(new DateTime());
     }
 
     public void delete() {
@@ -46,5 +55,10 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 		|| !getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod().contains(DateTime.now())) {
 	    blockers.add(BundleUtil.getString("resources.ThesisProposalsResources", "error.candidacies.cant.delete"));
 	}
+    }
+
+    @Override
+    public DateTime getTimestamp() {
+	return super.getTimestamp();
     }
 }

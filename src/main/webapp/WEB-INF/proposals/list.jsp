@@ -123,31 +123,31 @@ ${portal.toolkit()}
          <small class="explanation"><spring:message code="label.modal.proposals.details"/></small>
       </div>
       <div class="modal-body">
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.goals'/></label>
+					<div class="col-sm-10">
+						<div class="information goals"></div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.requirements'/></label>
+					<div class="col-sm-10">
+						<div class="information requirements"></div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.localization'/></label>
+					<div class="col-sm-10">
+						<div class="information localization"></div>
+					</div>
+				</div>
+
          <div class="form-group">
             <label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.observations'/></label>
             <div class="col-sm-10">
                <div class="information observations"></div>
-            </div>
-         </div>
-
-         <div class="form-group">
-            <label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.requirements'/></label>
-            <div class="col-sm-10">
-               <div class="information requirements"></div>
-            </div>
-         </div>
-
-         <div class="form-group">
-            <label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.goals'/></label>
-            <div class="col-sm-10">
-               <div class="information goals"></div>
-            </div>
-         </div>
-
-         <div class="form-group">
-            <label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.localization'/></label>
-            <div class="col-sm-10">
-               <div class="information localization"></div>
             </div>
          </div>
 
