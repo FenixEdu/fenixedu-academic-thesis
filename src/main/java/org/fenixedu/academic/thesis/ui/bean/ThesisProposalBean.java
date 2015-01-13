@@ -167,17 +167,23 @@ public class ThesisProposalBean {
 		participants.add(participant);
 	    }
 
-	    for (ThesisProposalsConfiguration thesisProposalsConfiguration : configurations) {
-		if (!thesisProposalsConfiguration.getProposalPeriod().containsNow()) {
-		    throw new OutOfProposalPeriodException();
-		}
+	    ThesisProposalsConfiguration baseConfig = configurations.iterator().next();
+
+	    if (!baseConfig.getProposalPeriod().containsNow()) {
+		throw new OutOfProposalPeriodException();
 	    }
 
 	    for (ThesisProposalParticipant participant : participants) {
 		for (ThesisProposalsConfiguration configuration : configurations) {
+		    int proposalsCount = configuration
+			    .getThesisProposalSet()
+			    .stream()
+			    .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser())
+				    .collect(Collectors.toSet()).contains(participant.getUser())).collect(Collectors.toSet())
+				    .size();
+
 		    if (configuration.getMaxThesisProposalsByUser() != -1
-			    && participant.getUser().getThesisProposalParticipantSet().size() >= configuration
-			    .getMaxThesisProposalsByUser()) {
+			    && proposalsCount >= configuration.getMaxThesisProposalsByUser()) {
 			throw new MaxNumberThesisProposalsException(participant);
 		    }
 		}
