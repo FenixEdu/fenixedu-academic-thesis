@@ -44,7 +44,7 @@
 				<td>${studentThesisCandidacy.timestamp.toString('dd-MM-YYY HH:mm')}</td>
 				<td>
 					<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
-					<form:form role="form" method="POST" action="${pageContext.request.contextPath}/thesisCandidacies/accept/${studentThesisCandidacy.externalId}" class="form-horizontal">
+					<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/accept/${studentThesisCandidacy.externalId}" class="form-horizontal">
 
 					<c:if test="${bestAccepted.get(studentThesisCandidacy.student.externalId) < studentThesisCandidacy.preferenceNumber}">
 					<button type="submit" class="btn btn-success acceptButton" disabled="true">
@@ -62,7 +62,7 @@
 	</c:if>
 
 	<c:if test="${studentThesisCandidacy.acceptedByAdvisor}">
-	<form:form role="form" method="POST" action="${pageContext.request.contextPath}/thesisCandidacies/reject/${studentThesisCandidacy.externalId}" class="form-horizontal">
+	<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/reject/${studentThesisCandidacy.externalId}" class="form-horizontal">
 	<button type="submit" class="btn btn-default removeButton">
 		<spring:message code='button.candidacy.reject' />
 	</button>
