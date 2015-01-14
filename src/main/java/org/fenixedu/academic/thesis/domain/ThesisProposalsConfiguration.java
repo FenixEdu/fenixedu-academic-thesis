@@ -2,6 +2,8 @@ package org.fenixedu.academic.thesis.domain;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.exceptions.DomainException;
@@ -66,5 +68,10 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
 	return getProposalPeriod() + " , " + getCandidacyPeriod() + " w/ " + getMaxThesisProposalsByUser() + " , "
 		+ getMaxThesisProposalsByUser();
 
+    }
+
+    public static Set<ThesisProposalsConfiguration> getConfigurationsWithOpenProposalPeriod(ExecutionDegree executionDegree) {
+	return executionDegree.getThesisProposalsConfigurationSet().stream()
+		.filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
     }
 }

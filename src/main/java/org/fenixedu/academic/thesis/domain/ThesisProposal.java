@@ -26,6 +26,7 @@ public class ThesisProposal extends ThesisProposal_Base {
 	    }
 	}
     };
+    public static final String SIGNAL_CREATED = "fenixedu.academic.thesis.thesisProposal.created";
 
     @Override
     public Set<StudentThesisCandidacy> getStudentThesisCandidacySet() {
@@ -102,7 +103,7 @@ public class ThesisProposal extends ThesisProposal_Base {
 			.stream()
 			.anyMatch(
 				configuration -> configuration.getExecutionDegree().getExecutionYear()
-				.isAfterOrEquals(ExecutionYear.readCurrentExecutionYear()))).collect(Collectors.toSet());
+					.isAfterOrEquals(ExecutionYear.readCurrentExecutionYear()))).collect(Collectors.toSet());
     }
 
     public Set<ExecutionDegree> getExecutionDegreeSet() {

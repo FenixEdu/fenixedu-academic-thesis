@@ -27,6 +27,8 @@ import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.joda.time.DateTime;
@@ -249,7 +251,9 @@ public class ThesisProposalsController {
 		throw new UnexistentThesisParticipantException();
 	    }
 
-	    createThesisProposal(proposalBean, participants);
+	    ThesisProposal thesisProposal = createThesisProposal(proposalBean, participants);
+	    System.out.println("emiting signal for " + thesisProposal.getExternalId());
+	    Signal.emit(ThesisProposal.SIGNAL_CREATED, new DomainObjectEvent<ThesisProposal>(thesisProposal));
 
 	} catch (OutOfProposalPeriodException exception) {
 	    model.addAttribute("createOutOfProposalPeriodException", exception);
@@ -625,5 +629,4 @@ public class ThesisProposalsController {
 
 	return mav;
     }
-
 }
