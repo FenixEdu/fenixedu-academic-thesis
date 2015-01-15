@@ -8,11 +8,11 @@ public class MaxNumberThesisProposalsException extends Exception {
     private final ThesisProposalParticipant participant;
 
     public ThesisProposalParticipant getParticipant() {
-	return participant;
+        return participant;
     }
 
     public MaxNumberThesisProposalsException(ThesisProposalParticipant participant) {
-	this.participant = participant;
+        this.participant = participant;
     }
 
 }

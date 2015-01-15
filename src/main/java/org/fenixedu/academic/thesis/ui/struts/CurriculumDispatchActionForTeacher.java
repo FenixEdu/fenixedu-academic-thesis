@@ -35,10 +35,10 @@ public class CurriculumDispatchActionForTeacher extends CurriculumDispatchAction
 
     @Override
     public ActionForward execute(ActionMapping mapping, ActionForm actionForm, HttpServletRequest request,
-	    HttpServletResponse response) throws Exception {
-	BennuPortalDispatcher.selectFunctionality(request,
-		MenuFunctionality.findFunctionality(SpringPortalBackend.BACKEND_KEY, "/thesisCandidacies"));
-	return super.execute(mapping, actionForm, request, response);
+            HttpServletResponse response) throws Exception {
+        BennuPortalDispatcher.selectFunctionality(request,
+                MenuFunctionality.findFunctionality(SpringPortalBackend.BACKEND_KEY, "/thesisCandidacies"));
+        return super.execute(mapping, actionForm, request, response);
     }
 
 }

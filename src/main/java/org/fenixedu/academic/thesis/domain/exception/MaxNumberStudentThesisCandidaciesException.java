@@ -8,12 +8,12 @@ public class MaxNumberStudentThesisCandidaciesException extends Exception {
     private final Student student;
 
     public MaxNumberStudentThesisCandidaciesException(Student student) {
-	super();
-	this.student = student;
+        super();
+        this.student = student;
     }
 
     public Student getStudent() {
-	return student;
+        return student;
     }
 
 }

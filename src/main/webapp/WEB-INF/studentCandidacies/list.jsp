@@ -39,6 +39,18 @@
 <p class="text-danger"><spring:message code="error.thesisProposal.candidacy.remove.accepted"/></p>
 </c:if>
 
+
+<c:if test="${!empty suggestedConfigs}">
+<div class="alert alert-info">
+		<c:forEach items="${suggestedConfigs}" var="config">
+	<p>
+	<spring:message code="label.thesis.candidacy.info" arguments="${config.executionDegree.degree.sigla},${config.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${config.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/>
+	</p>
+	</c:forEach>
+</div>
+</c:if>
+
+
 <div role="tabpanel">
 	<!-- Nav tabs -->
 	<ul class="nav nav-tabs" role="tablist">
@@ -52,7 +64,7 @@
 
 			<div class="well">
 				<p>
-					<spring:message code="label.candidacies.student.well" />
+					<spring:message code="label.candidacies.student.well"/>
 				</p>
 				<p>
 					<spring:message code="label.dragAndDrop.hint" />
@@ -64,6 +76,8 @@
 			<input type="hidden" name="json" id="json" />
 			<button type="submit" class="btn btn-default" id="savePreferencesButton" style="display:none;"><spring:message code="button.preferences.save"/></button>
 		</form:form>
+
+		<c:if test="${!empty studentThesisCandidacies}">
 		<div class="table-responsive">
 			<table class="table" id="candidaciesTable">
 				<thead>
@@ -115,6 +129,26 @@
 </table>
 </div>
 
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#candidaciesTable").tableDnD({
+		onDrop:function(){
+			$("#savePreferencesButton").show();
+		}
+	});
+});
+</script>
+
+</c:if>
+<c:if test="${empty studentThesisCandidacies}">
+<div class="alert alert-warning" role="alert">
+	<p>
+		<spring:message code='label.student.candidacies.empty'/>
+	</p>
+</p>
+</div>
+</c:if>
+
 <style type="text/css">
 .information{
 	margin-top: 7px;
@@ -152,6 +186,7 @@ $(function(){
 		</p>
 	</div>
 
+	<c:if test="${availableProposals}">
 	<div class="table-responsive">
 		<table class="table" id="candidaciesTable">
 			<thead>
@@ -206,6 +241,15 @@ $(function(){
 </tbody>
 </table>
 </div>
+</c:if>
+<c:if test="${!availableProposals}">
+<div class="alert alert-warning" role="alert">
+	<p>
+		<spring:message code='label.student.proposals.empty'/>
+	</p>
+</p>
+</div>
+</c:if>
 </div>
 
 
@@ -263,15 +307,6 @@ $(function(){
 </div>
 
 
-<script type="text/javascript">
-$(document).ready(function() {
-	$("#candidaciesTable").tableDnD({
-		onDrop:function(){
-			$("#savePreferencesButton").show();
-		}
-	});
-});
-</script>
 
 <script type="text/javascript">
 $("#savePreferencesButton").on("click", function(e) {
