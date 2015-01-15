@@ -32,6 +32,7 @@ ${portal.toolkit()}
 <p class="text-danger"><spring:message code="error.thesisProposal.maxNumberThesisProposalsException"/></p>
 </c:if>
 
+<c:if test="${!empty suggestedConfigs}">
 <div class="alert alert-info">
 	<c:forEach items="${suggestedConfigs}" var="config">
 	<p>
@@ -39,6 +40,7 @@ ${portal.toolkit()}
 	</p>
 </c:forEach>
 </div>
+</c:if>
 
 <div class="well">
    <p>

@@ -76,6 +76,8 @@
 			<input type="hidden" name="json" id="json" />
 			<button type="submit" class="btn btn-default" id="savePreferencesButton" style="display:none;"><spring:message code="button.preferences.save"/></button>
 		</form:form>
+
+		<c:if test="${!empty studentThesisCandidacies}">
 		<div class="table-responsive">
 			<table class="table" id="candidaciesTable">
 				<thead>
@@ -127,6 +129,26 @@
 </table>
 </div>
 
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#candidaciesTable").tableDnD({
+		onDrop:function(){
+			$("#savePreferencesButton").show();
+		}
+	});
+});
+</script>
+
+</c:if>
+<c:if test="${empty studentThesisCandidacies}">
+<div class="alert alert-warning" role="alert">
+	<p>
+		<spring:message code='label.student.candidacies.empty'/>
+	</p>
+</p>
+</div>
+</c:if>
+
 <style type="text/css">
 .information{
 	margin-top: 7px;
@@ -164,6 +186,7 @@ $(function(){
 		</p>
 	</div>
 
+	<c:if test="${availableProposals}">
 	<div class="table-responsive">
 		<table class="table" id="candidaciesTable">
 			<thead>
@@ -218,6 +241,15 @@ $(function(){
 </tbody>
 </table>
 </div>
+</c:if>
+<c:if test="${!availableProposals}">
+<div class="alert alert-warning" role="alert">
+	<p>
+		<spring:message code='label.student.proposals.empty'/>
+	</p>
+</p>
+</div>
+</c:if>
 </div>
 
 
@@ -275,15 +307,6 @@ $(function(){
 </div>
 
 
-<script type="text/javascript">
-$(document).ready(function() {
-	$("#candidaciesTable").tableDnD({
-		onDrop:function(){
-			$("#savePreferencesButton").show();
-		}
-	});
-});
-</script>
 
 <script type="text/javascript">
 $("#savePreferencesButton").on("click", function(e) {
