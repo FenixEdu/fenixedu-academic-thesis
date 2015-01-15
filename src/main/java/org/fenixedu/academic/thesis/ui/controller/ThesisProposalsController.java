@@ -151,8 +151,8 @@ public class ThesisProposalsController {
 		    .filter(executionDegree -> CoordinatorGroup.get(executionDegree.getDegree()).isMember(Authenticate.getUser()))
 		    .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
 			    ExecutionYear.readCurrentExecutionYear()))
-		    .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream())
-		    .flatMap(config -> config.getThesisProposalSet().stream()).collect(Collectors.toSet());
+			    .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream())
+			    .flatMap(config -> config.getThesisProposalSet().stream()).collect(Collectors.toSet());
 
 	    if (!proposals.isEmpty()) {
 		coordinatorProposals.put(degree, proposals);
@@ -252,7 +252,6 @@ public class ThesisProposalsController {
 	    }
 
 	    ThesisProposal thesisProposal = createThesisProposal(proposalBean, participants);
-	    System.out.println("emiting signal for " + thesisProposal.getExternalId());
 	    Signal.emit(ThesisProposal.SIGNAL_CREATED, new DomainObjectEvent<ThesisProposal>(thesisProposal));
 
 	} catch (OutOfProposalPeriodException exception) {
@@ -385,7 +384,7 @@ public class ThesisProposalsController {
 			    .stream()
 			    .filter(config -> config.getProposalPeriod().overlaps(
 				    thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod()))
-				    .collect(Collectors.toSet());
+			    .collect(Collectors.toSet());
 
 		    mav.addObject("configurations", configs);
 
