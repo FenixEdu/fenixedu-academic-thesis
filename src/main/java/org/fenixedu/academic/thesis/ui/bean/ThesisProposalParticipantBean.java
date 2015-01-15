@@ -8,31 +8,31 @@ public class ThesisProposalParticipantBean {
     private String participantTypeExternalId;
 
     public String getUserExternalId() {
-	return user.getExternalId();
+        return user.getExternalId();
     }
 
     public void setUser(User user) {
-	this.user = user;
+        this.user = user;
     }
 
     public String getParticipantTypeExternalId() {
-	return participantTypeExternalId;
+        return participantTypeExternalId;
     }
 
     public void setParticipantTypeExternalId(String participantType) {
-	this.participantTypeExternalId = participantType;
+        this.participantTypeExternalId = participantType;
     }
 
     public ThesisProposalParticipantBean(User user, String participantType) {
-	setUser(user);
-	this.participantTypeExternalId = participantType;
+        setUser(user);
+        this.participantTypeExternalId = participantType;
     }
 
     public ThesisProposalParticipantBean() {
     }
 
     public User getUser() {
-	return user;
+        return user;
     }
 
 }

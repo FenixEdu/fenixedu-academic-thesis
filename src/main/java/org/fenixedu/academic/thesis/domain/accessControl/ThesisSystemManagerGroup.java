@@ -22,35 +22,35 @@ public class ThesisSystemManagerGroup extends FenixGroupStrategy {
 
     @Override
     public Set<User> getMembers() {
-	return computeGroupForMembers().getMembers();
+        return computeGroupForMembers().getMembers();
     }
 
     @Override
     public Set<User> getMembers(DateTime when) {
-	return computeGroupForMembers().getMembers(when);
+        return computeGroupForMembers().getMembers(when);
     }
 
     @Override
     public boolean isMember(User user) {
-	return computeGroupStreamForIsMember().anyMatch(g -> g.isMember(user));
+        return computeGroupStreamForIsMember().anyMatch(g -> g.isMember(user));
     }
 
     @Override
     public boolean isMember(User user, DateTime when) {
-	return computeGroupStreamForIsMember().anyMatch(g -> g.isMember(user, when));
+        return computeGroupStreamForIsMember().anyMatch(g -> g.isMember(user, when));
     }
 
     private Group computeGroupForMembers() {
-	return computeGroupStream().reduce(ThesisProposalsSystem.getInstance().getCanManageThesisGroup(), Group::or);
+        return computeGroupStream().reduce(ThesisProposalsSystem.getInstance().getCanManageThesisGroup(), Group::or);
     }
 
     private Stream<Group> computeGroupStreamForIsMember() {
-	return Stream.concat(Stream.of(ThesisProposalsSystem.getInstance().getCanManageThesisGroup()), computeGroupStream());
+        return Stream.concat(Stream.of(ThesisProposalsSystem.getInstance().getCanManageThesisGroup()), computeGroupStream());
     }
 
     private Stream<Group> computeGroupStream() {
-	return Bennu.getInstance().getDegreesSet().stream().map(degree -> DegreeHelper.getCanManageThesis(degree))
-		.filter(Objects::nonNull);
+        return Bennu.getInstance().getDegreesSet().stream().map(degree -> DegreeHelper.getCanManageThesis(degree))
+                .filter(Objects::nonNull);
     }
 
 }

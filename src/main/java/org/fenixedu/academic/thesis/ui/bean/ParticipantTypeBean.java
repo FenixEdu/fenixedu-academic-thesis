@@ -9,38 +9,38 @@ public class ParticipantTypeBean {
     private String externalId;
 
     public LocalizedString getName() {
-	return name;
+        return name;
     }
 
     public void setName(LocalizedString name) {
-	this.name = name;
+        this.name = name;
     }
 
     public int getWeight() {
-	return weight;
+        return weight;
     }
 
     public void setWeight(int weight) {
-	this.weight = weight;
+        this.weight = weight;
     }
 
     public String getExternalId() {
-	return externalId;
+        return externalId;
     }
 
     public void setExternalId(String externalId) {
-	this.externalId = externalId;
+        this.externalId = externalId;
     }
 
     public ParticipantTypeBean(LocalizedString name, int weight) {
-	this.name = name;
-	this.weight = weight;
+        this.name = name;
+        this.weight = weight;
     }
 
     public ParticipantTypeBean(LocalizedString name, int weight, String externalId) {
-	this.name = name;
-	this.weight = weight;
-	this.externalId = externalId;
+        this.name = name;
+        this.weight = weight;
+        this.externalId = externalId;
     }
 
     public ParticipantTypeBean() {

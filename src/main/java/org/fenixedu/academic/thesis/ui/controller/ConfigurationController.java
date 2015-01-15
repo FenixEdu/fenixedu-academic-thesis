@@ -48,312 +48,318 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-@SpringFunctionality(app = ThesisProposalsController.class, title = "title.configuration.management", accessGroup = "#managers | thesisSystemManagers")
+@SpringFunctionality(app = ThesisProposalsController.class, title = "title.configuration.management",
+accessGroup = "#managers | thesisSystemManagers")
 @RequestMapping("/configuration")
 public class ConfigurationController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String listConfigurations(Model model) {
 
-	TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
-	executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
+        TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
+        executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
 
-	model.addAttribute("executionYearsList", executionYearsList);
+        model.addAttribute("executionYearsList", executionYearsList);
 
-	Set<ThesisProposalsConfiguration> configurationsSet = ThesisProposalsSystem.getInstance()
-		.getThesisProposalsConfigurationSet();
+        Set<ThesisProposalsConfiguration> configurationsSet =
+                ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet();
 
-	List<ThesisProposalsConfiguration> configurationsList = configurationsSet.stream()
-		.filter((x) -> ThesisProposalsSystem.canManage(x.getExecutionDegree().getDegree(), Authenticate.getUser()))
-		.collect(Collectors.toList());
-	Collections.sort(configurationsList, ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE);
+        List<ThesisProposalsConfiguration> configurationsList =
+                configurationsSet
+                .stream()
+                .filter((x) -> ThesisProposalsSystem.canManage(x.getExecutionDegree().getDegree(), Authenticate.getUser()))
+                .collect(Collectors.toList());
+        Collections.sort(configurationsList, ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE);
 
-	model.addAttribute("configurationsList", configurationsList);
+        model.addAttribute("configurationsList", configurationsList);
 
-	List<ThesisProposalParticipantType> participantTypeList = ThesisProposalsSystem.getInstance()
-		.getThesisProposalParticipantTypeSet().stream().collect(Collectors.toList());
+        List<ThesisProposalParticipantType> participantTypeList =
+                ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet().stream().collect(Collectors.toList());
 
-	Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
+        Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
 
-	model.addAttribute("participantTypeList", participantTypeList);
+        model.addAttribute("participantTypeList", participantTypeList);
 
-	model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
+        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
 
-	return "/configuration/list";
+        return "/configuration/list";
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.GET)
     public ModelAndView createConfigurationForm(Model model, @RequestParam ConfigurationBean thesisProposalsConfigurationBean) {
 
-	ModelAndView mav = new ModelAndView("/configuration/create", "command", thesisProposalsConfigurationBean);
+        ModelAndView mav = new ModelAndView("/configuration/create", "command", thesisProposalsConfigurationBean);
 
-	TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
-	executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
-	model.addAttribute("executionYearsList", executionYearsList);
+        TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
+        executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
+        model.addAttribute("executionYearsList", executionYearsList);
 
-	List<ExecutionDegree> executionDegreeList = Bennu.getInstance().getExecutionDegreesSet().stream()
-		.collect(Collectors.toList());
-	Collections.sort(executionDegreeList, ExecutionDegree.COMPARATOR_BY_DEGREE_NAME);
-	mav.addObject("executionDegreeList", executionDegreeList);
+        List<ExecutionDegree> executionDegreeList =
+                Bennu.getInstance().getExecutionDegreesSet().stream().collect(Collectors.toList());
+        Collections.sort(executionDegreeList, ExecutionDegree.COMPARATOR_BY_DEGREE_NAME);
+        mav.addObject("executionDegreeList", executionDegreeList);
 
-	return mav;
+        return mav;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ModelAndView createConfiguration(@ModelAttribute ConfigurationBean configurationBean, Model model) {
 
-	try {
-	    if (configurationBean.getExecutionDegree() == null) {
-		model.addAttribute("unselectedExecutionDegreeException", true);
-		return createConfigurationForm(model, configurationBean);
-	    }
+        try {
+            if (configurationBean.getExecutionDegree() == null) {
+                model.addAttribute("unselectedExecutionDegreeException", true);
+                return createConfigurationForm(model, configurationBean);
+            }
 
-	    new ConfigurationBean.Builder(configurationBean).build();
-	} catch (ConsistencyException exception) {
-	    model.addAttribute("createException", true);
-	    model.addAttribute("command", configurationBean);
+            new ConfigurationBean.Builder(configurationBean).build();
+        } catch (ConsistencyException exception) {
+            model.addAttribute("createException", true);
+            model.addAttribute("command", configurationBean);
 
-	    TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
-	    executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
-	    model.addAttribute("executionYearsList", executionYearsList);
+            TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
+            executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
+            model.addAttribute("executionYearsList", executionYearsList);
 
-	    return new ModelAndView("/configuration/create", model.asMap());
-	} catch (IllegalArgumentException exception) {
-	    model.addAttribute("illegalArgumentException", true);
-	    model.addAttribute("command", configurationBean);
+            return new ModelAndView("/configuration/create", model.asMap());
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("illegalArgumentException", true);
+            model.addAttribute("command", configurationBean);
 
-	    TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
-	    executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
-	    model.addAttribute("executionYearsList", executionYearsList);
+            TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
+            executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
+            model.addAttribute("executionYearsList", executionYearsList);
 
-	    return new ModelAndView("/configuration/create", model.asMap());
-	} catch (OverlappingIntervalsException e) {
-	    model.addAttribute("overlappingIntervalsException", true);
-	    model.addAttribute("command", configurationBean);
+            return new ModelAndView("/configuration/create", model.asMap());
+        } catch (OverlappingIntervalsException e) {
+            model.addAttribute("overlappingIntervalsException", true);
+            model.addAttribute("command", configurationBean);
 
-	    TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
-	    executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
-	    model.addAttribute("executionYearsList", executionYearsList);
+            TreeSet<ExecutionYear> executionYearsList = new TreeSet<ExecutionYear>(ExecutionYear.REVERSE_COMPARATOR_BY_YEAR);
+            executionYearsList.addAll(Bennu.getInstance().getExecutionYearsSet());
+            model.addAttribute("executionYearsList", executionYearsList);
 
-	    return new ModelAndView("/configuration/create", model.asMap());
-	}
+            return new ModelAndView("/configuration/create", model.asMap());
+        }
 
-	return new ModelAndView("redirect:/configuration");
+        return new ModelAndView("redirect:/configuration");
     }
 
     @RequestMapping(value = "/delete/{oid}", method = RequestMethod.POST)
     public ModelAndView deleteConfiguration(@PathVariable("oid") ThesisProposalsConfiguration thesisProposalsConfiguration,
-	    Model model) {
+            Model model) {
 
-	try {
-	    delete(thesisProposalsConfiguration);
-	} catch (DomainException exception) {
-	    model.addAttribute("deleteException", true);
-	    return editConfigurationForm(thesisProposalsConfiguration, model);
-	}
+        try {
+            delete(thesisProposalsConfiguration);
+        } catch (DomainException exception) {
+            model.addAttribute("deleteException", true);
+            return editConfigurationForm(thesisProposalsConfiguration, model);
+        }
 
-	return new ModelAndView(listConfigurations(model));
+        return new ModelAndView(listConfigurations(model));
     }
 
     @Atomic(mode = TxMode.WRITE)
     private void delete(ThesisProposalsConfiguration thesisProposalsConfiguration) {
-	thesisProposalsConfiguration.delete();
+        thesisProposalsConfiguration.delete();
     }
 
     @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)
     public ModelAndView editConfigurationForm(@PathVariable("oid") ThesisProposalsConfiguration configuration, Model model) {
 
-	ConfigurationBean configurationBean = new ConfigurationBean(configuration.getProposalPeriod().getStart(), configuration
-		.getProposalPeriod().getEnd(), configuration.getCandidacyPeriod().getStart(), configuration.getCandidacyPeriod()
-		.getEnd(), configuration.getExecutionDegree(), configuration.getExternalId(),
-		configuration.getMaxThesisCandidaciesByStudent(), configuration.getMaxThesisProposalsByUser());
+        ConfigurationBean configurationBean =
+                new ConfigurationBean(configuration.getProposalPeriod().getStart(), configuration.getProposalPeriod().getEnd(),
+                        configuration.getCandidacyPeriod().getStart(), configuration.getCandidacyPeriod().getEnd(),
+                        configuration.getExecutionDegree(), configuration.getExternalId(),
+                        configuration.getMaxThesisCandidaciesByStudent(), configuration.getMaxThesisProposalsByUser());
 
-	ModelAndView mav = new ModelAndView("configuration/edit", "command", configurationBean);
+        ModelAndView mav = new ModelAndView("configuration/edit", "command", configurationBean);
 
-	return mav;
+        return mav;
     }
 
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
     public ModelAndView editConfiguration(@ModelAttribute ConfigurationBean configurationBean, Model model) {
 
-	try {
-	    edit(configurationBean);
-	} catch (IllegalArgumentException exception) {
-	    model.addAttribute("illegalArgumentException", true);
-	    model.addAttribute("command", configurationBean);
+        try {
+            edit(configurationBean);
+        } catch (IllegalArgumentException exception) {
+            model.addAttribute("illegalArgumentException", true);
+            model.addAttribute("command", configurationBean);
 
-	    return new ModelAndView("/configuration/edit", model.asMap());
-	} catch (OverlappingIntervalsException e) {
-	    model.addAttribute("overlappingIntervalsException", true);
-	    model.addAttribute("command", configurationBean);
+            return new ModelAndView("/configuration/edit", model.asMap());
+        } catch (OverlappingIntervalsException e) {
+            model.addAttribute("overlappingIntervalsException", true);
+            model.addAttribute("command", configurationBean);
 
-	    return new ModelAndView("/configuration/edit", model.asMap());
-	}
+            return new ModelAndView("/configuration/edit", model.asMap());
+        }
 
-	return new ModelAndView("redirect:/configuration");
+        return new ModelAndView("redirect:/configuration");
     }
 
     @Atomic(mode = TxMode.WRITE)
     private void edit(ConfigurationBean configurationBean) throws OverlappingIntervalsException {
 
-	ThesisProposalsConfiguration thesisProposalsConfiguration = FenixFramework.getDomainObject(configurationBean
-		.getExternalId());
+        ThesisProposalsConfiguration thesisProposalsConfiguration =
+                FenixFramework.getDomainObject(configurationBean.getExternalId());
 
-	DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
+        DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
 
-	DateTime proposalPeriodStartDT = formatter.parseDateTime(configurationBean.getProposalPeriodStart());
-	DateTime proposalPeriodEndDT = formatter.parseDateTime(configurationBean.getProposalPeriodEnd());
-	DateTime candidacyPeriodStartDT = formatter.parseDateTime(configurationBean.getCandidacyPeriodStart());
-	DateTime candidacyPeriodEndDT = formatter.parseDateTime(configurationBean.getCandidacyPeriodEnd());
+        DateTime proposalPeriodStartDT = formatter.parseDateTime(configurationBean.getProposalPeriodStart());
+        DateTime proposalPeriodEndDT = formatter.parseDateTime(configurationBean.getProposalPeriodEnd());
+        DateTime candidacyPeriodStartDT = formatter.parseDateTime(configurationBean.getCandidacyPeriodStart());
+        DateTime candidacyPeriodEndDT = formatter.parseDateTime(configurationBean.getCandidacyPeriodEnd());
 
-	Interval proposalPeriod = new Interval(proposalPeriodStartDT, proposalPeriodEndDT);
-	Interval candidacyPeriod = new Interval(candidacyPeriodStartDT, candidacyPeriodEndDT);
+        Interval proposalPeriod = new Interval(proposalPeriodStartDT, proposalPeriodEndDT);
+        Interval candidacyPeriod = new Interval(candidacyPeriodStartDT, candidacyPeriodEndDT);
 
-	if (proposalPeriod.overlaps(candidacyPeriod)) {
-	    throw new OverlappingIntervalsException();
-	}
+        if (proposalPeriod.overlaps(candidacyPeriod)) {
+            throw new OverlappingIntervalsException();
+        }
 
-	for (ThesisProposalsConfiguration config : thesisProposalsConfiguration.getExecutionDegree()
-		.getThesisProposalsConfigurationSet()) {
-	    if (!config.equals(thesisProposalsConfiguration)
-		    && (config.getProposalPeriod().overlaps(proposalPeriod)
-			    || config.getCandidacyPeriod().overlaps(candidacyPeriod)
-			    || config.getProposalPeriod().overlaps(candidacyPeriod) || config.getCandidacyPeriod().overlaps(
-			    proposalPeriod))) {
-		throw new OverlappingIntervalsException();
-	    }
-	}
+        for (ThesisProposalsConfiguration config : thesisProposalsConfiguration.getExecutionDegree()
+                .getThesisProposalsConfigurationSet()) {
+            if (!config.equals(thesisProposalsConfiguration)
+                    && (config.getProposalPeriod().overlaps(proposalPeriod)
+                            || config.getCandidacyPeriod().overlaps(candidacyPeriod)
+                            || config.getProposalPeriod().overlaps(candidacyPeriod) || config.getCandidacyPeriod().overlaps(
+                                    proposalPeriod))) {
+                throw new OverlappingIntervalsException();
+            }
+        }
 
-	thesisProposalsConfiguration.setProposalPeriod(proposalPeriod);
-	thesisProposalsConfiguration.setCandidacyPeriod(candidacyPeriod);
+        thesisProposalsConfiguration.setProposalPeriod(proposalPeriod);
+        thesisProposalsConfiguration.setCandidacyPeriod(candidacyPeriod);
 
-	thesisProposalsConfiguration.setMaxThesisCandidaciesByStudent(configurationBean.getMaxThesisCandidaciesByStudent());
-	thesisProposalsConfiguration.setMaxThesisProposalsByUser(configurationBean.getMaxThesisProposalsByUser());
+        thesisProposalsConfiguration.setMaxThesisCandidaciesByStudent(configurationBean.getMaxThesisCandidaciesByStudent());
+        thesisProposalsConfiguration.setMaxThesisProposalsByUser(configurationBean.getMaxThesisProposalsByUser());
     }
 
-    @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE, value = "/execution-year/{executionYear}/execution-degrees", method = RequestMethod.GET)
+    @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE, value = "/execution-year/{executionYear}/execution-degrees",
+            method = RequestMethod.GET)
     public @ResponseBody ResponseEntity<String> getExecutionDegreesByYear(
-	    @PathVariable("executionYear") ExecutionYear executionYear) {
+            @PathVariable("executionYear") ExecutionYear executionYear) {
 
-	JsonArray response = new JsonArray();
+        JsonArray response = new JsonArray();
 
-	List<ExecutionDegree> executionDegreeList = ExecutionDegree.getAllByExecutionYear(executionYear).stream()
-		.filter(executionDegree -> executionDegree.getDegree().getCycleTypes().contains(CycleType.SECOND_CYCLE))
-		.filter((x) -> ThesisProposalsSystem.canManage(x.getDegree(), Authenticate.getUser()))
-		.collect(Collectors.toList());
+        List<ExecutionDegree> executionDegreeList =
+                ExecutionDegree.getAllByExecutionYear(executionYear).stream()
+                .filter(executionDegree -> executionDegree.getDegree().getCycleTypes().contains(CycleType.SECOND_CYCLE))
+                .filter((x) -> ThesisProposalsSystem.canManage(x.getDegree(), Authenticate.getUser()))
+                .collect(Collectors.toList());
 
-	Collections.sort(executionDegreeList,
-		ExecutionDegree.EXECUTION_DEGREE_COMPARATORY_BY_DEGREE_TYPE_AND_NAME_AND_EXECUTION_YEAR);
+        Collections.sort(executionDegreeList,
+                ExecutionDegree.EXECUTION_DEGREE_COMPARATORY_BY_DEGREE_TYPE_AND_NAME_AND_EXECUTION_YEAR);
 
-	executionDegreeList.forEach(executionDegree -> response.add(executionDegreeToJson(executionDegree)));
+        executionDegreeList.forEach(executionDegree -> response.add(executionDegreeToJson(executionDegree)));
 
-	return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
+        return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
     }
 
     private JsonElement executionDegreeToJson(ExecutionDegree executionDegree) {
-	JsonObject json = new JsonObject();
+        JsonObject json = new JsonObject();
 
-	json.addProperty("externalId", executionDegree.getExternalId());
-	json.addProperty("name", executionDegree.getPresentationName());
+        json.addProperty("externalId", executionDegree.getExternalId());
+        json.addProperty("name", executionDegree.getPresentationName());
 
-	return json;
+        return json;
     }
 
     @RequestMapping(value = "createParticipantType", method = RequestMethod.GET)
     public String createParticipantTypeForm(Model model) {
 
-	List<ThesisProposalParticipantType> participantTypeList = ThesisProposalsSystem.getInstance()
-		.getThesisProposalParticipantTypeSet().stream().collect(Collectors.toList());
+        List<ThesisProposalParticipantType> participantTypeList =
+                ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet().stream().collect(Collectors.toList());
 
-	Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
+        Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
 
-	model.addAttribute("participantTypeList", participantTypeList);
+        model.addAttribute("participantTypeList", participantTypeList);
 
-	return "participantsType/create";
+        return "participantsType/create";
     }
 
     @RequestMapping(value = "/createParticipantType", method = RequestMethod.POST)
     public String createParticipantType(@RequestParam LocalizedString name, @RequestParam int weight) {
 
-	createThesisProposalParticipantType(name, weight);
+        createThesisProposalParticipantType(name, weight);
 
-	return "redirect:/configuration";
+        return "redirect:/configuration";
     }
 
     @Atomic(mode = TxMode.WRITE)
     public void createThesisProposalParticipantType(LocalizedString name, int weight) {
-	new ThesisProposalParticipantType(name, weight);
+        new ThesisProposalParticipantType(name, weight);
     }
 
     @RequestMapping(value = "deleteParticipantType/{participantType}", method = RequestMethod.POST)
     public String deleteParticipantType(@PathVariable("participantType") ThesisProposalParticipantType participantType,
-	    Model model) {
+            Model model) {
 
-	return delete(participantType, model);
+        return delete(participantType, model);
     }
 
     @Atomic(mode = TxMode.WRITE)
     private String delete(ThesisProposalParticipantType participantType, Model model) {
-	try {
-	    participantType.delete();
-	} catch (DomainException domainException) {
-	    model.addAttribute("deleteException", true);
-	    return createParticipantTypeForm(model);
-	}
+        try {
+            participantType.delete();
+        } catch (DomainException domainException) {
+            model.addAttribute("deleteException", true);
+            return createParticipantTypeForm(model);
+        }
 
-	return "redirect:/configuration";
+        return "redirect:/configuration";
     }
 
     @RequestMapping(value = "editParticipantType/{participantType}", method = RequestMethod.GET)
     public ModelAndView editParticipantTypeForm(@PathVariable("participantType") ThesisProposalParticipantType participantType,
-	    Model model) {
+            Model model) {
 
-	ParticipantTypeBean thesisProposalParticipantTypeBean = new ParticipantTypeBean(participantType.getName(),
-		participantType.getWeight(), participantType.getExternalId());
+        ParticipantTypeBean thesisProposalParticipantTypeBean =
+                new ParticipantTypeBean(participantType.getName(), participantType.getWeight(), participantType.getExternalId());
 
-	ModelAndView mav = new ModelAndView("participantsType/edit", "command", thesisProposalParticipantTypeBean);
-	return mav;
+        ModelAndView mav = new ModelAndView("participantsType/edit", "command", thesisProposalParticipantTypeBean);
+        return mav;
     }
 
     @RequestMapping(value = "editParticipantType", method = RequestMethod.POST)
     public String editParticipantType(@RequestParam LocalizedString name, @RequestParam String externalId,
-	    @RequestParam int weight) {
+            @RequestParam int weight) {
 
-	ParticipantTypeBean bean = new ParticipantTypeBean(name, weight, externalId);
+        ParticipantTypeBean bean = new ParticipantTypeBean(name, weight, externalId);
 
-	return edit(bean);
+        return edit(bean);
     }
 
     @Atomic(mode = TxMode.WRITE)
     private String edit(ParticipantTypeBean participantTypeBean) {
-	ThesisProposalParticipantType thesisProposalParticipantType = FenixFramework.getDomainObject(participantTypeBean
-		.getExternalId());
+        ThesisProposalParticipantType thesisProposalParticipantType =
+                FenixFramework.getDomainObject(participantTypeBean.getExternalId());
 
-	thesisProposalParticipantType.setName(participantTypeBean.getName());
+        thesisProposalParticipantType.setName(participantTypeBean.getName());
 
-	return "redirect:/configuration";
+        return "redirect:/configuration";
     }
 
     @RequestMapping(value = "/updateWeights", method = RequestMethod.POST)
     public String updateParticipantTypeWeights(@RequestParam String json) {
 
-	JsonParser parser = new JsonParser();
-	JsonArray jsonArray = (JsonArray) parser.parse(json);
+        JsonParser parser = new JsonParser();
+        JsonArray jsonArray = (JsonArray) parser.parse(json);
 
-	updateParticipantTypeWeights(jsonArray);
+        updateParticipantTypeWeights(jsonArray);
 
-	return "redirect:/configuration";
+        return "redirect:/configuration";
     }
 
     @Atomic(mode = TxMode.WRITE)
     public void updateParticipantTypeWeights(JsonArray jsonArray) {
-	jsonArray.forEach((JsonElement elem) -> {
-	    String externalId = elem.getAsJsonObject().get("externalId").getAsString();
-	    int weight = elem.getAsJsonObject().get("weight").getAsInt();
+        jsonArray.forEach((JsonElement elem) -> {
+            String externalId = elem.getAsJsonObject().get("externalId").getAsString();
+            int weight = elem.getAsJsonObject().get("weight").getAsInt();
 
-	    ThesisProposalParticipantType type = FenixFramework.getDomainObject(externalId);
-	    type.setWeight(weight);
-	});
+            ThesisProposalParticipantType type = FenixFramework.getDomainObject(externalId);
+            type.setWeight(weight);
+        });
     }
 
 }

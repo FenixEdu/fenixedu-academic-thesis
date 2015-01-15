@@ -17,23 +17,23 @@ public class ThesisCreatorsGroup extends FenixGroupStrategy {
 
     @Override
     public Set<User> getMembers() {
-	return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().getMembers();
+        return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().getMembers();
     }
 
     @Override
     public Set<User> getMembers(DateTime when) {
-	return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().getMembers(when);
+        return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().getMembers(when);
     }
 
     @Override
     public boolean isMember(User user) {
-	return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().isMember(user);
+        return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().isMember(user);
 
     }
 
     @Override
     public boolean isMember(User user, DateTime when) {
-	return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().isMember(user, when);
+        return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().isMember(user, when);
 
     }
 

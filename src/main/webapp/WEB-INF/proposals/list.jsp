@@ -32,7 +32,13 @@ ${portal.toolkit()}
 <p class="text-danger"><spring:message code="error.thesisProposal.maxNumberThesisProposalsException"/></p>
 </c:if>
 
-
+<div class="alert alert-info">
+	<c:forEach items="${suggestedConfigs}" var="config">
+	<p>
+		<spring:message code="label.thesis.proposal.info" arguments="${config.executionDegree.degree.sigla},${config.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${config.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/>
+	</p>
+</c:forEach>
+</div>
 
 <div class="well">
    <p>

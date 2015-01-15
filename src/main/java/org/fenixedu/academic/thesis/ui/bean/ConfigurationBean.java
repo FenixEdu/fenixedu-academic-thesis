@@ -23,147 +23,147 @@ public class ConfigurationBean {
     private int maxThesisProposalsByUser;
 
     public String getProposalPeriodStart() {
-	return proposalPeriodStart;
+        return proposalPeriodStart;
     }
 
     public void setProposalPeriodStart(String proposalPeriodStart) {
-	this.proposalPeriodStart = proposalPeriodStart;
+        this.proposalPeriodStart = proposalPeriodStart;
     }
 
     public String getProposalPeriodEnd() {
-	return proposalPeriodEnd;
+        return proposalPeriodEnd;
     }
 
     public void setProposalPeriodEnd(String proposalPeriodEnd) {
-	this.proposalPeriodEnd = proposalPeriodEnd;
+        this.proposalPeriodEnd = proposalPeriodEnd;
     }
 
     public String getCandidacyPeriodStart() {
-	return candidacyPeriodStart;
+        return candidacyPeriodStart;
     }
 
     public void setCandidacyPeriodStart(String candidacyPeriodStart) {
-	this.candidacyPeriodStart = candidacyPeriodStart;
+        this.candidacyPeriodStart = candidacyPeriodStart;
     }
 
     public String getCandidacyPeriodEnd() {
-	return candidacyPeriodEnd;
+        return candidacyPeriodEnd;
     }
 
     public void setCandidacyPeriodEnd(String candidacyPeriodEnd) {
-	this.candidacyPeriodEnd = candidacyPeriodEnd;
+        this.candidacyPeriodEnd = candidacyPeriodEnd;
     }
 
     public ExecutionDegree getExecutionDegree() {
-	return executionDegree;
+        return executionDegree;
     }
 
     public void setExecutionDegree(ExecutionDegree executionDegree) {
-	this.executionDegree = executionDegree;
+        this.executionDegree = executionDegree;
     }
 
     public int getMaxThesisCandidaciesByStudent() {
-	return maxThesisCandidaciesByStudent;
+        return maxThesisCandidaciesByStudent;
     }
 
     public void setMaxThesisCandidaciesByStudent(int maxThesisCandidaciesByStudent) {
-	this.maxThesisCandidaciesByStudent = maxThesisCandidaciesByStudent;
+        this.maxThesisCandidaciesByStudent = maxThesisCandidaciesByStudent;
     }
 
     public int getMaxThesisProposalsByUser() {
-	return maxThesisProposalsByUser;
+        return maxThesisProposalsByUser;
     }
 
     public void setMaxThesisProposalsByUser(int maxThesisProposalsByUser) {
-	this.maxThesisProposalsByUser = maxThesisProposalsByUser;
+        this.maxThesisProposalsByUser = maxThesisProposalsByUser;
     }
 
     public String getExternalId() {
-	return externalId;
+        return externalId;
     }
 
     public void setExternalId(String externalId) {
-	this.externalId = externalId;
+        this.externalId = externalId;
     }
 
     public ConfigurationBean(String proposalPeriodStart, String proposalPeriodEnd, String candidacyPeriodStart,
-	    String candidacyPeriodEnd, ExecutionDegree executionDegree, int maxThesisCandidaciesByStudent,
-	    int maxThesisProposalsByUser) {
-	this.proposalPeriodStart = proposalPeriodStart;
-	this.proposalPeriodEnd = proposalPeriodEnd;
-	this.candidacyPeriodStart = candidacyPeriodStart;
-	this.candidacyPeriodEnd = candidacyPeriodEnd;
-	this.executionDegree = executionDegree;
-	this.maxThesisCandidaciesByStudent = maxThesisCandidaciesByStudent;
-	this.maxThesisProposalsByUser = maxThesisProposalsByUser;
+            String candidacyPeriodEnd, ExecutionDegree executionDegree, int maxThesisCandidaciesByStudent,
+            int maxThesisProposalsByUser) {
+        this.proposalPeriodStart = proposalPeriodStart;
+        this.proposalPeriodEnd = proposalPeriodEnd;
+        this.candidacyPeriodStart = candidacyPeriodStart;
+        this.candidacyPeriodEnd = candidacyPeriodEnd;
+        this.executionDegree = executionDegree;
+        this.maxThesisCandidaciesByStudent = maxThesisCandidaciesByStudent;
+        this.maxThesisProposalsByUser = maxThesisProposalsByUser;
     }
 
     public ConfigurationBean() {
     }
 
     public ConfigurationBean(DateTime proposalPeriodStart, DateTime proposalPeriodEnd, DateTime candidacyPeriodStart,
-	    DateTime candidacyPeriodEnd, ExecutionDegree executionDegree, String externalId, int maxThesisCandidaciesByStudent,
-	    int maxThesisProposalsByUser) {
+            DateTime candidacyPeriodEnd, ExecutionDegree executionDegree, String externalId, int maxThesisCandidaciesByStudent,
+            int maxThesisProposalsByUser) {
 
-	this.proposalPeriodStart = proposalPeriodStart.toString();
-	this.proposalPeriodEnd = proposalPeriodEnd.toString();
-	this.candidacyPeriodStart = candidacyPeriodStart.toString();
-	this.candidacyPeriodEnd = candidacyPeriodEnd.toString();
+        this.proposalPeriodStart = proposalPeriodStart.toString();
+        this.proposalPeriodEnd = proposalPeriodEnd.toString();
+        this.candidacyPeriodStart = candidacyPeriodStart.toString();
+        this.candidacyPeriodEnd = candidacyPeriodEnd.toString();
 
-	this.executionDegree = executionDegree;
-	this.externalId = externalId;
-	this.maxThesisCandidaciesByStudent = maxThesisCandidaciesByStudent;
-	this.maxThesisProposalsByUser = maxThesisProposalsByUser;
+        this.executionDegree = executionDegree;
+        this.externalId = externalId;
+        this.maxThesisCandidaciesByStudent = maxThesisCandidaciesByStudent;
+        this.maxThesisProposalsByUser = maxThesisProposalsByUser;
     }
 
     public static class Builder {
-	private final String proposalPeriodStart;
-	private final String proposalPeriodEnd;
-	private final String candidacyPeriodStart;
-	private final String candidacyPeriodEnd;
-	private final ExecutionDegree executionDegree;
-	private final int maxThesisCandidaciesByStudent;
-	private final int maxThesisProposalsByUser;
+        private final String proposalPeriodStart;
+        private final String proposalPeriodEnd;
+        private final String candidacyPeriodStart;
+        private final String candidacyPeriodEnd;
+        private final ExecutionDegree executionDegree;
+        private final int maxThesisCandidaciesByStudent;
+        private final int maxThesisProposalsByUser;
 
-	public Builder(ConfigurationBean thesisProposalsConfigurationBean) {
-	    this.proposalPeriodStart = thesisProposalsConfigurationBean.getProposalPeriodStart();
-	    this.proposalPeriodEnd = thesisProposalsConfigurationBean.getProposalPeriodEnd();
-	    this.candidacyPeriodStart = thesisProposalsConfigurationBean.getCandidacyPeriodStart();
-	    this.candidacyPeriodEnd = thesisProposalsConfigurationBean.getCandidacyPeriodEnd();
-	    this.executionDegree = thesisProposalsConfigurationBean.getExecutionDegree();
-	    this.maxThesisCandidaciesByStudent = thesisProposalsConfigurationBean.getMaxThesisCandidaciesByStudent();
-	    this.maxThesisProposalsByUser = thesisProposalsConfigurationBean.getMaxThesisProposalsByUser();
-	}
+        public Builder(ConfigurationBean thesisProposalsConfigurationBean) {
+            this.proposalPeriodStart = thesisProposalsConfigurationBean.getProposalPeriodStart();
+            this.proposalPeriodEnd = thesisProposalsConfigurationBean.getProposalPeriodEnd();
+            this.candidacyPeriodStart = thesisProposalsConfigurationBean.getCandidacyPeriodStart();
+            this.candidacyPeriodEnd = thesisProposalsConfigurationBean.getCandidacyPeriodEnd();
+            this.executionDegree = thesisProposalsConfigurationBean.getExecutionDegree();
+            this.maxThesisCandidaciesByStudent = thesisProposalsConfigurationBean.getMaxThesisCandidaciesByStudent();
+            this.maxThesisProposalsByUser = thesisProposalsConfigurationBean.getMaxThesisProposalsByUser();
+        }
 
-	@Atomic(mode = TxMode.WRITE)
-	public ThesisProposalsConfiguration build() throws OverlappingIntervalsException {
+        @Atomic(mode = TxMode.WRITE)
+        public ThesisProposalsConfiguration build() throws OverlappingIntervalsException {
 
-	    DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
+            DateTimeFormatter formatter = ISODateTimeFormat.dateTime();
 
-	    DateTime proposalPeriodStartDT = formatter.parseDateTime(proposalPeriodStart);
-	    DateTime proposalPeriodEndDT = formatter.parseDateTime(proposalPeriodEnd);
-	    DateTime candidacyPeriodStartDT = formatter.parseDateTime(candidacyPeriodStart);
-	    DateTime candidacyPeriodEndDT = formatter.parseDateTime(candidacyPeriodEnd);
+            DateTime proposalPeriodStartDT = formatter.parseDateTime(proposalPeriodStart);
+            DateTime proposalPeriodEndDT = formatter.parseDateTime(proposalPeriodEnd);
+            DateTime candidacyPeriodStartDT = formatter.parseDateTime(candidacyPeriodStart);
+            DateTime candidacyPeriodEndDT = formatter.parseDateTime(candidacyPeriodEnd);
 
-	    Interval proposalPeriod = new Interval(proposalPeriodStartDT, proposalPeriodEndDT);
-	    Interval candidacyPeriod = new Interval(candidacyPeriodStartDT, candidacyPeriodEndDT);
+            Interval proposalPeriod = new Interval(proposalPeriodStartDT, proposalPeriodEndDT);
+            Interval candidacyPeriod = new Interval(candidacyPeriodStartDT, candidacyPeriodEndDT);
 
-	    if (proposalPeriod.overlaps(candidacyPeriod)) {
-		throw new OverlappingIntervalsException();
-	    }
+            if (proposalPeriod.overlaps(candidacyPeriod)) {
+                throw new OverlappingIntervalsException();
+            }
 
-	    for (ThesisProposalsConfiguration config : executionDegree.getThesisProposalsConfigurationSet()) {
+            for (ThesisProposalsConfiguration config : executionDegree.getThesisProposalsConfigurationSet()) {
 
-		if (config.getProposalPeriod().overlaps(proposalPeriod) || config.getCandidacyPeriod().overlaps(candidacyPeriod)
-			|| config.getProposalPeriod().overlaps(candidacyPeriod)
-			|| config.getCandidacyPeriod().overlaps(proposalPeriod)) {
-		    throw new OverlappingIntervalsException();
-		}
-	    }
+                if (config.getProposalPeriod().overlaps(proposalPeriod) || config.getCandidacyPeriod().overlaps(candidacyPeriod)
+                        || config.getProposalPeriod().overlaps(candidacyPeriod)
+                        || config.getCandidacyPeriod().overlaps(proposalPeriod)) {
+                    throw new OverlappingIntervalsException();
+                }
+            }
 
-	    return new ThesisProposalsConfiguration(proposalPeriod, candidacyPeriod, executionDegree,
-		    maxThesisCandidaciesByStudent, maxThesisProposalsByUser);
-	}
+            return new ThesisProposalsConfiguration(proposalPeriod, candidacyPeriod, executionDegree,
+                    maxThesisCandidaciesByStudent, maxThesisProposalsByUser);
+        }
     }
 
 }
