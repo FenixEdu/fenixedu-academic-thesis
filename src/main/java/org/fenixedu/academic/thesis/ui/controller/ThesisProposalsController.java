@@ -588,35 +588,6 @@ public class ThesisProposalsController {
         return new ModelAndView("redirect:/proposals");
     }
 
-    @RequestMapping(value = "/candidacies", method = RequestMethod.GET)
-    public String listCandidaciesProposals(Model model) {
-
-        ArrayList<ThesisProposal> thesisProposalsList =
-                new ArrayList<ThesisProposal>(ThesisProposal.readCurrentByParticipant(Authenticate.getUser()));
-        Collections.sort(thesisProposalsList, ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
-        model.addAttribute("thesisProposalsList", thesisProposalsList);
-
-        HashMap<String, Integer> bestAccepted = new HashMap<String, Integer>();
-        for (ThesisProposal thesisProposal : thesisProposalsList) {
-            for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
-                Registration registration = candidacy.getRegistration();
-                if (!bestAccepted.containsKey(registration.getExternalId())) {
-                    for (StudentThesisCandidacy studentCandidacy : registration.getStudentThesisCandidacySet()) {
-                        if (studentCandidacy.getAcceptedByAdvisor()
-                                && studentCandidacy.getPreferenceNumber() < bestAccepted.getOrDefault(
-                                        registration.getExternalId(), Integer.MAX_VALUE)) {
-                            bestAccepted.put(registration.getExternalId(), studentCandidacy.getPreferenceNumber());
-                        }
-                    }
-                }
-            }
-        }
-
-        model.addAttribute("bestAccepted", bestAccepted);
-
-        return "thesisCandidacies/list";
-    }
-
     @RequestMapping(value = "/accept/{studentThesisCandidacy}", method = RequestMethod.POST)
     public String acceptStudentThesisCandidacy(
             @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy, Model model) {
@@ -641,7 +612,7 @@ public class ThesisProposalsController {
             return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
         } catch (OutOfCandidacyPeriodException exception) {
             model.addAttribute("outOfCandidacyPeriodException", true);
-            return listCandidaciesProposals(model);
+            return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
         }
     }
 
@@ -664,7 +635,7 @@ public class ThesisProposalsController {
             return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
         } catch (OutOfCandidacyPeriodException exception) {
             model.addAttribute("outOfCandidacyPeriodException", true);
-            return listCandidaciesProposals(model);
+            return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
         }
     }
 
@@ -673,12 +644,31 @@ public class ThesisProposalsController {
 
         ModelAndView mav = new ModelAndView("thesisCandidacies/manage");
 
+        mav.addObject("thesisProposal", thesisProposal);
+
         ArrayList<StudentThesisCandidacy> candidacies =
                 new ArrayList<StudentThesisCandidacy>(thesisProposal.getStudentThesisCandidacySet());
 
         Collections.sort(candidacies, StudentThesisCandidacy.COMPARATOR_BY_DATETIME);
 
         mav.addObject("candidaciesList", candidacies);
+
+        HashMap<String, Integer> bestAccepted = new HashMap<String, Integer>();
+
+        for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
+            Registration registration = candidacy.getRegistration();
+            if (!bestAccepted.containsKey(registration.getExternalId())) {
+                for (StudentThesisCandidacy studentCandidacy : registration.getStudentThesisCandidacySet()) {
+                    if (studentCandidacy.getAcceptedByAdvisor()
+                            && studentCandidacy.getPreferenceNumber() < bestAccepted.getOrDefault(registration.getExternalId(),
+                                    Integer.MAX_VALUE)) {
+                        bestAccepted.put(registration.getExternalId(), studentCandidacy.getPreferenceNumber());
+                    }
+                }
+            }
+        }
+
+        model.addAttribute("bestAccepted", bestAccepted);
 
         return mav;
     }

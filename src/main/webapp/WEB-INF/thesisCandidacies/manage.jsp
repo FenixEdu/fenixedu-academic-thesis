@@ -11,9 +11,14 @@
 </div>
 
 <div class="well">
-	<p><spring:message code="label.candidacies.well"/></p>
+	<p><spring:message code="label.candidacies.well"/> - ${thesisProposal.title}</p>
 </div>
 
+<c:if test="${!empty outOfCandidacyPeriodException}">
+<p class="text-danger"><spring:message code="error.thesisProposal.candidacy.confirm.outOfCandidacyPeriodException"/></p>
+</c:if>
+
+<c:if test="${!empty candidaciesList}">
 <table class="table">
 	<colgroup>
 		<col></col>
@@ -46,18 +51,18 @@
 					<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
 					<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/accept/${studentThesisCandidacy.externalId}" class="form-horizontal">
 
-					<c:if test="${bestAccepted.get(studentThesisCandidacy.student.externalId) < studentThesisCandidacy.preferenceNumber}">
-					<button type="submit" class="btn btn-success acceptButton" disabled="true">
+					<c:if test="${bestAccepted.get(studentThesisCandidacy.registration.externalId) < studentThesisCandidacy.preferenceNumber}">
+					<button type="submit" class="btn btn-default acceptButton" disabled="true">
 						<spring:message code='button.candidacy.accept' />
 					</button>
 					<p>You can't accept this student since it has already been accepted in a more prefereble proposal</p>
 				</c:if>
-				<c:if test="${!(bestAccepted.get(studentThesisCandidacy.student.externalId) < studentThesisCandidacy.preferenceNumber)}">
+				<c:if test="${!(bestAccepted.get(studentThesisCandidacy.registration.externalId) < studentThesisCandidacy.preferenceNumber)}">
 				<button type="submit" class="btn btn-default acceptButton">
 					<spring:message code='button.candidacy.accept' />
 				</button>
-
 			</c:if>
+
 		</form:form>
 	</c:if>
 
@@ -73,3 +78,9 @@
 </c:forEach>
 </tbody>
 </table>
+</c:if>
+<c:if test="${empty candidaciesList}">
+<div class="alert alert-warning" role="alert">
+<spring:message code='label.proposal.candidacies.empty' />
+</div>
+</c:if>
