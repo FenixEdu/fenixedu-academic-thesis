@@ -15,11 +15,20 @@
     <packaging>jar</packaging>
 
     <name>FenixEdu Academic Thesis</name>
+    <url>http://fenixedu.org</url>
+    <inceptionYear>2014</inceptionYear>
 
     <properties>
         <version.org.fenixedu.bennu>3.4.1</version.org.fenixedu.bennu>
         <version.org.fenixedu.bennu.spring>1.2.0</version.org.fenixedu.bennu.spring>
     </properties>
+
+    <scm>
+        <connection>scm:git:git@github.com:fenixedu/fenixedu-academic-thesis.git</connection>
+        <developerConnection>scm:git:git@github.com:fenixedu/fenixedu-academic-thesis.git</developerConnection>
+        <url>http://fenixedu.org</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencies>
         <dependency>
