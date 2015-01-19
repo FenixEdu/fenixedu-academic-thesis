@@ -1,60 +1,20 @@
-/**
- * TableDnD plug-in for JQuery, allows you to drag and drop table rows
- * You can set up various options to control how the system will work
- * Copyright � Denis Howlett <denish@isocra.com>
- * Licensed like jQuery, see http://docs.jquery.com/License.
+/*
+ * Copyright © ${project.inceptionYear} Instituto Superior Técnico
  *
- * Configuration options:
- * 
- * onDragStyle
- *     This is the style that is assigned to the row during drag. There are limitations to the styles that can be
- *     associated with a row (such as you can't assign a border—well you can, but it won't be
- *     displayed). (So instead consider using onDragClass.) The CSS style to apply is specified as
- *     a map (as used in the jQuery css(...) function).
- * onDropStyle
- *     This is the style that is assigned to the row when it is dropped. As for onDragStyle, there are limitations
- *     to what you can do. Also this replaces the original style, so again consider using onDragClass which
- *     is simply added and then removed on drop.
- * onDragClass
- *     This class is added for the duration of the drag and then removed when the row is dropped. It is more
- *     flexible than using onDragStyle since it can be inherited by the row cells and other content. The default
- *     is class is tDnD_whileDrag. So to use the default, simply customise this CSS class in your
- *     stylesheet.
- * onDrop
- *     Pass a function that will be called when the row is dropped. The function takes 2 parameters: the table
- *     and the row that was dropped. You can work out the new order of the rows by using
- *     table.rows.
- * onDragStart
- *     Pass a function that will be called when the user starts dragging. The function takes 2 parameters: the
- *     table and the row which the user has started to drag.
- * onAllowDrop
- *     Pass a function that will be called as a row is over another row. If the function returns true, allow 
- *     dropping on that row, otherwise not. The function takes 2 parameters: the dragged row and the row under
- *     the cursor. It returns a boolean: true allows the drop, false doesn't allow it.
- * scrollAmount
- *     This is the number of pixels to scroll if the user moves the mouse cursor to the top or bottom of the
- *     window. The page should automatically scroll up or down as appropriate (tested in IE6, IE7, Safari, FF2,
- *     FF3 beta)
- * 
- * Other ways to control behaviour:
+ * This file is part of FenixEdu Academic Thesis.
  *
- * Add class="nodrop" to any rows for which you don't want to allow dropping, and class="nodrag" to any rows
- * that you don't want to be draggable.
+ * FenixEdu Academic Thesis is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Inside the onDrop method you can also call $.tableDnD.serialize() this returns a string of the form
- * <tableID>[]=<rowID1>&<tableID>[]=<rowID2> so that you can send this back to the server. The table must have
- * an ID as must all the rows.
+ * FenixEdu Academic Thesis is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
  *
- * Known problems:
- * - Auto-scoll has some problems with IE7  (it scrolls even when it shouldn't), work-around: set scrollAmount to 0
- * 
- * Version 0.2: 2008-02-20 First public version
- * Version 0.3: 2008-02-07 Added onDragStart option
- *                         Made the scroll amount configurable (default is 5 as before)
- * Version 0.4: 2008-03-15 Changed the noDrag/noDrop attributes to nodrag/nodrop classes
- *                         Added onAllowDrop to control dropping
- *                         Fixed a bug which meant that you couldn't set the scroll amount in both directions
- *                         Added serialise method
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with FenixEdu Academic Thesis.  If not, see <http://www.gnu.org/licenses/>.
  */
 jQuery.tableDnD = {
     /** Keep hold of the current table being dragged */
