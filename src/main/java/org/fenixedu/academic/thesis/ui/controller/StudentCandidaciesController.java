@@ -35,7 +35,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.studentThesisCandidacy.management",
-        accessGroup = "activeStudents")
+accessGroup = "activeStudents")
 @RequestMapping("/studentCandidacies")
 public class StudentCandidaciesController {
 
@@ -46,10 +46,10 @@ public class StudentCandidaciesController {
 
         List<StudentThesisCandidacy> candidacies =
                 student.getActiveRegistrations()
-                        .stream()
-                        .flatMap((Registration registration) -> registration.getStudentThesisCandidacySet().stream())
-                        .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
-                                .getCandidacyPeriod().containsNow()).collect(Collectors.toList());
+                .stream()
+                .flatMap((Registration registration) -> registration.getStudentThesisCandidacySet().stream())
+                .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
+                        .getCandidacyPeriod().containsNow()).collect(Collectors.toList());
 
         Collections.sort(candidacies, StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
 
@@ -66,31 +66,33 @@ public class StudentCandidaciesController {
                 reg -> {
                     Set<ThesisProposalsConfiguration> regConfigs =
                             reg.getDegree()
-                                    .getExecutionDegrees()
-                                    .stream()
-                                    .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
-                                            ExecutionYear.readCurrentExecutionYear()))
+                            .getExecutionDegrees()
+                            .stream()
+                            .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
+                                    ExecutionYear.readCurrentExecutionYear()))
                                     .flatMap(
                                             (ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet()
-                                                    .stream()).collect(Collectors.toSet());
+                                            .stream()).collect(Collectors.toSet());
 
                     Set<ThesisProposalsConfiguration> openConfigs =
                             regConfigs.stream().filter(config -> config.getCandidacyPeriod().containsNow())
-                            .collect(Collectors.toSet());
+                                    .collect(Collectors.toSet());
 
                     if (openConfigs.isEmpty()) {
                         Optional<ThesisProposalsConfiguration> nextConfig =
                                 regConfigs.stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
-                        suggestedConfigs.add(nextConfig.get());
+                        if (nextConfig.isPresent()) {
+                            suggestedConfigs.add(nextConfig.get());
+                        }
                     } else {
                         suggestedConfigs.addAll(openConfigs);
                     }
                     proposals.put(
                             reg,
                             openConfigs.stream()
-                            .flatMap((ThesisProposalsConfiguration config) -> config.getThesisProposalSet().stream())
-                                    .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal))
-                                    .collect(Collectors.toSet()));
+                                    .flatMap((ThesisProposalsConfiguration config) -> config.getThesisProposalSet().stream())
+                            .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal))
+                            .collect(Collectors.toSet()));
                 });
 
         int size = 0;
@@ -139,10 +141,10 @@ public class StudentCandidaciesController {
 
             long candidaciesCount =
                     registration
-                            .getStudentThesisCandidacySet()
-                            .stream()
-                            .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
-                                    .getCandidacyPeriod().containsNow()).count();
+                    .getStudentThesisCandidacySet()
+                    .stream()
+                    .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
+                            .getCandidacyPeriod().containsNow()).count();
 
             if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
                     && candidaciesCount >= thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent()) {
