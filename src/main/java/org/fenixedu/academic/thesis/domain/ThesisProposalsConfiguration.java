@@ -14,22 +14,22 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE =
             new Comparator<ThesisProposalsConfiguration>() {
-        @Override
-        public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
+                @Override
+                public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
 
-            int yearComp =
-                    o2.getExecutionDegree().getExecutionYear().compareTo(o1.getExecutionDegree().getExecutionYear());
+                    int yearComp =
+                            o2.getExecutionDegree().getExecutionYear().compareTo(o1.getExecutionDegree().getExecutionYear());
 
-            return yearComp != 0 ? yearComp : o2.getExecutionDegree().getPresentationName()
-                    .compareTo(o1.getExecutionDegree().getPresentationName());
-        }
-    };
+                    return yearComp != 0 ? yearComp : o2.getExecutionDegree().getPresentationName()
+                            .compareTo(o1.getExecutionDegree().getPresentationName());
+                }
+            };
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC =
             new Comparator<ThesisProposalsConfiguration>() {
                 @Override
                 public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
-            return o1.getProposalPeriod().getStart().compareTo(o2.getProposalPeriod().getStart());
+                    return o1.getProposalPeriod().getStart().compareTo(o2.getProposalPeriod().getStart());
                 }
             };
 
@@ -37,7 +37,7 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
             new Comparator<ThesisProposalsConfiguration>() {
                 @Override
                 public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
-            return o1.getCandidacyPeriod().getStart().compareTo(o2.getCandidacyPeriod().getStart());
+                    return o1.getCandidacyPeriod().getStart().compareTo(o2.getCandidacyPeriod().getStart());
                 }
             };
 

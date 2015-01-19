@@ -49,7 +49,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.configuration.management",
-accessGroup = "#managers | thesisSystemManagers")
+        accessGroup = "#managers | thesisSystemManagers")
 @RequestMapping("/configuration")
 public class ConfigurationController {
 
@@ -66,9 +66,9 @@ public class ConfigurationController {
 
         List<ThesisProposalsConfiguration> configurationsList =
                 configurationsSet
-                .stream()
-                .filter((x) -> ThesisProposalsSystem.canManage(x.getExecutionDegree().getDegree(), Authenticate.getUser()))
-                .collect(Collectors.toList());
+                        .stream()
+                        .filter((x) -> ThesisProposalsSystem.canManage(x.getExecutionDegree().getDegree(), Authenticate.getUser()))
+                        .collect(Collectors.toList());
         Collections.sort(configurationsList, ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE);
 
         model.addAttribute("configurationsList", configurationsList);
@@ -223,7 +223,7 @@ public class ConfigurationController {
                     && (config.getProposalPeriod().overlaps(proposalPeriod)
                             || config.getCandidacyPeriod().overlaps(candidacyPeriod)
                             || config.getProposalPeriod().overlaps(candidacyPeriod) || config.getCandidacyPeriod().overlaps(
-                                    proposalPeriod))) {
+                            proposalPeriod))) {
                 throw new OverlappingIntervalsException();
             }
         }
@@ -244,9 +244,9 @@ public class ConfigurationController {
 
         List<ExecutionDegree> executionDegreeList =
                 ExecutionDegree.getAllByExecutionYear(executionYear).stream()
-                .filter(executionDegree -> executionDegree.getDegree().getCycleTypes().contains(CycleType.SECOND_CYCLE))
-                .filter((x) -> ThesisProposalsSystem.canManage(x.getDegree(), Authenticate.getUser()))
-                .collect(Collectors.toList());
+                        .filter(executionDegree -> executionDegree.getDegree().getCycleTypes().contains(CycleType.SECOND_CYCLE))
+                        .filter((x) -> ThesisProposalsSystem.canManage(x.getDegree(), Authenticate.getUser()))
+                        .collect(Collectors.toList());
 
         Collections.sort(executionDegreeList,
                 ExecutionDegree.EXECUTION_DEGREE_COMPARATORY_BY_DEGREE_TYPE_AND_NAME_AND_EXECUTION_YEAR);
