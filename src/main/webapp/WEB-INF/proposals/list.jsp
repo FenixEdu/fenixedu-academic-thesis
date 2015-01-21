@@ -107,6 +107,9 @@ ${portal.toolkit()}
 				<th>
 					<spring:message code='label.participants'/>
 				</th>
+				<th>
+					<spring:message code='label.proposal.status'/>
+				</th>
 				<th></th>
 			</tr>
 		</thead>
@@ -124,6 +127,14 @@ ${portal.toolkit()}
 						</c:forEach>
 					</td>
 					<td>
+						<c:if test="${thesisProposal.hidden}">
+							<spring:message code='label.proposal.status.hidden'/>
+						</c:if>
+						<c:if test="${!thesisProposal.hidden}">
+							<spring:message code='label.proposal.status.visible'/>
+						</c:if>
+						</td>
+					<td>
 						<form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">
 							<div class="btn-group btn-group-xs">
 								<button type="submit" class="btn btn-default" id="editButton">
@@ -140,8 +151,12 @@ ${portal.toolkit()}
 
 								<input type='button' class='detailsButton btn btn-default' data-observations="${thesisProposal.observations}" data-requirements="${thesisProposal.requirements}" data-goals="${thesisProposal.goals}" data-localization="${thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
 
+								<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
 								<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage" arguments="${thesisProposal.studentThesisCandidacy.size()}"/></button>
-
+							</c:if>
+							<c:if test="${thesisProposal.studentThesisCandidacy.size() <= 0}">
+								<button type="button" disabled='disabled' class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage" arguments="${thesisProposal.studentThesisCandidacy.size()}"/></button>
+							</c:if>
 							</div>
 						</form:form>
 						<form method="GET" action="${pageContext.request.contextPath}/proposals/manage/${thesisProposal.externalId}" id='${thesisProposal.externalId}'></form>
@@ -169,6 +184,9 @@ ${portal.toolkit()}
 					<th>
 						<spring:message code='label.participants'/>
 					</th>
+					<th>
+						<spring:message code='label.proposal.status'/>
+					</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -181,6 +199,14 @@ ${portal.toolkit()}
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
 								<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
 							</c:forEach>
+						</td>
+						<td>
+							<c:if test="${thesisProposal.hidden}">
+								<spring:message code='label.proposal.status.hidden'/>
+							</c:if>
+							<c:if test="${!thesisProposal.hidden}">
+								<spring:message code='label.proposal.status.visible'/>
+							</c:if>
 						</td>
 						<td>
 							<form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">

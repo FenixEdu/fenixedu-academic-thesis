@@ -178,9 +178,12 @@ ${portal.toolkit()}
   <label class="col-sm-2 control-label">${executionDegrees}</label>
   <div class="col-sm-10" id="configurationsSelect">
     <c:forEach items="${configurations}" var="configuration">
-    <form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
-    <br>
-  </c:forEach>
+      <div class="checkbox">
+        <label>
+          <form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
+        </label>
+      </div>
+    </c:forEach>
 </div>
 </div>
 
@@ -250,7 +253,7 @@ ${portal.toolkit()}
   });
 
   function checkboxListener(e) {
-    if($("#configurationsSelect").children(":checked").size() > 0) {
+    if($("#configurationsSelect").find(":checked").size() > 0) {
       $("#submitButton").attr("disabled", false);
     }
     else {

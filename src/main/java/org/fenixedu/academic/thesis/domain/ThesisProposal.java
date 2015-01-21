@@ -45,6 +45,22 @@ public class ThesisProposal extends ThesisProposal_Base {
         }
     };
 
+    public final static Comparator<ThesisProposal> COMPARATOR_BY_NUMBER_OF_CANDIDACIES_AND_ID = new Comparator<ThesisProposal>() {
+
+        @Override
+        public int compare(ThesisProposal arg0, ThesisProposal arg1) {
+            if (arg1.getStudentThesisCandidacySet().size() < arg0.getStudentThesisCandidacySet().size()) {
+                return -1;
+            } else {
+                if (arg1.getStudentThesisCandidacySet().size() > arg0.getStudentThesisCandidacySet().size()) {
+                    return 1;
+                } else {
+                    return arg0.getIdentifier().compareTo(arg1.getIdentifier());
+                }
+            }
+        }
+    };
+
     public final static Comparator<ThesisProposal> COMPARATOR_BY_PROPOSAL_PERIOD = new Comparator<ThesisProposal>() {
 
         @Override
@@ -82,6 +98,7 @@ public class ThesisProposal extends ThesisProposal_Base {
         setLocalization(localization);
         getThesisProposalParticipantSet().addAll(participants);
         getThesisConfigurationSet().addAll(configurations);
+        setHidden(false);
     }
 
     public int getNumberOfStudentCandidacies() {
@@ -152,6 +169,15 @@ public class ThesisProposal extends ThesisProposal_Base {
 
         new ThesisProposal(proposal.getTitle(), proposal.getObservations(), proposal.getRequirements(), proposal.getGoals(),
                 proposal.getLocalization(), proposal.getThesisProposalParticipantSet(), configs);
+    }
+
+    @Override
+    public boolean getHidden() {
+        if (super.getHidden()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

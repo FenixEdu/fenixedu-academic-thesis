@@ -59,6 +59,7 @@ ${portal.toolkit()}
 
 <spring:message code='label.title' var='title'/>
 <spring:message code='label.observations' var='observations'/>
+<spring:message code='label.hidden' var='hidden'/>
 <spring:message code='label.requirements' var='requirements'/>
 <spring:message code='label.goals' var='goals'/>
 <spring:message code='label.localization' var='localization'/>
@@ -156,11 +157,22 @@ ${portal.toolkit()}
 	<label class="col-sm-2 control-label">${executionDegrees}</label>
 	<div class="col-sm-10" id="configurationsSelect">
 		<c:forEach items="${configurations}" var="configuration">
-		<form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
-		<br>
+			<div class="checkbox">
+				<label>
+					<form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
+				</label>
+				</div>
 	</c:forEach>
 </div>
 </div>
+
+<div class="form-group">
+	<form:label for="thesisProposalHidden" path="hidden" class="col-sm-2 control-label">${hidden}</form:label>
+	<div class="col-sm-10">
+		<form:checkbox id="thesisProposalHidden" path="hidden" placeholder="${hidden}"/>
+	</div>
+</div>
+
 
 <div class="col-sm-offset-3 col-sm-8">
 	<button type="submit" class="btn btn-default" id="submitButton">${saveButton}</button>
@@ -236,7 +248,7 @@ $("#submitButton").on("click", function(e) {
 });
 
 function checkboxListener(e) {
-	if($("#configurationsSelect").children(":checked").size() > 0) {
+	if($("#configurationsSelect").find(":checked").size() > 0) {
 		$("#submitButton").attr("disabled", false);
 	}
 	else {

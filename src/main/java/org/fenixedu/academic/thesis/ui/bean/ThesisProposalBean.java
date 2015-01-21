@@ -47,6 +47,7 @@ public class ThesisProposalBean {
     private Set<StudentThesisCandidacy> studentThesisCandidacy;
     private Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean;
     private String externalId;
+    private boolean hidden;
 
     public String getTitle() {
         return title;
@@ -135,7 +136,7 @@ public class ThesisProposalBean {
 
     public ThesisProposalBean(String title, String observations, String requirements, String goals, String localization,
             Set<ThesisProposalsConfiguration> configurations, Set<StudentThesisCandidacy> studentThesisCandidacy,
-            Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean, String externalId) {
+            Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean, boolean hidden, String externalId) {
         this.title = title;
         this.observations = observations;
         this.requirements = requirements;
@@ -144,6 +145,7 @@ public class ThesisProposalBean {
         this.setThesisProposalsConfigurations(configurations);
         this.studentThesisCandidacy = studentThesisCandidacy;
         this.thesisProposalParticipantsBean = thesisProposalParticipantsBean;
+        this.hidden = true == hidden ? true : false;
         this.externalId = externalId;
     }
 
@@ -215,6 +217,14 @@ public class ThesisProposalBean {
     public Set<ExecutionDegree> getExecutionDegreeSet() {
         return this.getThesisProposalsConfigurations().stream().map(config -> config.getExecutionDegree())
                 .collect(Collectors.toSet());
+    }
+
+    public boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
 }

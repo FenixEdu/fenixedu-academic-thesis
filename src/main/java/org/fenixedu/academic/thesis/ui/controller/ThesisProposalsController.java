@@ -194,7 +194,9 @@ public class ThesisProposalsController {
 
         model.addAttribute("suggestedConfigs", suggestedConfigs);
 
-        Set<ThesisProposal> thesisProposalsList = ThesisProposal.readCurrentByParticipant(Authenticate.getUser());
+        List<ThesisProposal> thesisProposalsList =
+                new ArrayList<ThesisProposal>(ThesisProposal.readCurrentByParticipant(Authenticate.getUser()));
+        Collections.sort(thesisProposalsList, ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
 
         model.addAttribute("thesisProposalsList", thesisProposalsList);
 
@@ -442,7 +444,7 @@ public class ThesisProposalsController {
                                     thesisProposal.getRequirements(), thesisProposal.getGoals(),
                                     thesisProposal.getLocalization(), thesisProposal.getThesisConfigurationSet(),
                                     thesisProposal.getStudentThesisCandidacySet(), thesisProposalParticipantsBean,
-                                    thesisProposal.getExternalId());
+                                    thesisProposal.getHidden(), thesisProposal.getExternalId());
 
                     ModelAndView mav = new ModelAndView("proposals/edit", "command", thesisProposalBean);
 
@@ -516,6 +518,11 @@ public class ThesisProposalsController {
             IllegalParticipantTypeException, UnexistentConfigurationException, UnexistentThesisParticipantException,
             UnequivalentThesisConfigurations {
 
+        boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
+        boolean isDegreeCoordinator =
+                thesisProposal.getExecutionDegreeSet().stream()
+                        .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));
+
         ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
 
         for (JsonElement elem : jsonArray) {
@@ -561,7 +568,7 @@ public class ThesisProposalsController {
                                         .collect(Collectors.toSet()).contains(participant.getUser())).collect(Collectors.toSet())
                                 .size();
 
-                if (configuration.getMaxThesisProposalsByUser() != -1
+                if (!(isManager || isDegreeCoordinator) && configuration.getMaxThesisProposalsByUser() != -1
                         && proposalsCount >= configuration.getMaxThesisProposalsByUser()) {
                     throw new MaxNumberThesisProposalsException(participant);
                 }
@@ -577,6 +584,7 @@ public class ThesisProposalsController {
         thesisProposal.setObservations(thesisProposalBean.getObservations());
         thesisProposal.setRequirements(thesisProposalBean.getRequirements());
         thesisProposal.setGoals(thesisProposalBean.getGoals());
+        thesisProposal.setHidden(thesisProposalBean.getHidden());
         thesisProposal.getThesisConfigurationSet().clear();
         thesisProposal.getThesisConfigurationSet().addAll(thesisProposalBean.getThesisProposalsConfigurations());
 
@@ -592,11 +600,6 @@ public class ThesisProposalsController {
         }
 
         ThesisProposalsConfiguration config = thesisProposal.getSingleThesisProposalsConfiguration();
-
-        boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
-        boolean isDegreeCoordinator =
-                thesisProposal.getExecutionDegreeSet().stream()
-                        .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));
 
         if (!(isManager || isDegreeCoordinator) && !config.getProposalPeriod().containsNow()) {
             throw new OutOfProposalPeriodException();

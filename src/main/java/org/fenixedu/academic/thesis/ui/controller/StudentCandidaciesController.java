@@ -107,10 +107,11 @@ public class StudentCandidaciesController {
                     }
                     proposals.put(
                             reg,
-                            openConfigs.stream()
+                            openConfigs
+                                    .stream()
                                     .flatMap((ThesisProposalsConfiguration config) -> config.getThesisProposalSet().stream())
-                                    .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal))
-                                    .collect(Collectors.toSet()));
+                                    .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal)
+                                            && !proposal.getHidden()).collect(Collectors.toSet()));
                 });
 
         int size = 0;
