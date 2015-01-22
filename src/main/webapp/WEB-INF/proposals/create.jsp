@@ -82,6 +82,7 @@ ${portal.toolkit()}
   <label class="col-sm-2 control-label">${participants}</label>
   <div id="tableBody">
     <div class="col-sm-offset-2 col-sm-10">
+      <c:if test="${empty command.thesisProposalParticipantsBean}">
       <div class="tableRow">
         <div class="form-group">
           <div class="col-sm-10">
@@ -104,6 +105,38 @@ ${portal.toolkit()}
         </div>
       </div>
     </div>
+  </c:if>
+  <c:if test="${!empty command.thesisProposalParticipantsBean}">
+    <c:forEach var="participantBean" items="${command.thesisProposalParticipantsBean}">
+        <div class="tableRow">
+          <div class="form-group">
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="UserExternalId"  bennu-user-autocomplete placeholder="${participantBean.user.username}" value="${participantBean.user.username}" required="required"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-10">
+              <select id="selectParticipantType" class="form-control">
+                <option value="" label="${selectParticipantType}"/>
+                <c:forEach var="participantType" items="${participantTypeList}">
+                  <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
+                    <option value="${participantType.externalId}" selected="selected" label="${participantType.name.content}"/>
+                  </c:if>
+                  <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
+                    <option value="${participantType.externalId}" label="${participantType.name.content}"/>
+                  </c:if>
+                </c:forEach>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <a href="#" class="removeParticipant">${removeParticipant}</a>
+            </div>
+          </div>
+        </div>
+    </c:forEach>
+  </c:if>
   </div>
 </div>
 <div class="col-sm-offset-2 col-sm-10">
@@ -145,9 +178,12 @@ ${portal.toolkit()}
   <label class="col-sm-2 control-label">${executionDegrees}</label>
   <div class="col-sm-10" id="configurationsSelect">
     <c:forEach items="${configurations}" var="configuration">
-    <form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
-    <br>
-  </c:forEach>
+      <div class="checkbox">
+        <label>
+          <form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
+        </label>
+      </div>
+    </c:forEach>
 </div>
 </div>
 
@@ -190,17 +226,20 @@ ${portal.toolkit()}
   var onRemoveParticipant = function(e) {
     $(this).closest(".tableRow").remove();
   };
+
   $("#addParticipant").on("click", function(e) {
     var addedRow = $("#tableBody").append($("#participantRowTemplate").html());
     $(".removeParticipant", addedRow).on("click", onRemoveParticipant);
   });
+
   $(".removeParticipant").on("click", onRemoveParticipant);
+
   $("#submitButton").on("click", function(e) {
+    debugger;
     var participantsJSON = {
       participants: []
     };
     var participants = $("#tableBody").find(".tableRow");
-
     for (index=0; index < participants.length; index++) {
       participant = participants.eq(index)
       user = participant.find("#UserExternalId").val()
@@ -212,13 +251,15 @@ ${portal.toolkit()}
     }
     $("#participantsJson").val(JSON.stringify(participantsJSON.participants));
   });
+
   function checkboxListener(e) {
-    if($("#configurationsSelect").children(":checked").size() > 0) {
+    if($("#configurationsSelect").find(":checked").size() > 0) {
       $("#submitButton").attr("disabled", false);
     }
     else {
       $("#submitButton").attr("disabled", true);
     }
   }
+
   $(document).ready(checkboxListener(null));
 </script>

@@ -44,6 +44,37 @@ public class ThesisProposal extends ThesisProposal_Base {
             }
         }
     };
+
+    public final static Comparator<ThesisProposal> COMPARATOR_BY_NUMBER_OF_CANDIDACIES_AND_ID = new Comparator<ThesisProposal>() {
+
+        @Override
+        public int compare(ThesisProposal arg0, ThesisProposal arg1) {
+            if (arg1.getStudentThesisCandidacySet().size() < arg0.getStudentThesisCandidacySet().size()) {
+                return -1;
+            } else {
+                if (arg1.getStudentThesisCandidacySet().size() > arg0.getStudentThesisCandidacySet().size()) {
+                    return 1;
+                } else {
+                    return arg0.getIdentifier().compareTo(arg1.getIdentifier());
+                }
+            }
+        }
+    };
+
+    public final static Comparator<ThesisProposal> COMPARATOR_BY_PROPOSAL_PERIOD = new Comparator<ThesisProposal>() {
+
+        @Override
+        public int compare(ThesisProposal arg0, ThesisProposal arg1) {
+
+            if (arg0.getSingleThesisProposalsConfiguration().getProposalPeriod()
+                    .isBefore(arg1.getSingleThesisProposalsConfiguration().getProposalPeriod())) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+    };
+
     public static final String SIGNAL_CREATED = "fenixedu.academic.thesis.thesisProposal.created";
 
     @Override
@@ -56,7 +87,7 @@ public class ThesisProposal extends ThesisProposal_Base {
     }
 
     public ThesisProposal(String title, String observations, String requirements, String goals, String localization,
-            List<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations) {
+            Set<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations) {
 
         setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
         setIdentifier(ThesisProposalsSystem.getInstance().generateProposalIdentifier());
@@ -67,6 +98,7 @@ public class ThesisProposal extends ThesisProposal_Base {
         setLocalization(localization);
         getThesisProposalParticipantSet().addAll(participants);
         getThesisConfigurationSet().addAll(configurations);
+        setHidden(false);
     }
 
     public int getNumberOfStudentCandidacies() {
@@ -132,4 +164,20 @@ public class ThesisProposal extends ThesisProposal_Base {
     public String getIdentifier() {
         return super.getIdentifier();
     }
+
+    public ThesisProposal(ThesisProposal proposal, Set<ThesisProposalsConfiguration> configs) {
+
+        new ThesisProposal(proposal.getTitle(), proposal.getObservations(), proposal.getRequirements(), proposal.getGoals(),
+                proposal.getLocalization(), proposal.getThesisProposalParticipantSet(), configs);
+    }
+
+    @Override
+    public boolean getHidden() {
+        if (super.getHidden()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

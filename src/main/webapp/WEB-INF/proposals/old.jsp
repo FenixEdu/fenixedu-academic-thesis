@@ -1,21 +1,21 @@
 <%--
 
-    Copyright © ${project.inceptionYear} Instituto Superior Técnico
+Copyright © ${project.inceptionYear} Instituto Superior Técnico
 
-    This file is part of FenixEdu Academic Thesis.
+This file is part of FenixEdu Academic Thesis.
 
-    FenixEdu Academic Thesis is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+FenixEdu Academic Thesis is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    FenixEdu Academic Thesis is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
+FenixEdu Academic Thesis is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public License
-    along with FenixEdu Academic Thesis.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU Lesser General Public License
+along with FenixEdu Academic Thesis.  If not, see <http://www.gnu.org/licenses/>.
 
 --%>
 <!DOCTYPE html>
@@ -32,64 +32,13 @@ ${portal.toolkit()}
 	<h1><spring:message code="title.thesisProposal.management"/></h1>
 </div>
 
-<c:if test="${!empty deleteException}">
-	<p class="text-danger"><spring:message code="error.thesisProposal.delete"/></p>
-</c:if>
-
-<c:if test="${!empty editOutOfProposalPeriodException}">
-	<p class="text-danger"><spring:message code="error.thesisProposal.edit.outOfProposalPeriodException"/></p>
-</c:if>
-
-<c:if test="${!empty createOutOfProposalPeriodException}">
-	<p class="text-danger"><spring:message code="error.thesisProposal.create.outOfProposalPeriodException"/></p>
-</c:if>
-
-<c:if test="${!empty cannotEditUsedThesisProposalsException}">
-	<p class="text-danger"><spring:message code="error.thesisProposal.cannotEditUsedThesisProposalsException"/></p>
-</c:if>
-
-<c:if test="${!empty createMaxNumberThesisProposalsException}">
-	<p class="text-danger"><spring:message code="error.thesisProposal.maxNumberThesisProposalsException"/></p>
-</c:if>
-
-<c:if test="${!empty suggestedConfigs}">
-	<div class="alert alert-info">
-		<c:forEach items="${suggestedConfigs}" var="config">
-			<p>
-				<spring:message code="label.thesis.proposal.info" arguments="${config.executionDegree.degree.sigla},${config.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${config.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/>
-			</p>
-		</c:forEach>
-	</div>
-</c:if>
 
 <div class="well">
 	<p>
-		<spring:message code="label.proposals.well"/>
+		<spring:message code="label.proposals.old.well"/>
 	</p>
 </div>
 
-<p>
-	<div class="row">
-		<div class="col-sm-8">
-			<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/create" class="form-horizontal" id="thesisProposalCreateForm">
-				<button type="submit" class="btn btn-default"><spring:message code="button.create"/></button>
-			</form>
-			<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/transpose" class="form-horizontal" id="thesisProposalTransposeForm">
-				<button type="submit" class="btn btn-default"><spring:message code="button.transpose"/></button>
-			</form>
-		</div>
-		<div class="col-sm-4">
-			<c:if test="${!empty executionYearsList}">
-				<select id="executionYearSelect" class="form-control">
-					<option value="NONE" label="<spring:message code='label.executionYear.select'/>"/>
-					<c:forEach items="${executionYearsList}" var="executionYear">
-						<option value="${executionYear.year}" label="${executionYear.year}"/>
-					</c:forEach>
-				</select>
-			</c:if>
-		</div>
-	</div>
-</p>
 
 <div class="table-responsive">
 	<table class="table">
@@ -107,14 +56,11 @@ ${portal.toolkit()}
 				<th>
 					<spring:message code='label.participants'/>
 				</th>
-				<th>
-					<spring:message code='label.proposal.status'/>
-				</th>
 				<th></th>
 			</tr>
 		</thead>
 		<tbody>
-			<c:forEach items="${thesisProposalsList}" var="thesisProposal">
+			<c:forEach items="${recentProposals}" var="thesisProposal">
 				<tr>
 					<td>${thesisProposal.identifier}</td>
 					<td>
@@ -127,37 +73,9 @@ ${portal.toolkit()}
 						</c:forEach>
 					</td>
 					<td>
-						<c:if test="${thesisProposal.hidden}">
-							<spring:message code='label.proposal.status.hidden'/>
-						</c:if>
-						<c:if test="${!thesisProposal.hidden}">
-							<spring:message code='label.proposal.status.visible'/>
-						</c:if>
-						</td>
-					<td>
-						<form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">
-							<div class="btn-group btn-group-xs">
-								<button type="submit" class="btn btn-default" id="editButton">
-									<spring:message code='button.edit'/>
-								</button>
-
-								<c:set var="result" scope="session" value=''/>
-								<c:forEach items="${thesisProposal.executionDegreeSet}" var="executionDegree" varStatus="i">
-									<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
-									<c:if test="${i.index != thesisProposal.executionDegreeSet.size() - 1}">
-										<c:set var="result" scope="session" value="${result}, " />
-									</c:if>
-								</c:forEach>
-
-								<input type='button' class='detailsButton btn btn-default' data-observations="${thesisProposal.observations}" data-requirements="${thesisProposal.requirements}" data-goals="${thesisProposal.goals}" data-localization="${thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
-
-								<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
-									<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage"/></button>
-								</c:if>
-							</div>
-						</form:form>
-						<form method="GET" action="${pageContext.request.contextPath}/proposals/manage/${thesisProposal.externalId}" id='${thesisProposal.externalId}'></form>
-
+						<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/transpose/${thesisProposal.externalId}" class="form-horizontal" id="thesisProposalTransposeForm">
+							<button type="submit" class="btn btn-default"><spring:message code="button.transpose"/></button>
+						</form>
 					</td>
 				</tr>
 			</c:forEach>
@@ -181,9 +99,6 @@ ${portal.toolkit()}
 					<th>
 						<spring:message code='label.participants'/>
 					</th>
-					<th>
-						<spring:message code='label.proposal.status'/>
-					</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -196,14 +111,6 @@ ${portal.toolkit()}
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
 								<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
 							</c:forEach>
-						</td>
-						<td>
-							<c:if test="${thesisProposal.hidden}">
-								<spring:message code='label.proposal.status.hidden'/>
-							</c:if>
-							<c:if test="${!thesisProposal.hidden}">
-								<spring:message code='label.proposal.status.visible'/>
-							</c:if>
 						</td>
 						<td>
 							<form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">

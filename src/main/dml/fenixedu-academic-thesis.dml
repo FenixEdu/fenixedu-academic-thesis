@@ -14,12 +14,13 @@ class ThesisProposalsConfiguration {
 }
 
 class ThesisProposal {
-    	protected String identifier;
+    protected String identifier;
  	public String title;
  	public String observations;
  	public String requirements;
  	public String goals;
  	public String localization;
+ 	public boolean hidden;
  }
 
 class StudentThesisCandidacy {
