@@ -152,11 +152,8 @@ ${portal.toolkit()}
 								<input type='button' class='detailsButton btn btn-default' data-observations="${thesisProposal.observations}" data-requirements="${thesisProposal.requirements}" data-goals="${thesisProposal.goals}" data-localization="${thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
 
 								<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
-								<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage" arguments="${thesisProposal.studentThesisCandidacy.size()}"/></button>
-							</c:if>
-							<c:if test="${thesisProposal.studentThesisCandidacy.size() <= 0}">
-								<button type="button" disabled='disabled' class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage" arguments="${thesisProposal.studentThesisCandidacy.size()}"/></button>
-							</c:if>
+									<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage"/></button>
+								</c:if>
 							</div>
 						</form:form>
 						<form method="GET" action="${pageContext.request.contextPath}/proposals/manage/${thesisProposal.externalId}" id='${thesisProposal.externalId}'></form>
