@@ -21,6 +21,7 @@ package org.fenixedu.academic.thesis.domain;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -84,6 +85,14 @@ public class ThesisProposal extends ThesisProposal_Base {
 
     public ThesisProposalsConfiguration getSingleThesisProposalsConfiguration() {
         return (ThesisProposalsConfiguration) getThesisConfigurationSet().toArray()[0];
+    }
+
+    @Deprecated
+    public ThesisProposal(String title, String observations, String requirements, String goals, String localization,
+            List<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations) {
+
+        this(title, observations, requirements, goals, localization, new HashSet<ThesisProposalParticipant>(participants),
+                configurations);
     }
 
     public ThesisProposal(String title, String observations, String requirements, String goals, String localization,
@@ -153,7 +162,7 @@ public class ThesisProposal extends ThesisProposal_Base {
                         .stream()
                         .anyMatch(
                                 configuration -> configuration.getExecutionDegree().getExecutionYear()
-                                        .isAfterOrEquals(ExecutionYear.readCurrentExecutionYear()))).collect(Collectors.toSet());
+                                .isAfterOrEquals(ExecutionYear.readCurrentExecutionYear()))).collect(Collectors.toSet());
     }
 
     public Set<ExecutionDegree> getExecutionDegreeSet() {
