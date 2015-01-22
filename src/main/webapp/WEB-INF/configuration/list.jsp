@@ -432,3 +432,7 @@ $("#saveButton").on("click", function(e) {
 </div>
 </c:if>
 </div>
+
+<style>
+.modal-backdrop{z-index: 900}.modal{z-index: 1000;}
+</style>
