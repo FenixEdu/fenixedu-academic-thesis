@@ -409,7 +409,7 @@ public class ThesisProposalsController {
     }
 
     @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)
-    public ModelAndView editConfigurationForm(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
+    public ModelAndView editProposalForm(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
 
         boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
         boolean isDegreeCoordinator =
@@ -476,7 +476,7 @@ public class ThesisProposalsController {
     }
 
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
-    public ModelAndView editConfiguration(@ModelAttribute ThesisProposalBean thesisProposalBean,
+    public ModelAndView editProposal(@ModelAttribute ThesisProposalBean thesisProposalBean,
             @RequestParam String participantsJson, @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations,
             Model model) {
 
@@ -491,22 +491,22 @@ public class ThesisProposalsController {
             return editThesisProposal(thesisProposalBean, thesisProposal, jsonArray);
         } catch (MaxNumberThesisProposalsException exception) {
             model.addAttribute("editMaxNumberThesisProposalsException", exception);
-            return editConfigurationForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, model);
         } catch (OutOfProposalPeriodException exception) {
             model.addAttribute("outOfProposalPeriodException", true);
-            return editConfigurationForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, model);
         } catch (IllegalParticipantTypeException exception) {
             model.addAttribute("illegalParticipantTypeException", exception);
-            return editConfigurationForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, model);
         } catch (UnexistentConfigurationException exception) {
             model.addAttribute("unexistentConfigurationException", exception);
-            return editConfigurationForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, model);
         } catch (UnexistentThesisParticipantException exception) {
             model.addAttribute("unexistentThesisParticipantException", exception);
-            return editConfigurationForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, model);
         } catch (UnequivalentThesisConfigurations exception) {
             model.addAttribute("unequivalentThesisConfigurations", exception);
-            return editConfigurationForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, model);
         }
     }
 
@@ -690,4 +690,70 @@ public class ThesisProposalsController {
 
         return mav;
     }
+
+    @RequestMapping(value = "/transpose", method = RequestMethod.GET)
+    public String listOldProposals(Model model) {
+
+        User user = Authenticate.getUser();
+
+        Set<ThesisProposal> proposals =
+                user.getThesisProposalParticipantSet().stream().map(participant -> participant.getThesisProposal())
+                        .collect(Collectors.toSet());
+
+        HashMap<String, Set<ThesisProposal>> proposalTitleMap = new HashMap<String, Set<ThesisProposal>>();
+
+        for (ThesisProposal proposal : proposals) {
+            if (!proposalTitleMap.containsKey(proposal.getTitle())) {
+                proposalTitleMap.put(proposal.getTitle(), new HashSet<ThesisProposal>());
+            }
+            proposalTitleMap.get(proposal.getTitle()).add(proposal);
+        }
+
+        Set<ThesisProposal> recentProposals = new HashSet<ThesisProposal>();
+        for (String key : proposalTitleMap.keySet()) {
+            recentProposals.add(proposalTitleMap.get(key).stream().max(ThesisProposal.COMPARATOR_BY_PROPOSAL_PERIOD).get());
+        }
+
+        model.addAttribute("recentProposals", recentProposals);
+
+        return "proposals/old";
+    }
+
+    @RequestMapping(value = "/transpose/{oid}", method = RequestMethod.GET)
+    public ModelAndView transposeProposal(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
+
+        ThesisProposalBean proposalBean = new ThesisProposalBean();
+        proposalBean.setGoals(thesisProposal.getGoals());
+        proposalBean.setLocalization(thesisProposal.getLocalization());
+        proposalBean.setObservations(thesisProposal.getObservations());
+        proposalBean.setRequirements(thesisProposal.getRequirements());
+        proposalBean.setTitle(thesisProposal.getTitle());
+
+        HashSet<ThesisProposalParticipantBean> thesisProposalParticipantsBean = new HashSet<ThesisProposalParticipantBean>();
+
+        for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
+            String participantType = participant.getThesisProposalParticipantType().getExternalId();
+            ThesisProposalParticipantBean bean = new ThesisProposalParticipantBean(participant.getUser(), participantType);
+            thesisProposalParticipantsBean.add(bean);
+        }
+
+        proposalBean.setThesisProposalParticipantsBean(thesisProposalParticipantsBean);
+
+        ModelAndView mav = new ModelAndView("proposals/create", "command", proposalBean);
+
+        Set<ThesisProposalsConfiguration> configs =
+                ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
+                        .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+
+        mav.addObject("configurations", configs);
+
+        List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
+        participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
+        Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
+
+        mav.addObject("participantTypeList", participantTypeList);
+
+        return mav;
+    }
+
 }

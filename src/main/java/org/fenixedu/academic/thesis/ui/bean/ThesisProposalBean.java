@@ -18,7 +18,7 @@
  */
 package org.fenixedu.academic.thesis.ui.bean;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -172,7 +172,7 @@ public class ThesisProposalBean {
 
         @Atomic(mode = TxMode.WRITE)
         public ThesisProposal build() throws MaxNumberThesisProposalsException, OutOfProposalPeriodException {
-            ArrayList<ThesisProposalParticipant> participants = new ArrayList<ThesisProposalParticipant>();
+            Set<ThesisProposalParticipant> participants = new HashSet<ThesisProposalParticipant>();
 
             for (ThesisProposalParticipantBean participantBean : thesisProposalParticipantsBean) {
 

@@ -44,6 +44,21 @@ public class ThesisProposal extends ThesisProposal_Base {
             }
         }
     };
+
+    public final static Comparator<ThesisProposal> COMPARATOR_BY_PROPOSAL_PERIOD = new Comparator<ThesisProposal>() {
+
+        @Override
+        public int compare(ThesisProposal arg0, ThesisProposal arg1) {
+
+            if (arg0.getSingleThesisProposalsConfiguration().getProposalPeriod()
+                    .isBefore(arg1.getSingleThesisProposalsConfiguration().getProposalPeriod())) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+    };
+
     public static final String SIGNAL_CREATED = "fenixedu.academic.thesis.thesisProposal.created";
 
     @Override
@@ -56,7 +71,7 @@ public class ThesisProposal extends ThesisProposal_Base {
     }
 
     public ThesisProposal(String title, String observations, String requirements, String goals, String localization,
-            List<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations) {
+            Set<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations) {
 
         setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
         setIdentifier(ThesisProposalsSystem.getInstance().generateProposalIdentifier());
@@ -132,4 +147,11 @@ public class ThesisProposal extends ThesisProposal_Base {
     public String getIdentifier() {
         return super.getIdentifier();
     }
+
+    public ThesisProposal(ThesisProposal proposal, Set<ThesisProposalsConfiguration> configs) {
+
+        new ThesisProposal(proposal.getTitle(), proposal.getObservations(), proposal.getRequirements(), proposal.getGoals(),
+                proposal.getLocalization(), proposal.getThesisProposalParticipantSet(), configs);
+    }
+
 }
