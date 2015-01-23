@@ -40,7 +40,6 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
 import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
-import org.fenixedu.academic.thesis.domain.exception.OutOfCandidacyPeriodException;
 import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
@@ -159,40 +158,42 @@ public class ThesisProposalsController {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String listProposals(Model model) {
 
-        Set<ExecutionDegree> notPastExecDegrees =
-                Authenticate
-                        .getUser()
-                        .getPerson()
-                        .getTeacher()
-                        .getProfessorships(ExecutionYear.readCurrentExecutionYear())
-                        .stream()
-                        .flatMap(professorship -> professorship.getExecutionCourse().getExecutionDegrees().stream())
-                        .map(execDegree -> execDegree.getDegree())
-                        .flatMap(degree -> degree.getExecutionDegrees().stream())
-                        .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
-                                ExecutionYear.readCurrentExecutionYear())).collect(Collectors.toSet());
+        if (Authenticate.getUser().getPerson().getTeacher() != null) {
+            Set<ExecutionDegree> notPastExecDegrees =
+                    Authenticate
+                            .getUser()
+                            .getPerson()
+                            .getTeacher()
+                            .getProfessorships(ExecutionYear.readCurrentExecutionYear())
+                            .stream()
+                            .flatMap(professorship -> professorship.getExecutionCourse().getExecutionDegrees().stream())
+                            .map(execDegree -> execDegree.getDegree())
+                            .flatMap(degree -> degree.getExecutionDegrees().stream())
+                            .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
+                                    ExecutionYear.readCurrentExecutionYear())).collect(Collectors.toSet());
 
-        HashMap<Degree, Set<ThesisProposalsConfiguration>> map = new HashMap<Degree, Set<ThesisProposalsConfiguration>>();
+            HashMap<Degree, Set<ThesisProposalsConfiguration>> map = new HashMap<Degree, Set<ThesisProposalsConfiguration>>();
 
-        notPastExecDegrees.stream().flatMap(execDegree -> execDegree.getThesisProposalsConfigurationSet().stream())
-                .filter(config -> config.getProposalPeriod().getEnd().isAfterNow()).forEach(config -> {
-                    Degree degree = config.getExecutionDegree().getDegree();
-                    if (!map.containsKey(degree)) {
-                        map.put(degree, new HashSet<ThesisProposalsConfiguration>());
-                    }
-                    map.get(degree).add(config);
-                });;
+            notPastExecDegrees.stream().flatMap(execDegree -> execDegree.getThesisProposalsConfigurationSet().stream())
+                    .filter(config -> config.getProposalPeriod().getEnd().isAfterNow()).forEach(config -> {
+                        Degree degree = config.getExecutionDegree().getDegree();
+                        if (!map.containsKey(degree)) {
+                            map.put(degree, new HashSet<ThesisProposalsConfiguration>());
+                        }
+                        map.get(degree).add(config);
+                    });;
 
-        Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<ThesisProposalsConfiguration>();
-        for (Degree degree : map.keySet()) {
-            Optional<ThesisProposalsConfiguration> config =
-                    map.get(degree).stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_CANDIDACY_PERIOD_START_ASC);
-            if (config.isPresent()) {
-                suggestedConfigs.add(config.get());
+            Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<ThesisProposalsConfiguration>();
+            for (Degree degree : map.keySet()) {
+                Optional<ThesisProposalsConfiguration> config =
+                        map.get(degree).stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
+                if (config.isPresent()) {
+                    suggestedConfigs.add(config.get());
+                }
             }
-        }
 
-        model.addAttribute("suggestedConfigs", suggestedConfigs);
+            model.addAttribute("suggestedConfigs", suggestedConfigs);
+        }
 
         List<ThesisProposal> thesisProposalsList =
                 new ArrayList<ThesisProposal>(ThesisProposal.readCurrentByParticipant(Authenticate.getUser()));
@@ -200,11 +201,11 @@ public class ThesisProposalsController {
 
         model.addAttribute("thesisProposalsList", thesisProposalsList);
 
-        HashMap<Degree, Set<ThesisProposal>> coordinatorProposals = new HashMap<Degree, Set<ThesisProposal>>();
+        HashMap<Degree, List<ThesisProposal>> coordinatorProposals = new HashMap<Degree, List<ThesisProposal>>();
 
         for (Degree degree : Degree.readBolonhaDegrees()) {
 
-            Set<ThesisProposal> proposals =
+            List<ThesisProposal> proposals =
                     degree.getExecutionDegrees()
                             .stream()
                             .filter(executionDegree -> CoordinatorGroup.get(executionDegree.getDegree()).isMember(
@@ -212,9 +213,10 @@ public class ThesisProposalsController {
                             .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
                                     ExecutionYear.readCurrentExecutionYear()))
                             .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream())
-                            .flatMap(config -> config.getThesisProposalSet().stream()).collect(Collectors.toSet());
+                            .flatMap(config -> config.getThesisProposalSet().stream()).collect(Collectors.toList());
 
             if (!proposals.isEmpty()) {
+                Collections.sort(proposals, ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
                 coordinatorProposals.put(degree, proposals);
             }
         }
@@ -305,6 +307,10 @@ public class ThesisProposalsController {
 
                 if (userType.isEmpty()) {
                     throw new IllegalParticipantTypeException(User.findByUsername(userId));
+                }
+
+                if (userId == null || userId.isEmpty()) {
+                    throw new UnexistentThesisParticipantException();
                 }
 
                 participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType));
@@ -618,23 +624,13 @@ public class ThesisProposalsController {
 
     @Atomic(mode = TxMode.WRITE)
     private String accept(StudentThesisCandidacy studentThesisCandidacy, Model model) {
-        try {
-            if (!studentThesisCandidacy.getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod()
-                    .containsNow()) {
-                throw new OutOfCandidacyPeriodException();
-            }
-
-            for (StudentThesisCandidacy candidacy : studentThesisCandidacy.getThesisProposal().getStudentThesisCandidacySet()) {
-                candidacy.setAcceptedByAdvisor(false);
-            }
-
-            studentThesisCandidacy.setAcceptedByAdvisor(true);
-
-            return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
-        } catch (OutOfCandidacyPeriodException exception) {
-            model.addAttribute("outOfCandidacyPeriodException", true);
-            return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
+        for (StudentThesisCandidacy candidacy : studentThesisCandidacy.getThesisProposal().getStudentThesisCandidacySet()) {
+            candidacy.setAcceptedByAdvisor(false);
         }
+
+        studentThesisCandidacy.setAcceptedByAdvisor(true);
+
+        return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 
     @RequestMapping(value = "/reject/{studentThesisCandidacy}", method = RequestMethod.POST)
@@ -646,18 +642,9 @@ public class ThesisProposalsController {
 
     @Atomic(mode = TxMode.WRITE)
     private String reject(StudentThesisCandidacy studentThesisCandidacy, Model model) {
-        try {
-            if (!studentThesisCandidacy.getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod()
-                    .containsNow()) {
-                throw new OutOfCandidacyPeriodException();
-            }
-            studentThesisCandidacy.setAcceptedByAdvisor(false);
+        studentThesisCandidacy.setAcceptedByAdvisor(false);
 
-            return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
-        } catch (OutOfCandidacyPeriodException exception) {
-            model.addAttribute("outOfCandidacyPeriodException", true);
-            return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
-        }
+        return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 
     @RequestMapping(value = "/manage/{oid}", method = RequestMethod.GET)

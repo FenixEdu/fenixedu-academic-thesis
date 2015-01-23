@@ -41,8 +41,6 @@
 	<h1><spring:message code="title.studentThesisCandidacy.management"/></h1>
 </div>
 
-
-
 <c:if test="${!empty outOfCandidacyPeriodException}">
 <p class="text-danger"><spring:message code="error.thesisProposal.candidacy.confirm.outOfCandidacyPeriodException"/></p>
 </c:if>
@@ -111,6 +109,9 @@
 						<th>
 							<spring:message code='label.participants' />
 						</th>
+						<th>
+							<spring:message code='label.student.candidacy.accepted'/>
+						</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -124,6 +125,14 @@
 							<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
 							</div>
 						</c:forEach>
+					</td>
+					<td>
+						<c:if test="${studentThesisCandidacy.acceptedByAdvisor}">
+							<spring:message code='label.yes'/>
+						</c:if>
+						<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
+							<spring:message code='label.no'/>
+						</c:if>
 					</td>
 					<td>
 						<form:form method="GET" action="${pageContext.request.contextPath}/studentCandidacies/delete/${studentThesisCandidacy.externalId}">

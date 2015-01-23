@@ -56,7 +56,7 @@ ${portal.toolkit()}
 	<div class="alert alert-info">
 		<c:forEach items="${suggestedConfigs}" var="config">
 			<p>
-				<spring:message code="label.thesis.proposal.info" arguments="${config.executionDegree.degree.sigla},${config.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${config.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/>
+				<spring:message code="label.thesis.proposal.info" arguments="${config.executionDegree.degree.sigla},${config.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${config.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/>
 			</p>
 		</c:forEach>
 	</div>
@@ -91,6 +91,7 @@ ${portal.toolkit()}
 	</div>
 </p>
 
+<c:if test="${!empty thesisProposalsList}">
 <div class="table-responsive">
 	<table class="table">
 		<thead>
@@ -157,23 +158,31 @@ ${portal.toolkit()}
 							</div>
 						</form:form>
 						<form method="GET" action="${pageContext.request.contextPath}/proposals/manage/${thesisProposal.externalId}" id='${thesisProposal.externalId}'></form>
-
 					</td>
 				</tr>
 			</c:forEach>
 		</tbody>
 	</table>
 </div>
+</c:if>
+<c:if test="${empty thesisProposalsList}">
+	<div class="alert alert-warning" role="alert">
+	<spring:message code='label.proposals.empty'/>
+</div>
+</c:if>
+
 
 <c:forEach items="${coordinatorProposals}" var="node">
-	<hr/>
-	<caption>${node.key.presentationName}</caption>
+		<h3><spring:message code='label.proposals.coordinator' arguments="${node.key.presentationName}"/></h3>
 	<div class="table-responsive">
 		<table class="table">
 			<thead>
 				<tr>
 					<th>
 						<spring:message code='label.thesis.id'/>
+					</th>
+					<th>
+						<spring:message code='label.year'/>
 					</th>
 					<th>
 						<spring:message code='label.title'/>
@@ -191,6 +200,7 @@ ${portal.toolkit()}
 				<c:forEach items="${node.value}" var="thesisProposal">
 					<tr>
 						<td>${thesisProposal.identifier}</td>
+						<td>${thesisProposal.getSingleThesisProposalsConfiguration().executionDegree.executionYear.year}</td>
 						<td>${thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
@@ -221,8 +231,13 @@ ${portal.toolkit()}
 									</c:forEach>
 
 									<input type='button' class='detailsButton btn btn-default' data-observations="${thesisProposal.observations}" data-requirements="${thesisProposal.requirements}" data-goals="${thesisProposal.goals}" data-localization="${thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
+
+									<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
+										<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage"/></button>
+									</c:if>
 								</div>
 							</form:form>
+							<form method="GET" action="${pageContext.request.contextPath}/proposals/manage/${thesisProposal.externalId}" id='${thesisProposal.externalId}'></form>
 						</td>
 					</tr>
 				</c:forEach>
