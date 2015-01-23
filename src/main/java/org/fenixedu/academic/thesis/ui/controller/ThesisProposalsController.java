@@ -158,40 +158,42 @@ public class ThesisProposalsController {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String listProposals(Model model) {
 
-        Set<ExecutionDegree> notPastExecDegrees =
-                Authenticate
-                        .getUser()
-                        .getPerson()
-                        .getTeacher()
-                        .getProfessorships(ExecutionYear.readCurrentExecutionYear())
-                        .stream()
-                        .flatMap(professorship -> professorship.getExecutionCourse().getExecutionDegrees().stream())
-                        .map(execDegree -> execDegree.getDegree())
-                        .flatMap(degree -> degree.getExecutionDegrees().stream())
-                        .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
-                                ExecutionYear.readCurrentExecutionYear())).collect(Collectors.toSet());
+        if (Authenticate.getUser().getPerson().getTeacher() != null) {
+            Set<ExecutionDegree> notPastExecDegrees =
+                    Authenticate
+                            .getUser()
+                            .getPerson()
+                            .getTeacher()
+                            .getProfessorships(ExecutionYear.readCurrentExecutionYear())
+                            .stream()
+                            .flatMap(professorship -> professorship.getExecutionCourse().getExecutionDegrees().stream())
+                            .map(execDegree -> execDegree.getDegree())
+                            .flatMap(degree -> degree.getExecutionDegrees().stream())
+                            .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
+                                    ExecutionYear.readCurrentExecutionYear())).collect(Collectors.toSet());
 
-        HashMap<Degree, Set<ThesisProposalsConfiguration>> map = new HashMap<Degree, Set<ThesisProposalsConfiguration>>();
+            HashMap<Degree, Set<ThesisProposalsConfiguration>> map = new HashMap<Degree, Set<ThesisProposalsConfiguration>>();
 
-        notPastExecDegrees.stream().flatMap(execDegree -> execDegree.getThesisProposalsConfigurationSet().stream())
-                .filter(config -> config.getProposalPeriod().getEnd().isAfterNow()).forEach(config -> {
-                    Degree degree = config.getExecutionDegree().getDegree();
-                    if (!map.containsKey(degree)) {
-                        map.put(degree, new HashSet<ThesisProposalsConfiguration>());
-                    }
-                    map.get(degree).add(config);
-                });;
+            notPastExecDegrees.stream().flatMap(execDegree -> execDegree.getThesisProposalsConfigurationSet().stream())
+                    .filter(config -> config.getProposalPeriod().getEnd().isAfterNow()).forEach(config -> {
+                        Degree degree = config.getExecutionDegree().getDegree();
+                        if (!map.containsKey(degree)) {
+                            map.put(degree, new HashSet<ThesisProposalsConfiguration>());
+                        }
+                        map.get(degree).add(config);
+                    });;
 
-        Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<ThesisProposalsConfiguration>();
-        for (Degree degree : map.keySet()) {
-            Optional<ThesisProposalsConfiguration> config =
-                    map.get(degree).stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
-            if (config.isPresent()) {
-                suggestedConfigs.add(config.get());
+            Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<ThesisProposalsConfiguration>();
+            for (Degree degree : map.keySet()) {
+                Optional<ThesisProposalsConfiguration> config =
+                        map.get(degree).stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
+                if (config.isPresent()) {
+                    suggestedConfigs.add(config.get());
+                }
             }
-        }
 
-        model.addAttribute("suggestedConfigs", suggestedConfigs);
+            model.addAttribute("suggestedConfigs", suggestedConfigs);
+        }
 
         List<ThesisProposal> thesisProposalsList =
                 new ArrayList<ThesisProposal>(ThesisProposal.readCurrentByParticipant(Authenticate.getUser()));
