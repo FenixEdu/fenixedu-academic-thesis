@@ -38,11 +38,9 @@ public class ThesisProposal extends ThesisProposal_Base {
 
         @Override
         public int compare(ThesisProposal arg0, ThesisProposal arg1) {
-            if (arg1.getStudentThesisCandidacySet().size() < arg0.getStudentThesisCandidacySet().size()) {
-                return -1;
-            } else {
-                return 1;
-            }
+            int diff = arg1.getStudentThesisCandidacySet().size() - arg0.getStudentThesisCandidacySet().size();
+
+            return diff != 0 ? diff / Math.abs(diff) : diff;
         }
     };
 

@@ -186,7 +186,7 @@ public class ThesisProposalsController {
         Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<ThesisProposalsConfiguration>();
         for (Degree degree : map.keySet()) {
             Optional<ThesisProposalsConfiguration> config =
-                    map.get(degree).stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_CANDIDACY_PERIOD_START_ASC);
+                    map.get(degree).stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
             if (config.isPresent()) {
                 suggestedConfigs.add(config.get());
             }
@@ -320,6 +320,7 @@ public class ThesisProposalsController {
 
             ThesisProposal thesisProposal = createThesisProposal(proposalBean, participants);
             Signal.emit(ThesisProposal.SIGNAL_CREATED, new DomainObjectEvent<ThesisProposal>(thesisProposal));
+            System.out.println(ThesisProposal.SIGNAL_CREATED);
 
         } catch (OutOfProposalPeriodException exception) {
             model.addAttribute("createOutOfProposalPeriodException", exception);

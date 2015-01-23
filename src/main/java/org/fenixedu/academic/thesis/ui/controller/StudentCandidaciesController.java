@@ -18,6 +18,7 @@
  */
 package org.fenixedu.academic.thesis.ui.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,23 +54,53 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.studentThesisCandidacy.management",
-        accessGroup = "activeStudents")
+accessGroup = "activeStudents")
 @RequestMapping("/studentCandidacies")
 public class StudentCandidaciesController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String listProposals(Model model) {
 
+        System.out.println(model.asMap().containsKey("outOfCandidacyPeriodException"));
+
         Student student = Authenticate.getUser().getPerson().getStudent();
 
-        List<StudentThesisCandidacy> candidacies =
+        Set<ThesisProposalsConfiguration> configs =
                 student.getActiveRegistrations()
-                        .stream()
-                        .flatMap((Registration registration) -> registration.getStudentThesisCandidacySet().stream())
-                        .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
-                                .getCandidacyPeriod().containsNow()).collect(Collectors.toList());
+                .stream()
+                .flatMap(reg -> reg.getDegree().getExecutionDegrees().stream())
+                .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
+                        ExecutionYear.readCurrentExecutionYear()))
+                        .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream())
+                        .collect(Collectors.toSet());
+
+        List<ThesisProposalsConfiguration> openConfigs =
+                configs.stream().filter(config -> config.getCandidacyPeriod().containsNow()).collect(Collectors.toList());
+
+        ThesisProposalsConfiguration configuration = null;
+
+        if (!openConfigs.isEmpty() && openConfigs.size() == 1) {
+            //look this student candidacies in openConfigs
+            configuration = openConfigs.get(0);
+
+        } else {
+            //look this student candidacies in last closing config
+            Optional<ThesisProposalsConfiguration> lastConfigOpt =
+                    configs.stream().filter(config -> config.getCandidacyPeriod().isBeforeNow())
+                            .min(ThesisProposalsConfiguration.COMPARATOR_BY_CANDIDACY_PERIOD_END_ASC);
+            if (lastConfigOpt.isPresent()) {
+                configuration = lastConfigOpt.get();
+            }
+        }
+
+        List<StudentThesisCandidacy> candidacies =
+                new ArrayList<StudentThesisCandidacy>(configuration.getThesisProposalSet().stream()
+                        .flatMap(proposal -> proposal.getStudentThesisCandidacySet().stream())
+                        .filter(candidacy -> candidacy.getRegistration().getStudent().equals(student))
+                        .collect(Collectors.toSet()));
 
         Collections.sort(candidacies, StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
+        model.addAttribute("studentThesisCandidacies", candidacies);
 
         Set<ThesisProposal> thesisProposalCandidacies = new HashSet<ThesisProposal>();
         for (StudentThesisCandidacy candidacy : candidacies) {
@@ -84,34 +115,34 @@ public class StudentCandidaciesController {
                 reg -> {
                     Set<ThesisProposalsConfiguration> regConfigs =
                             reg.getDegree()
-                                    .getExecutionDegrees()
-                                    .stream()
-                                    .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
-                                            ExecutionYear.readCurrentExecutionYear()))
+                            .getExecutionDegrees()
+                            .stream()
+                            .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
+                                    ExecutionYear.readCurrentExecutionYear()))
                                     .flatMap(
                                             (ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet()
-                                                    .stream()).collect(Collectors.toSet());
+                                            .stream()).collect(Collectors.toSet());
 
-                    Set<ThesisProposalsConfiguration> openConfigs =
+                    Set<ThesisProposalsConfiguration> openRegConfigs =
                             regConfigs.stream().filter(config -> config.getCandidacyPeriod().containsNow())
-                                    .collect(Collectors.toSet());
+                            .collect(Collectors.toSet());
 
-                    if (openConfigs.isEmpty()) {
+                    if (openRegConfigs.isEmpty()) {
                         Optional<ThesisProposalsConfiguration> nextConfig =
                                 regConfigs.stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
                         if (nextConfig.isPresent()) {
                             suggestedConfigs.add(nextConfig.get());
                         }
                     } else {
-                        suggestedConfigs.addAll(openConfigs);
+                        suggestedConfigs.addAll(openRegConfigs);
                     }
                     proposals.put(
                             reg,
-                            openConfigs
-                                    .stream()
-                                    .flatMap((ThesisProposalsConfiguration config) -> config.getThesisProposalSet().stream())
-                                    .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal)
-                                            && !proposal.getHidden()).collect(Collectors.toSet()));
+                            openRegConfigs
+                            .stream()
+                            .flatMap((ThesisProposalsConfiguration config) -> config.getThesisProposalSet().stream())
+                            .filter((ThesisProposal proposal) -> !thesisProposalCandidacies.contains(proposal)
+                                    && !proposal.getHidden()).collect(Collectors.toSet()));
                 });
 
         int size = 0;
@@ -121,7 +152,6 @@ public class StudentCandidaciesController {
 
         model.addAttribute("availableProposals", size > 0);
         model.addAttribute("proposals", proposals);
-        model.addAttribute("studentThesisCandidacies", candidacies);
         model.addAttribute("suggestedConfigs", suggestedConfigs);
 
         return "studentCandidacies/list";
@@ -160,10 +190,10 @@ public class StudentCandidaciesController {
 
             long candidaciesCount =
                     registration
-                            .getStudentThesisCandidacySet()
-                            .stream()
-                            .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
-                                    .getCandidacyPeriod().containsNow()).count();
+                    .getStudentThesisCandidacySet()
+                    .stream()
+                    .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
+                            .getCandidacyPeriod().containsNow()).count();
 
             if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
                     && candidaciesCount >= thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent()) {
@@ -196,24 +226,35 @@ public class StudentCandidaciesController {
     }
 
     @RequestMapping(value = "/updatePreferences", method = RequestMethod.POST)
-    public String updateStudentThesisCandidaciesWeights(@RequestParam String json) {
+    public String updateStudentThesisCandidaciesWeights(@RequestParam String json, Model model) {
 
         JsonParser parser = new JsonParser();
         JsonArray jsonArray = (JsonArray) parser.parse(json);
 
-        updateStudentThesisCandidaciesWeights(jsonArray);
+        try {
+            updateStudentThesisCandidaciesWeights(jsonArray);
+        } catch (OutOfCandidacyPeriodException e) {
+            model.addAttribute("outOfCandidacyPeriodException", true);
+        }
 
-        return "redirect:/studentCandidacies";
+        return listProposals(model);
     }
 
     @Atomic(mode = TxMode.WRITE)
-    public void updateStudentThesisCandidaciesWeights(JsonArray jsonArray) {
-        jsonArray.forEach((JsonElement elem) -> {
+    public void updateStudentThesisCandidaciesWeights(JsonArray jsonArray) throws OutOfCandidacyPeriodException {
+        for (JsonElement elem : jsonArray) {
+
             String externalId = elem.getAsJsonObject().get("externalId").getAsString();
             int preference = elem.getAsJsonObject().get("preference").getAsInt();
 
             StudentThesisCandidacy studentThesisCandidacy = FenixFramework.getDomainObject(externalId);
-            studentThesisCandidacy.setPreferenceNumber(preference);
-        });
+
+            if (studentThesisCandidacy.getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod()
+                    .containsNow()) {
+                studentThesisCandidacy.setPreferenceNumber(preference);
+            } else {
+                throw new OutOfCandidacyPeriodException();
+            }
+        }
     }
 }

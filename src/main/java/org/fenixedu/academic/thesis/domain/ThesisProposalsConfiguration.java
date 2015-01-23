@@ -59,6 +59,14 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
                 }
             };
 
+    static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_CANDIDACY_PERIOD_END_ASC =
+            new Comparator<ThesisProposalsConfiguration>() {
+        @Override
+        public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
+            return o2.getCandidacyPeriod().getEnd().compareTo(o1.getCandidacyPeriod().getEnd());
+        }
+    };
+
     public ThesisProposalsConfiguration(Interval proposalPeriod, Interval candidacyPeriod, ExecutionDegree executionDegree,
             int maxThesisCandidaciesByStudent, int maxThesisProposalsByUser) {
         super();
