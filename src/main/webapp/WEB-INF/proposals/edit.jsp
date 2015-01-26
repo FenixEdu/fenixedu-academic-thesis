@@ -36,7 +36,8 @@ ${portal.toolkit()}
 </div>
 
 <form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/edit" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalBean">
-
+	<input type="hidden" name="configuration" value="${configuration.externalId}"/>
+	
 <c:if test="${!empty editMaxNumberThesisProposalsException}">
 <p class="text-danger"><spring:message code="error.thesisProposal.edit.maxNumberThesisProposalsException"/></p>
 </c:if>

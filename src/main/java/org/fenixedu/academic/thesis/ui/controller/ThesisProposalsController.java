@@ -58,6 +58,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
@@ -155,8 +156,8 @@ public class ThesisProposalsController {
 
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
-    public String listProposals(Model model) {
+    @RequestMapping(method = RequestMethod.GET)
+    public String listProposals(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration) {
 
         if (Authenticate.getUser().getPerson().getTeacher() != null) {
             Set<ExecutionDegree> notPastExecDegrees =
@@ -195,8 +196,23 @@ public class ThesisProposalsController {
             model.addAttribute("suggestedConfigs", suggestedConfigs);
         }
 
+        List<ThesisProposalsConfiguration> configs =
+                new ArrayList<ThesisProposalsConfiguration>(Authenticate.getUser().getThesisProposalParticipantSet().stream()
+                        .map(participant -> participant.getThesisProposal())
+                        .flatMap(proposal -> proposal.getThesisConfigurationSet().stream()).collect(Collectors.toSet()));
+        Collections.sort(configs, ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC);
+
+        model.addAttribute("configsList", configs);
+
+        if (configuration == null && !configs.isEmpty()) {
+            configuration = configs.get(0);
+        }
+
+        model.addAttribute("configuration", configuration);
+
         List<ThesisProposal> thesisProposalsList =
-                new ArrayList<ThesisProposal>(ThesisProposal.readCurrentByParticipant(Authenticate.getUser()));
+                new ArrayList<ThesisProposal>(ThesisProposal.readProposalsByUserAndConfiguration(Authenticate.getUser(),
+                        configuration));
         Collections.sort(thesisProposalsList, ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
 
         model.addAttribute("thesisProposalsList", thesisProposalsList);
@@ -385,7 +401,7 @@ public class ThesisProposalsController {
             return new ModelAndView("proposals/create", model.asMap());
         }
 
-        return new ModelAndView(listProposals(model));
+        return new ModelAndView(listProposals(model, null));
     }
 
     @Atomic(mode = TxMode.WRITE)
@@ -411,18 +427,25 @@ public class ThesisProposalsController {
             thesisProposal.delete();
         } catch (DomainException domainException) {
             model.addAttribute("deleteException", true);
-            return new ModelAndView(listProposals(model));
+            return new ModelAndView(listProposals(model, null));
         }
         return new ModelAndView("redirect:/proposals");
     }
 
     @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)
-    public ModelAndView editProposalForm(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
+    public ModelAndView editProposalForm(@PathVariable("oid") ThesisProposal thesisProposal,
+            @RequestParam(required = false) ThesisProposalsConfiguration configuration, Model model) {
 
         boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
         boolean isDegreeCoordinator =
                 thesisProposal.getExecutionDegreeSet().stream()
                         .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));
+
+        if (configuration == null) {
+            configuration = thesisProposal.getSingleThesisProposalsConfiguration();
+        }
+
+        model.addAttribute("configuration", configuration);
 
         try {
             if (!(isManager || isDegreeCoordinator)
@@ -476,17 +499,18 @@ public class ThesisProposalsController {
             }
         } catch (OutOfProposalPeriodException exception) {
             model.addAttribute("editOutOfProposalPeriodException", exception);
-            return new ModelAndView(listProposals(model));
+            return new ModelAndView(listProposals(model, configuration));
         } catch (CannotEditUsedThesisProposalsException exception) {
             model.addAttribute("cannotEditUsedThesisProposalsException", exception);
-            return new ModelAndView(listProposals(model));
+            return new ModelAndView(listProposals(model, configuration));
         }
     }
 
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
     public ModelAndView editProposal(@ModelAttribute ThesisProposalBean thesisProposalBean,
-            @RequestParam String participantsJson, @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations,
-            Model model) {
+            @RequestParam String participantsJson, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
+            @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations, Model model,
+            RedirectAttributes redirectAttrs) {
 
         thesisProposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
 
@@ -496,33 +520,34 @@ public class ThesisProposalsController {
         JsonArray jsonArray = (JsonArray) parser.parse(participantsJson);
 
         try {
-            return editThesisProposal(thesisProposalBean, thesisProposal, jsonArray);
+            editThesisProposal(thesisProposalBean, thesisProposal, jsonArray);
+            redirectAttrs.addAttribute("configuration", configuration != null ? configuration.getExternalId() : null);
+            return new ModelAndView("redirect:/proposals");
         } catch (MaxNumberThesisProposalsException exception) {
             model.addAttribute("editMaxNumberThesisProposalsException", exception);
-            return editProposalForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, configuration, model);
         } catch (OutOfProposalPeriodException exception) {
             model.addAttribute("outOfProposalPeriodException", true);
-            return editProposalForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, configuration, model);
         } catch (IllegalParticipantTypeException exception) {
             model.addAttribute("illegalParticipantTypeException", exception);
-            return editProposalForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, configuration, model);
         } catch (UnexistentConfigurationException exception) {
             model.addAttribute("unexistentConfigurationException", exception);
-            return editProposalForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, configuration, model);
         } catch (UnexistentThesisParticipantException exception) {
             model.addAttribute("unexistentThesisParticipantException", exception);
-            return editProposalForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, configuration, model);
         } catch (UnequivalentThesisConfigurations exception) {
             model.addAttribute("unequivalentThesisConfigurations", exception);
-            return editProposalForm(thesisProposal, model);
+            return editProposalForm(thesisProposal, configuration, model);
         }
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private ModelAndView editThesisProposal(ThesisProposalBean thesisProposalBean, ThesisProposal thesisProposal,
-            JsonArray jsonArray) throws MaxNumberThesisProposalsException, OutOfProposalPeriodException,
-            IllegalParticipantTypeException, UnexistentConfigurationException, UnexistentThesisParticipantException,
-            UnequivalentThesisConfigurations {
+    private void editThesisProposal(ThesisProposalBean thesisProposalBean, ThesisProposal thesisProposal, JsonArray jsonArray)
+            throws MaxNumberThesisProposalsException, OutOfProposalPeriodException, IllegalParticipantTypeException,
+            UnexistentConfigurationException, UnexistentThesisParticipantException, UnequivalentThesisConfigurations {
 
         boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
         boolean isDegreeCoordinator =
@@ -611,8 +636,6 @@ public class ThesisProposalsController {
             throw new OutOfProposalPeriodException();
         }
         thesisProposal.setLocalization(thesisProposalBean.getLocalization());
-
-        return new ModelAndView("redirect:/proposals");
     }
 
     @RequestMapping(value = "/accept/{studentThesisCandidacy}", method = RequestMethod.POST)
@@ -745,5 +768,4 @@ public class ThesisProposalsController {
 
         return mav;
     }
-
 }

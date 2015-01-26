@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
-import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
@@ -149,18 +148,18 @@ public class ThesisProposal extends ThesisProposal_Base {
         return sortedParticipants;
     }
 
-    public static Set<ThesisProposal> readCurrentByParticipant(User user) {
+    public static Set<ThesisProposal> readProposalsByUserAndConfiguration(User user, ThesisProposalsConfiguration configuration) {
 
-        return user
-                .getThesisProposalParticipantSet()
-                .stream()
-                .map(participant -> participant.getThesisProposal())
-                .filter(proposal -> proposal
-                        .getThesisConfigurationSet()
-                        .stream()
-                        .anyMatch(
-                                configuration -> configuration.getExecutionDegree().getExecutionYear()
-                                .isAfterOrEquals(ExecutionYear.readCurrentExecutionYear()))).collect(Collectors.toSet());
+        if (configuration != null) {
+            return configuration
+                    .getThesisProposalSet()
+                    .stream()
+                    .filter(proposal -> proposal.getThesisProposalParticipantSet().stream()
+                            .map(participant -> participant.getUser()).collect(Collectors.toSet()).contains(user))
+                    .collect(Collectors.toSet());
+        } else {
+            return new HashSet<ThesisProposal>();
+        }
     }
 
     public Set<ExecutionDegree> getExecutionDegreeSet() {

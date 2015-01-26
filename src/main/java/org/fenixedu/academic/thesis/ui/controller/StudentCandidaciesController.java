@@ -80,7 +80,6 @@ public class StudentCandidaciesController {
         if (!openConfigs.isEmpty() && openConfigs.size() == 1) {
             //look this student candidacies in openConfigs
             configuration = openConfigs.get(0);
-
         } else {
             //look this student candidacies in last closing config
             Optional<ThesisProposalsConfiguration> lastConfigOpt =
@@ -92,10 +91,10 @@ public class StudentCandidaciesController {
         }
 
         List<StudentThesisCandidacy> candidacies =
-                new ArrayList<StudentThesisCandidacy>(configuration.getThesisProposalSet().stream()
+                configuration != null ? new ArrayList<StudentThesisCandidacy>(configuration.getThesisProposalSet().stream()
                         .flatMap(proposal -> proposal.getStudentThesisCandidacySet().stream())
                         .filter(candidacy -> candidacy.getRegistration().getStudent().equals(student))
-                        .collect(Collectors.toSet()));
+                        .collect(Collectors.toSet())) : new ArrayList<StudentThesisCandidacy>();
 
         Collections.sort(candidacies, StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
         model.addAttribute("studentThesisCandidacies", candidacies);
