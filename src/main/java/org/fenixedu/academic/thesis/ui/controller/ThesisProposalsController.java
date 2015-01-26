@@ -684,16 +684,16 @@ public class ThesisProposalsController {
 
         mav.addObject("candidaciesList", candidacies);
 
-        HashMap<String, Integer> bestAccepted = new HashMap<String, Integer>();
+        HashMap<String, StudentThesisCandidacy> bestAccepted = new HashMap<String, StudentThesisCandidacy>();
 
         for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
             Registration registration = candidacy.getRegistration();
             if (!bestAccepted.containsKey(registration.getExternalId())) {
                 for (StudentThesisCandidacy studentCandidacy : registration.getStudentThesisCandidacySet()) {
                     if (studentCandidacy.getAcceptedByAdvisor()
-                            && studentCandidacy.getPreferenceNumber() < bestAccepted.getOrDefault(registration.getExternalId(),
-                                    Integer.MAX_VALUE)) {
-                        bestAccepted.put(registration.getExternalId(), studentCandidacy.getPreferenceNumber());
+                            && (!bestAccepted.containsKey(registration.getExternalId()) || studentCandidacy.getPreferenceNumber() < bestAccepted
+                                    .get(registration.getExternalId()).getPreferenceNumber())) {
+                        bestAccepted.put(registration.getExternalId(), studentCandidacy);
                     }
                 }
             }

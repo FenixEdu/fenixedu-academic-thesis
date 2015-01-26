@@ -31,7 +31,7 @@
 </div>
 
 <div class="well">
-	<p><spring:message code="label.candidacies.well"/> - ${thesisProposal.title}</p>
+	<p><spring:message code="label.candidacies.well"/> : <b>${thesisProposal.identifier} - ${thesisProposal.title}</b></p>
 </div>
 
 <c:if test="${!empty outOfCandidacyPeriodException}">
@@ -64,20 +64,23 @@
 			<td>
 				<a href="${fr:checksumLink(pageContext.request, '/teacher/viewStudentCurriculum.do?method=prepare&registrationOID='.concat(studentThesisCandidacy.registration.externalId))}">
 					${studentThesisCandidacy.registration.student.name}</a>
+					<c:if test="${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber}">
+						<p><spring:message code='label.candidate.already.accepted' arguments="${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber}, ${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.getSortedParticipants().get(0).user.name}"/></p>
+					</c:if>
 				</td>
-				<td> ${studentThesisCandidacy.preferenceNumber + 1}</td>
+				<td> ${studentThesisCandidacy.preferenceNumber}</td>
 				<td>${studentThesisCandidacy.timestamp.toString('dd-MM-YYY HH:mm')}</td>
 				<td>
 					<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
 					<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/accept/${studentThesisCandidacy.externalId}" class="form-horizontal">
 
-					<c:if test="${bestAccepted.get(studentThesisCandidacy.registration.externalId) < studentThesisCandidacy.preferenceNumber}">
+					<c:if test="${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber}">
 					<button type="submit" class="btn btn-default acceptButton" disabled="true">
 						<spring:message code='button.candidacy.accept' />
 					</button>
 					<p>You can't accept this student since it has already been accepted in a more prefereble proposal</p>
 				</c:if>
-				<c:if test="${!(bestAccepted.get(studentThesisCandidacy.registration.externalId) < studentThesisCandidacy.preferenceNumber)}">
+				<c:if test="${!(bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber)}">
 				<button type="submit" class="btn btn-default acceptButton">
 					<spring:message code='button.candidacy.accept' />
 				</button>

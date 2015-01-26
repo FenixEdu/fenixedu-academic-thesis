@@ -116,9 +116,18 @@
 					</tr>
 				</thead>
 				<tbody>
+					<c:set var="anyAccepted" scope="session" value="false"/>
 					<c:forEach items="${studentThesisCandidacies}" var="studentThesisCandidacy">
-					<tr class="studentThesisCandidacyRow sortableRow" data-studentThesisCandidacy-id="${studentThesisCandidacy.externalId}">
-						<td>${studentThesisCandidacy.thesisProposal.identifier}</td>
+					<tr class="studentThesisCandidacyRow  ${(studentThesisCandidacy.acceptedByAdvisor && !anyAccepted) ? 'thesis-selected' : '' } sortableRow" data-studentThesisCandidacy-id="${studentThesisCandidacy.externalId}">
+
+						<c:if test="${!(studentThesisCandidacy.acceptedByAdvisor && !anyAccepted)}" >
+							<td>${studentThesisCandidacy.thesisProposal.identifier}</td>
+						</c:if>
+						<c:if test="${studentThesisCandidacy.acceptedByAdvisor && !anyAccepted}" >
+							<c:set var="anyAccepted" scope="session" value="true"/>
+							<td>${studentThesisCandidacy.thesisProposal.identifier}<span class="badge">	<spring:message code='label.proposal.attributed'/></span></td>
+						</c:if>
+
 						<td>${studentThesisCandidacy.thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${studentThesisCandidacy.thesisProposal.getSortedParticipants()}" var="participant">
@@ -157,6 +166,12 @@
 </tbody>
 </table>
 </div>
+
+<style media="screen">
+	.thesis-selected{
+		font-weight:bold !important;
+	}
+</style>
 
 <script type="text/javascript">
 $(document).ready(function() {
