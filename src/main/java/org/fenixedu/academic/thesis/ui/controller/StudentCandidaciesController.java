@@ -35,8 +35,9 @@ import org.fenixedu.academic.domain.student.Student;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
-import org.fenixedu.academic.thesis.domain.exception.MaxNumberStudentThesisCandidaciesException;
-import org.fenixedu.academic.thesis.domain.exception.OutOfCandidacyPeriodException;
+import org.fenixedu.academic.thesis.ui.exception.MaxNumberStudentThesisCandidaciesException;
+import org.fenixedu.academic.thesis.ui.exception.OutOfCandidacyPeriodException;
+import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.springframework.ui.Model;
@@ -161,14 +162,8 @@ public class StudentCandidaciesController {
 
         try {
             createStudentThesisCandidacy(registration, thesisProposal);
-        } catch (MaxNumberStudentThesisCandidaciesException exception) {
-            model.addAttribute("maxNumberStudentThesisCandidaciesException", exception);
-            return listProposals(model);
-        } catch (OutOfCandidacyPeriodException exception) {
-            model.addAttribute("outOfCandidacyPeriodException", exception);
-            return listProposals(model);
-        } catch (NullPointerException exception) {
-            model.addAttribute("nullPointerException", exception);
+        } catch (Exception exception) {
+            model.addAttribute("error", exception);
             return listProposals(model);
         }
 
@@ -230,8 +225,8 @@ public class StudentCandidaciesController {
 
         try {
             updateStudentThesisCandidaciesWeights(jsonArray);
-        } catch (OutOfCandidacyPeriodException e) {
-            model.addAttribute("outOfCandidacyPeriodException", true);
+        } catch (ThesisProposalException e) {
+            model.addAttribute("error", e.getClass().getSimpleName());
         }
 
         return listProposals(model);

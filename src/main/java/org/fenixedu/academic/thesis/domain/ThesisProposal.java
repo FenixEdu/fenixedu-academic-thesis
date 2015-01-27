@@ -155,8 +155,7 @@ public class ThesisProposal extends ThesisProposal_Base {
                     .getThesisProposalSet()
                     .stream()
                     .filter(proposal -> proposal.getThesisProposalParticipantSet().stream()
-                            .map(participant -> participant.getUser()).collect(Collectors.toSet()).contains(user))
-                    .collect(Collectors.toSet());
+                            .anyMatch(participant -> participant.getUser().equals(user))).collect(Collectors.toSet());
         } else {
             return new HashSet<ThesisProposal>();
         }

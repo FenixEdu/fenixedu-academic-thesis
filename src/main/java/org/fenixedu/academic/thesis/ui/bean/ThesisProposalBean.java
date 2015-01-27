@@ -28,8 +28,8 @@ import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
-import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
-import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
+import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
+import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
 import org.fenixedu.bennu.core.domain.User;
 
 import pt.ist.fenixframework.Atomic;
@@ -150,6 +150,25 @@ public class ThesisProposalBean {
     }
 
     public ThesisProposalBean() {
+
+    }
+
+    public ThesisProposalBean(ThesisProposal thesisProposal) {
+        setGoals(thesisProposal.getGoals());
+        setLocalization(thesisProposal.getLocalization());
+        setObservations(thesisProposal.getObservations());
+        setRequirements(thesisProposal.getRequirements());
+        setTitle(thesisProposal.getTitle());
+        setThesisProposalsConfigurations(thesisProposal.getThesisConfigurationSet());
+
+        HashSet<ThesisProposalParticipantBean> thesisProposalParticipantsBean = new HashSet<ThesisProposalParticipantBean>();
+
+        for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
+            String participantType = participant.getThesisProposalParticipantType().getExternalId();
+            ThesisProposalParticipantBean bean = new ThesisProposalParticipantBean(participant.getUser(), participantType);
+            thesisProposalParticipantsBean.add(bean);
+        }
+        setThesisProposalParticipantsBean(thesisProposalParticipantsBean);
     }
 
     public static class Builder {

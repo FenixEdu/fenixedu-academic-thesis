@@ -16,10 +16,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu Academic Thesis.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.fenixedu.academic.thesis.domain.exception;
+package org.fenixedu.academic.thesis.ui.exception;
 
-public class OverlappingIntervalsException extends Exception {
+import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 
-    private static final long serialVersionUID = -7109720400744389874L;
+public class MaxNumberThesisProposalsException extends ThesisProposalException {
+
+    private static final long serialVersionUID = 4565172166760489278L;
+    private final ThesisProposalParticipant participant;
+
+    public ThesisProposalParticipant getParticipant() {
+        return participant;
+    }
+
+    public MaxNumberThesisProposalsException(ThesisProposalParticipant participant) {
+        this.participant = participant;
+    }
 
 }

@@ -20,7 +20,7 @@ package org.fenixedu.academic.thesis.ui.bean;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
-import org.fenixedu.academic.thesis.domain.exception.OverlappingIntervalsException;
+import org.fenixedu.academic.thesis.ui.exception.OverlappingIntervalsException;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormatter;

@@ -18,39 +18,30 @@
  */
 package org.fenixedu.academic.thesis.ui.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.fenixedu.academic.domain.Degree;
-import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
-import org.fenixedu.academic.domain.exceptions.DomainException;
-import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
-import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
-import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
-import org.fenixedu.academic.thesis.domain.exception.MaxNumberThesisProposalsException;
-import org.fenixedu.academic.thesis.domain.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
-import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.academic.thesis.ui.exception.CannotEditUsedThesisProposalsException;
+import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
+import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
+import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
+import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationException;
+import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,12 +51,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 @SpringApplication(group = "thesisCreators | activeStudents | #managers", path = "thesisProposals",
@@ -75,169 +63,38 @@ import com.google.gson.JsonParser;
 @RequestMapping("/proposals")
 public class ThesisProposalsController {
 
-    public class UnexistentThesisParticipantException extends Exception {
+    @Autowired
+    ThesisProposalsService service;
 
-    }
-
-    public class CannotEditUsedThesisProposalsException extends Exception {
-
-        private static final long serialVersionUID = -4965296880371661815L;
-        private ThesisProposal thesisProposal;
-
-        public CannotEditUsedThesisProposalsException(ThesisProposal thesisProposal) {
-            this.thesisProposal = thesisProposal;
-        }
-
-        public ThesisProposal getThesisProposal() {
-            return thesisProposal;
-        }
-
-        public void setThesisProposal(ThesisProposal thesisProposal) {
-            this.thesisProposal = thesisProposal;
-        }
-
-    }
-
-    public class IllegalParticipantTypeException extends Exception {
-
-        private static final long serialVersionUID = -3114050449816099494L;
-        private User user;
-
-        public IllegalParticipantTypeException(User user) {
-            this.user = user;
-        }
-
-        public User getUser() {
-            return user;
-        }
-
-        public void setUser(User user) {
-            this.user = user;
-        }
-
-    }
-
-    public class UnequivalentThesisConfigurations extends Exception {
-
-        private static final long serialVersionUID = -4270028206922579262L;
-        private ThesisProposalsConfiguration configuration0;
-        private ThesisProposalsConfiguration configuration1;
-
-        public ThesisProposalsConfiguration getConfiguration0() {
-            return configuration0;
-        }
-
-        public void setConfiguration0(ThesisProposalsConfiguration configuration0) {
-            this.configuration0 = configuration0;
-        }
-
-        public ThesisProposalsConfiguration getConfiguration1() {
-            return configuration1;
-        }
-
-        public void setConfiguration1(ThesisProposalsConfiguration configuration1) {
-            this.configuration1 = configuration1;
-        }
-
-        public UnequivalentThesisConfigurations(ThesisProposalsConfiguration configuration0,
-                ThesisProposalsConfiguration configuration1) {
-            this.configuration0 = configuration0;
-            this.configuration1 = configuration1;
-        }
-
-    }
-
-    public class UnexistentConfigurationException extends Exception {
-
-        private static final long serialVersionUID = -85534820603380001L;
-
-        public UnexistentConfigurationException() {
-        }
-
+    private String listProposals(Model model, ThesisProposalsConfiguration configuration) {
+        return listProposals(model, configuration, null, null, null);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public String listProposals(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration) {
+    public String listProposals(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
+            @RequestParam(required = false) Boolean isVisible, @RequestParam(required = false) Boolean isAttributed,
+            @RequestParam(required = false) Boolean hasCandidacy) {
+
+        List<ThesisProposalsConfiguration> configs = service.getThesisProposalsConfigurations(Authenticate.getUser());
+
+        configuration = configuration == null && !configs.isEmpty() ? configs.iterator().next() : configuration;
 
         if (Authenticate.getUser().getPerson().getTeacher() != null) {
-            Set<ExecutionDegree> notPastExecDegrees =
-                    Authenticate
-                            .getUser()
-                            .getPerson()
-                            .getTeacher()
-                            .getProfessorships(ExecutionYear.readCurrentExecutionYear())
-                            .stream()
-                            .flatMap(professorship -> professorship.getExecutionCourse().getExecutionDegrees().stream())
-                            .map(execDegree -> execDegree.getDegree())
-                            .flatMap(degree -> degree.getExecutionDegrees().stream())
-                            .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
-                                    ExecutionYear.readCurrentExecutionYear())).collect(Collectors.toSet());
-
-            HashMap<Degree, Set<ThesisProposalsConfiguration>> map = new HashMap<Degree, Set<ThesisProposalsConfiguration>>();
-
-            notPastExecDegrees.stream().flatMap(execDegree -> execDegree.getThesisProposalsConfigurationSet().stream())
-                    .filter(config -> config.getProposalPeriod().getEnd().isAfterNow()).forEach(config -> {
-                        Degree degree = config.getExecutionDegree().getDegree();
-                        if (!map.containsKey(degree)) {
-                            map.put(degree, new HashSet<ThesisProposalsConfiguration>());
-                        }
-                        map.get(degree).add(config);
-                    });;
-
-            Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<ThesisProposalsConfiguration>();
-            for (Degree degree : map.keySet()) {
-                Optional<ThesisProposalsConfiguration> config =
-                        map.get(degree).stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
-                if (config.isPresent()) {
-                    suggestedConfigs.add(config.get());
-                }
-            }
-
-            model.addAttribute("suggestedConfigs", suggestedConfigs);
+            model.addAttribute("suggestedConfigs", service.getNotPastExecutionDegrees(Authenticate.getUser(), configuration
+                    .getExecutionDegree().getExecutionYear()));
         }
-
-        List<ThesisProposalsConfiguration> configs =
-                new ArrayList<ThesisProposalsConfiguration>(Authenticate.getUser().getThesisProposalParticipantSet().stream()
-                        .map(participant -> participant.getThesisProposal())
-                        .flatMap(proposal -> proposal.getThesisConfigurationSet().stream()).collect(Collectors.toSet()));
-        Collections.sort(configs, ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC);
 
         model.addAttribute("configsList", configs);
 
-        if (configuration == null && !configs.isEmpty()) {
-            configuration = configs.get(0);
-        }
-
         model.addAttribute("configuration", configuration);
 
-        List<ThesisProposal> thesisProposalsList =
-                new ArrayList<ThesisProposal>(ThesisProposal.readProposalsByUserAndConfiguration(Authenticate.getUser(),
-                        configuration));
-        Collections.sort(thesisProposalsList, ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
+        model.addAttribute("thesisProposalsList", service.getThesisProposals(Authenticate.getUser(), configuration));
 
-        model.addAttribute("thesisProposalsList", thesisProposalsList);
-
-        HashMap<Degree, List<ThesisProposal>> coordinatorProposals = new HashMap<Degree, List<ThesisProposal>>();
-
-        for (Degree degree : Degree.readBolonhaDegrees()) {
-
-            List<ThesisProposal> proposals =
-                    degree.getExecutionDegrees()
-                            .stream()
-                            .filter(executionDegree -> CoordinatorGroup.get(executionDegree.getDegree()).isMember(
-                                    Authenticate.getUser()))
-                            .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
-                                    ExecutionYear.readCurrentExecutionYear()))
-                            .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream())
-                            .flatMap(config -> config.getThesisProposalSet().stream()).collect(Collectors.toList());
-
-            if (!proposals.isEmpty()) {
-                Collections.sort(proposals, ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
-                coordinatorProposals.put(degree, proposals);
-            }
-        }
-
-        model.addAttribute("coordinatorProposals", coordinatorProposals);
+        model.addAttribute("isVisible", isVisible);
+        model.addAttribute("isAttributed", isAttributed);
+        model.addAttribute("hasCandidacy", hasCandidacy);
+        model.addAttribute("coordinatorProposals", service.getCoordinatorProposals(Authenticate.getUser(),
+                ExecutionYear.readCurrentExecutionYear(), isVisible, isAttributed, hasCandidacy));
 
         return "proposals/list";
     }
@@ -245,21 +102,14 @@ public class ThesisProposalsController {
     @RequestMapping(value = "/create", method = RequestMethod.GET)
     public ModelAndView createThesisProposalsForm(Model model) {
 
-        ModelAndView mav = new ModelAndView("proposals/create", "command", new ThesisProposalBean());
+        ModelAndView modelAndview = new ModelAndView("proposals/create", "command", new ThesisProposalBean());
 
-        List<ThesisProposalsConfiguration> configs =
-                ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
-                        .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toList());
-        mav.addObject("configurations", configs);
+        modelAndview.addObject("configurations", service
+                .getCurrentThesisProposalsConfigurations(ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE));
 
-        Collections.sort(configs, ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE);
+        modelAndview.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
 
-        List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-        participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-        Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-        mav.addObject("participantTypeList", participantTypeList);
-
-        return mav;
+        return modelAndview;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
@@ -267,169 +117,45 @@ public class ThesisProposalsController {
             @RequestParam String participantsJson, @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations,
             Model model) {
 
-        if (thesisProposalsConfigurations == null || thesisProposalsConfigurations.isEmpty()) {
-            model.addAttribute("unexistentConfigurationException", true);
-
-            Set<ThesisProposalsConfiguration> configs =
-                    ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
-                            .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
-            model.addAttribute("configurations", configs);
-
-            List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-            participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-            Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-            model.addAttribute("participantTypeList", participantTypeList);
-
-            model.addAttribute("command", proposalBean);
-            return new ModelAndView("proposals/create", model.asMap());
-        }
-
-        ThesisProposalsConfiguration base = (ThesisProposalsConfiguration) thesisProposalsConfigurations.toArray()[0];
-
         try {
+            if (thesisProposalsConfigurations == null || thesisProposalsConfigurations.isEmpty()) {
+                throw new UnexistentConfigurationException();
+            }
+
+            ThesisProposalsConfiguration base = thesisProposalsConfigurations.iterator().next();
+
             for (ThesisProposalsConfiguration configuration : thesisProposalsConfigurations) {
                 if (!base.isEquivalent(configuration)) {
-                    throw new UnequivalentThesisConfigurations(base, configuration);
+                    throw new UnequivalentThesisConfigurationsException(base, configuration);
                 }
             }
-        } catch (UnequivalentThesisConfigurations exception) {
-            model.addAttribute("unequivalentThesisConfigurationsException", exception);
 
-            Set<ThesisProposalsConfiguration> configs =
-                    ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
-                            .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
-            model.addAttribute("configurations", configs);
-
-            List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-            participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-            Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-            model.addAttribute("participantTypeList", participantTypeList);
-
-            model.addAttribute("command", proposalBean);
-            return new ModelAndView("proposals/create", model.asMap());
-        }
-
-        proposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
-
-        try {
-            JsonParser parser = new JsonParser();
-            JsonArray jsonArray = (JsonArray) parser.parse(participantsJson);
-
-            ArrayList<ThesisProposalParticipantBean> participants = new ArrayList<ThesisProposalParticipantBean>();
-
-            for (JsonElement elem : jsonArray) {
-                String userId = elem.getAsJsonObject().get("userId").getAsString();
-                String userType = elem.getAsJsonObject().get("userType").getAsString();
-
-                if (userType.isEmpty()) {
-                    throw new IllegalParticipantTypeException(User.findByUsername(userId));
-                }
-
-                if (userId == null || userId.isEmpty()) {
-                    throw new UnexistentThesisParticipantException();
-                }
-
-                participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType));
-            }
-
-            if (participants.isEmpty()) {
-                throw new UnexistentThesisParticipantException();
-            }
-
-            ThesisProposal thesisProposal = createThesisProposal(proposalBean, participants);
-            Signal.emit(ThesisProposal.SIGNAL_CREATED, new DomainObjectEvent<ThesisProposal>(thesisProposal));
-
-        } catch (OutOfProposalPeriodException exception) {
-            model.addAttribute("createOutOfProposalPeriodException", exception);
-
-            Set<ThesisProposalsConfiguration> configs =
-                    ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
-                            .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
-            model.addAttribute("configurations", configs);
-
-            List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-            participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-            Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-            model.addAttribute("participantTypeList", participantTypeList);
-
-            model.addAttribute("command", proposalBean);
-            return new ModelAndView("proposals/create", model.asMap());
-        } catch (MaxNumberThesisProposalsException exception) {
-            model.addAttribute("createMaxNumberThesisProposalsException", exception);
-
-            Set<ThesisProposalsConfiguration> configs =
-                    ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
-                            .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
-            model.addAttribute("configurations", configs);
-
-            List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-            participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-            Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-            model.addAttribute("participantTypeList", participantTypeList);
-
-            model.addAttribute("command", proposalBean);
-            return new ModelAndView("proposals/create", model.asMap());
-        } catch (IllegalParticipantTypeException exception) {
-            model.addAttribute("illegalParticipantTypeException", exception);
-
-            Set<ThesisProposalsConfiguration> configs =
-                    ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
-                            .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
-            model.addAttribute("configurations", configs);
-
-            List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-            participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-            Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-            model.addAttribute("participantTypeList", participantTypeList);
-
-            model.addAttribute("command", proposalBean);
-            return new ModelAndView("proposals/create", model.asMap());
-        } catch (UnexistentThesisParticipantException exception) {
-            model.addAttribute("unexistentThesisParticipantException", exception);
-
-            Set<ThesisProposalsConfiguration> configs =
-                    ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
-                            .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
-            model.addAttribute("configurations", configs);
-
-            List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-            participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-            Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-            model.addAttribute("participantTypeList", participantTypeList);
-
-            model.addAttribute("command", proposalBean);
-            return new ModelAndView("proposals/create", model.asMap());
+            proposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
+            service.createThesisProposal(proposalBean, participantsJson);
+        } catch (ThesisProposalException exception) {
+            model.addAttribute("error", exception.getClass().getSimpleName());
+            return error(proposalBean, model);
         }
 
         return new ModelAndView(listProposals(model, null));
     }
 
-    @Atomic(mode = TxMode.WRITE)
-    private ThesisProposal createThesisProposal(ThesisProposalBean proposalBean,
-            ArrayList<ThesisProposalParticipantBean> participantsBean) throws MaxNumberThesisProposalsException,
-            OutOfProposalPeriodException {
-
-        proposalBean.setThesisProposalParticipantsBean(new HashSet<ThesisProposalParticipantBean>());
-        proposalBean.getThesisProposalParticipantsBean().addAll(participantsBean);
-
-        return new ThesisProposalBean.Builder(proposalBean).build();
+    protected ModelAndView error(ThesisProposalBean proposalBean, Model model) {
+        model.addAttribute("configurations", service.getCurrentThesisProposalsConfigurations());
+        model.addAttribute("participantTypeList", service.getThesisProposalParticipantTypes());
+        model.addAttribute("command", proposalBean);
+        return new ModelAndView("proposals/create", model.asMap());
     }
 
     @RequestMapping(value = "/delete/{oid}", method = RequestMethod.POST)
     public ModelAndView deleteThesisProposals(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
 
-        return delete(thesisProposal, model);
-    }
-
-    @Atomic(mode = TxMode.WRITE)
-    private ModelAndView delete(ThesisProposal thesisProposal, Model model) {
-        try {
-            thesisProposal.delete();
-        } catch (DomainException domainException) {
-            model.addAttribute("deleteException", true);
-            return new ModelAndView(listProposals(model, null));
+        if (service.delete(thesisProposal)) {
+            return new ModelAndView("redirect:/proposals");
         }
-        return new ModelAndView("redirect:/proposals");
+
+        model.addAttribute("deleteException", true);
+        return new ModelAndView(listProposals(model, null));
     }
 
     @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)
@@ -448,10 +174,8 @@ public class ThesisProposalsController {
         model.addAttribute("configuration", configuration);
 
         try {
-            if (!(isManager || isDegreeCoordinator)
-                    && !thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
-                throw new OutOfProposalPeriodException();
-            } else {
+            if ((isManager || isDegreeCoordinator)
+                    || thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
                 if (!thesisProposal.getStudentThesisCandidacySet().isEmpty()) {
                     throw new CannotEditUsedThesisProposalsException(thesisProposal);
                 } else {
@@ -477,31 +201,17 @@ public class ThesisProposalsController {
 
                     ModelAndView mav = new ModelAndView("proposals/edit", "command", thesisProposalBean);
 
-                    Set<ThesisProposalsConfiguration> configs =
-                            ThesisProposalsSystem
-                                    .getInstance()
-                                    .getThesisProposalsConfigurationSet()
-                                    .stream()
-                                    .filter(config -> config.getProposalPeriod().overlaps(
-                                            thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod()))
-                                    .collect(Collectors.toSet());
+                    mav.addObject("configurations", service.getCurrentThesisProposalsConfigurations());
 
-                    mav.addObject("configurations", configs);
-
-                    List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-                    participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-                    Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-
-                    mav.addObject("participantTypeList", participantTypeList);
+                    mav.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
 
                     return mav;
                 }
+            } else {
+                throw new OutOfProposalPeriodException();
             }
-        } catch (OutOfProposalPeriodException exception) {
-            model.addAttribute("editOutOfProposalPeriodException", exception);
-            return new ModelAndView(listProposals(model, configuration));
-        } catch (CannotEditUsedThesisProposalsException exception) {
-            model.addAttribute("cannotEditUsedThesisProposalsException", exception);
+        } catch (ThesisProposalException exception) {
+            model.addAttribute("error", exception.getClass().getSimpleName());
             return new ModelAndView(listProposals(model, configuration));
         }
     }
@@ -520,252 +230,50 @@ public class ThesisProposalsController {
         JsonArray jsonArray = (JsonArray) parser.parse(participantsJson);
 
         try {
-            editThesisProposal(thesisProposalBean, thesisProposal, jsonArray);
+            service.editThesisProposal(Authenticate.getUser(), thesisProposalBean, thesisProposal, jsonArray);
             redirectAttrs.addAttribute("configuration", configuration != null ? configuration.getExternalId() : null);
             return new ModelAndView("redirect:/proposals");
-        } catch (MaxNumberThesisProposalsException exception) {
-            model.addAttribute("editMaxNumberThesisProposalsException", exception);
-            return editProposalForm(thesisProposal, configuration, model);
-        } catch (OutOfProposalPeriodException exception) {
-            model.addAttribute("outOfProposalPeriodException", true);
-            return editProposalForm(thesisProposal, configuration, model);
-        } catch (IllegalParticipantTypeException exception) {
-            model.addAttribute("illegalParticipantTypeException", exception);
-            return editProposalForm(thesisProposal, configuration, model);
-        } catch (UnexistentConfigurationException exception) {
-            model.addAttribute("unexistentConfigurationException", exception);
-            return editProposalForm(thesisProposal, configuration, model);
-        } catch (UnexistentThesisParticipantException exception) {
-            model.addAttribute("unexistentThesisParticipantException", exception);
-            return editProposalForm(thesisProposal, configuration, model);
-        } catch (UnequivalentThesisConfigurations exception) {
-            model.addAttribute("unequivalentThesisConfigurations", exception);
+        } catch (ThesisProposalException exception) {
+            model.addAttribute("error", exception.getClass().getSimpleName());
             return editProposalForm(thesisProposal, configuration, model);
         }
-    }
-
-    @Atomic(mode = TxMode.WRITE)
-    private void editThesisProposal(ThesisProposalBean thesisProposalBean, ThesisProposal thesisProposal, JsonArray jsonArray)
-            throws MaxNumberThesisProposalsException, OutOfProposalPeriodException, IllegalParticipantTypeException,
-            UnexistentConfigurationException, UnexistentThesisParticipantException, UnequivalentThesisConfigurations {
-
-        boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
-        boolean isDegreeCoordinator =
-                thesisProposal.getExecutionDegreeSet().stream()
-                        .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));
-
-        ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
-
-        for (JsonElement elem : jsonArray) {
-            String userId = elem.getAsJsonObject().get("userId").getAsString();
-            String userType = elem.getAsJsonObject().get("userType").getAsString();
-
-            if (userType.isEmpty()) {
-                throw new IllegalParticipantTypeException(User.findByUsername(userId));
-            }
-
-            ThesisProposalParticipantBean participantBean =
-                    new ThesisProposalParticipantBean(User.findByUsername(userId), userType);
-
-            participantsBean.add(participantBean);
-        }
-
-        if (participantsBean.isEmpty()) {
-            throw new UnexistentThesisParticipantException();
-        }
-
-        for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
-            participant.delete();
-        }
-
-        thesisProposal.getThesisProposalParticipantSet().clear();
-
-        ArrayList<ThesisProposalParticipant> participants = new ArrayList<ThesisProposalParticipant>();
-
-        for (ThesisProposalParticipantBean participantBean : participantsBean) {
-            User user = FenixFramework.getDomainObject(participantBean.getUserExternalId());
-
-            ThesisProposalParticipantType participantType =
-                    FenixFramework.getDomainObject(participantBean.getParticipantTypeExternalId());
-
-            ThesisProposalParticipant participant = new ThesisProposalParticipant(user, participantType);
-
-            for (ThesisProposalsConfiguration configuration : thesisProposal.getThesisConfigurationSet()) {
-                int proposalsCount =
-                        configuration
-                                .getThesisProposalSet()
-                                .stream()
-                                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser())
-                                        .collect(Collectors.toSet()).contains(participant.getUser())).collect(Collectors.toSet())
-                                .size();
-
-                if (!(isManager || isDegreeCoordinator) && configuration.getMaxThesisProposalsByUser() != -1
-                        && proposalsCount >= configuration.getMaxThesisProposalsByUser()) {
-                    throw new MaxNumberThesisProposalsException(participant);
-                }
-
-                else {
-                    participant.setThesisProposal(thesisProposal);
-                    participants.add(participant);
-                }
-            }
-        }
-
-        thesisProposal.setTitle(thesisProposalBean.getTitle());
-        thesisProposal.setObservations(thesisProposalBean.getObservations());
-        thesisProposal.setRequirements(thesisProposalBean.getRequirements());
-        thesisProposal.setGoals(thesisProposalBean.getGoals());
-        thesisProposal.setHidden(thesisProposalBean.getHidden());
-        thesisProposal.getThesisConfigurationSet().clear();
-        thesisProposal.getThesisConfigurationSet().addAll(thesisProposalBean.getThesisProposalsConfigurations());
-
-        thesisProposal.getThesisProposalParticipantSet().addAll(participants);
-
-        ThesisProposalsConfiguration base =
-                (ThesisProposalsConfiguration) thesisProposalBean.getThesisProposalsConfigurations().toArray()[0];
-
-        for (ThesisProposalsConfiguration configuration : thesisProposalBean.getThesisProposalsConfigurations()) {
-            if (!base.isEquivalent(configuration)) {
-                throw new UnequivalentThesisConfigurations(base, configuration);
-            }
-        }
-
-        ThesisProposalsConfiguration config = thesisProposal.getSingleThesisProposalsConfiguration();
-
-        if (!(isManager || isDegreeCoordinator) && !config.getProposalPeriod().containsNow()) {
-            throw new OutOfProposalPeriodException();
-        }
-        thesisProposal.setLocalization(thesisProposalBean.getLocalization());
     }
 
     @RequestMapping(value = "/accept/{studentThesisCandidacy}", method = RequestMethod.POST)
     public String acceptStudentThesisCandidacy(
-            @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy, Model model) {
-
-        return accept(studentThesisCandidacy, model);
-    }
-
-    @Atomic(mode = TxMode.WRITE)
-    private String accept(StudentThesisCandidacy studentThesisCandidacy, Model model) {
-        for (StudentThesisCandidacy candidacy : studentThesisCandidacy.getThesisProposal().getStudentThesisCandidacySet()) {
-            candidacy.setAcceptedByAdvisor(false);
-        }
-
-        studentThesisCandidacy.setAcceptedByAdvisor(true);
-
+            @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
+        service.accept(studentThesisCandidacy);
         return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 
     @RequestMapping(value = "/reject/{studentThesisCandidacy}", method = RequestMethod.POST)
     public String rejectStudentThesisCandidacy(
-            @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy, Model model) {
-
-        return reject(studentThesisCandidacy, model);
-    }
-
-    @Atomic(mode = TxMode.WRITE)
-    private String reject(StudentThesisCandidacy studentThesisCandidacy, Model model) {
-        studentThesisCandidacy.setAcceptedByAdvisor(false);
-
+            @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
+        service.reject(studentThesisCandidacy);
         return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 
     @RequestMapping(value = "/manage/{oid}", method = RequestMethod.GET)
     public ModelAndView manageCandidacies(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
-
-        ModelAndView mav = new ModelAndView("thesisCandidacies/manage");
-
-        mav.addObject("thesisProposal", thesisProposal);
-
-        ArrayList<StudentThesisCandidacy> candidacies =
-                new ArrayList<StudentThesisCandidacy>(thesisProposal.getStudentThesisCandidacySet());
-
-        Collections.sort(candidacies, StudentThesisCandidacy.COMPARATOR_BY_DATETIME);
-
-        mav.addObject("candidaciesList", candidacies);
-
-        HashMap<String, StudentThesisCandidacy> bestAccepted = new HashMap<String, StudentThesisCandidacy>();
-
-        for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
-            Registration registration = candidacy.getRegistration();
-            if (!bestAccepted.containsKey(registration.getExternalId())) {
-                for (StudentThesisCandidacy studentCandidacy : registration.getStudentThesisCandidacySet()) {
-                    if (studentCandidacy.getAcceptedByAdvisor()
-                            && (!bestAccepted.containsKey(registration.getExternalId()) || studentCandidacy.getPreferenceNumber() < bestAccepted
-                                    .get(registration.getExternalId()).getPreferenceNumber())) {
-                        bestAccepted.put(registration.getExternalId(), studentCandidacy);
-                    }
-                }
-            }
-        }
-
-        model.addAttribute("bestAccepted", bestAccepted);
-
-        return mav;
+        ModelAndView view = new ModelAndView("thesisCandidacies/manage");
+        view.addObject("thesisProposal", thesisProposal);
+        view.addObject("candidaciesList", service.getStudentThesisCandidacy(thesisProposal));
+        view.addObject("bestAccepted", service.getBestAccepted(thesisProposal));
+        return view;
     }
 
     @RequestMapping(value = "/transpose", method = RequestMethod.GET)
     public String listOldProposals(Model model) {
-
-        User user = Authenticate.getUser();
-
-        Set<ThesisProposal> proposals =
-                user.getThesisProposalParticipantSet().stream().map(participant -> participant.getThesisProposal())
-                        .collect(Collectors.toSet());
-
-        HashMap<String, Set<ThesisProposal>> proposalTitleMap = new HashMap<String, Set<ThesisProposal>>();
-
-        for (ThesisProposal proposal : proposals) {
-            if (!proposalTitleMap.containsKey(proposal.getTitle())) {
-                proposalTitleMap.put(proposal.getTitle(), new HashSet<ThesisProposal>());
-            }
-            proposalTitleMap.get(proposal.getTitle()).add(proposal);
-        }
-
-        Set<ThesisProposal> recentProposals = new HashSet<ThesisProposal>();
-        for (String key : proposalTitleMap.keySet()) {
-            recentProposals.add(proposalTitleMap.get(key).stream().max(ThesisProposal.COMPARATOR_BY_PROPOSAL_PERIOD).get());
-        }
-
-        model.addAttribute("recentProposals", recentProposals);
-
+        model.addAttribute("recentProposals", service.getRecentProposals(Authenticate.getUser()));
         return "proposals/old";
     }
 
     @RequestMapping(value = "/transpose/{oid}", method = RequestMethod.GET)
     public ModelAndView transposeProposal(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
-
-        ThesisProposalBean proposalBean = new ThesisProposalBean();
-        proposalBean.setGoals(thesisProposal.getGoals());
-        proposalBean.setLocalization(thesisProposal.getLocalization());
-        proposalBean.setObservations(thesisProposal.getObservations());
-        proposalBean.setRequirements(thesisProposal.getRequirements());
-        proposalBean.setTitle(thesisProposal.getTitle());
-
-        HashSet<ThesisProposalParticipantBean> thesisProposalParticipantsBean = new HashSet<ThesisProposalParticipantBean>();
-
-        for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
-            String participantType = participant.getThesisProposalParticipantType().getExternalId();
-            ThesisProposalParticipantBean bean = new ThesisProposalParticipantBean(participant.getUser(), participantType);
-            thesisProposalParticipantsBean.add(bean);
-        }
-
-        proposalBean.setThesisProposalParticipantsBean(thesisProposalParticipantsBean);
-
-        ModelAndView mav = new ModelAndView("proposals/create", "command", proposalBean);
-
-        Set<ThesisProposalsConfiguration> configs =
-                ThesisProposalsSystem.getInstance().getThesisProposalsConfigurationSet().stream()
-                        .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
-
-        mav.addObject("configurations", configs);
-
-        List<ThesisProposalParticipantType> participantTypeList = new ArrayList<ThesisProposalParticipantType>();
-        participantTypeList.addAll(ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet());
-        Collections.sort(participantTypeList, ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT);
-
-        mav.addObject("participantTypeList", participantTypeList);
-
-        return mav;
+        ThesisProposalBean proposalBean = new ThesisProposalBean(thesisProposal);
+        ModelAndView view = new ModelAndView("proposals/create", "command", proposalBean);
+        view.addObject("configurations", service.getCurrentThesisProposalsConfigurations());
+        view.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
+        return view;
     }
 }

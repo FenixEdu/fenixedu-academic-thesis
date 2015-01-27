@@ -34,8 +34,8 @@
 	<p><spring:message code="label.candidacies.well"/> : <b>${thesisProposal.identifier} - ${thesisProposal.title}</b></p>
 </div>
 
-<c:if test="${!empty outOfCandidacyPeriodException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.candidacy.confirm.outOfCandidacyPeriodException"/></p>
+<c:if test="${!empty error}">
+<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 
 <c:if test="${!empty candidaciesList}">
@@ -65,7 +65,7 @@
 				<a href="${fr:checksumLink(pageContext.request, '/teacher/viewStudentCurriculum.do?method=prepare&registrationOID='.concat(studentThesisCandidacy.registration.externalId))}">
 					${studentThesisCandidacy.registration.student.name}</a>
 					<c:if test="${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber}">
-						<p><spring:message code='label.candidate.already.accepted' arguments="${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber}, ${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.getSortedParticipants().get(0).user.name}"/></p>
+						<p><spring:message code='label.candidate.already.accepted' arguments="${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.identifier};${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber};${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.getSortedParticipants().get(0).user.name}" argumentSeparator=";"/></p>
 					</c:if>
 				</td>
 				<td> ${studentThesisCandidacy.preferenceNumber}</td>

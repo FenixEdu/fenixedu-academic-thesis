@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu Academic Thesis.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.fenixedu.academic.thesis.domain.exception;
+package org.fenixedu.academic.thesis.ui.exception;
 
-import org.fenixedu.academic.domain.exceptions.DomainException;
+public class OutOfCandidacyPeriodException extends ThesisProposalException {
 
-public class OutOfProposalPeriodException extends DomainException {
-    private static final long serialVersionUID = 7294240729086538046L;
+    private static final long serialVersionUID = -3686111349933490189L;
+
 }

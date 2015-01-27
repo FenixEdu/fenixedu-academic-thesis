@@ -38,24 +38,8 @@ ${portal.toolkit()}
 <form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/edit" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalBean">
 	<input type="hidden" name="configuration" value="${configuration.externalId}"/>
 	
-<c:if test="${!empty editMaxNumberThesisProposalsException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.edit.maxNumberThesisProposalsException"/></p>
-</c:if>
-
-<c:if test="${!empty illegalParticipantTypeException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.create.illegalParticipantTypeException"/></p>
-</c:if>
-
-<c:if test="${!empty unexistentConfigurationException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.create.unexistentConfigurationException"/></p>
-</c:if>
-
-<c:if test="${!empty unexistentThesisParticipantException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.unexistentThesisParticipantException"/></p>
-</c:if>
-
-<c:if test="${!empty unequivalentThesisConfigurations}">
-<p class="text-danger"><spring:message code="error.thesisProposal.create.unequivalentThesisConfigurationsException"/></p>
+<c:if test="${!empty error}">
+<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 
 <spring:message code='label.title' var='title'/>

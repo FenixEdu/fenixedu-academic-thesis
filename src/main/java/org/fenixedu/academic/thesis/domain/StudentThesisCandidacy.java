@@ -72,7 +72,7 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 
         if (getAcceptedByAdvisor()
                 || !getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod().contains(DateTime.now())) {
-            blockers.add(BundleUtil.getString("resources.ThesisProposalsResources", "error.candidacies.cant.delete"));
+            blockers.add(BundleUtil.getString("resources.FenixEduThesisProposalsResources", "error.candidacies.cant.delete"));
         }
     }
 

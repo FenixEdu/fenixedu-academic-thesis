@@ -41,22 +41,9 @@
 	<h1><spring:message code="title.studentThesisCandidacy.management"/></h1>
 </div>
 
-<c:if test="${!empty outOfCandidacyPeriodException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.candidacy.confirm.outOfCandidacyPeriodException"/></p>
+<c:if test="${!empty error}">
+	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
-
-<c:if test="${!empty maxNumberStudentThesisCandidaciesException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.candidacy.create.maxNumberStudentThesisCandidacies"/></p>
-</c:if>
-
-<c:if test="${!empty nullPointerException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.candidacy.nullPointerException"/></p>
-</c:if>
-
-<c:if test="${!empty deleteException}">
-<p class="text-danger"><spring:message code="error.thesisProposal.candidacy.remove.accepted"/></p>
-</c:if>
-
 
 <c:if test="${!empty suggestedConfigs}">
 <div class="alert alert-info">

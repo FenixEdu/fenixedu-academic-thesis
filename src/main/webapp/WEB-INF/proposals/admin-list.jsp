@@ -32,53 +32,86 @@ ${portal.toolkit()}
 	<h1><spring:message code="title.thesisProposal.management"/></h1>
 </div>
 
-<c:if test="${!empty deleteException}">
-	<p class="text-danger"><spring:message code="error.thesisProposal.delete"/></p>
-</c:if>
-
-<c:if test="${!empty error}">
-	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
-</c:if>
-
-<c:if test="${!empty suggestedConfigs}">
-	<div class="alert alert-info">
-		<c:forEach items="${suggestedConfigs}" var="config">
-			<p>
-				<spring:message code="label.thesis.proposal.info" arguments="${config.executionDegree.degree.sigla},${config.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${config.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/>
-			</p>
-		</c:forEach>
-	</div>
-</c:if>
-
-<p>
-	<div class="row">
-		<div class="col-sm-8">
-			<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/create" class="form-horizontal" id="thesisProposalCreateForm">
-				<button type="submit" class="btn btn-default"><spring:message code="button.create"/></button>
-			</form>
-			<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/transpose" class="form-horizontal" id="thesisProposalTransposeForm">
-				<button type="submit" class="btn btn-default"><spring:message code="button.transpose"/></button>
-			</form>
-		</div>
-		<div class="col-sm-4">
-			<c:if test="${!empty configsList}">
-				<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form-horizontal" id="thesisConfigForm">
-				<select name="configuration" class="form-control">
-					<c:forEach items="${configsList}" var="config">
-						<option <c:if test="${config.externalId eq configuration.externalId}">selected="selected"</c:if> value="${config.externalId}" label='${config.executionDegree.executionYear.qualifiedName} ${config.executionDegree.degree.sigla}: ${config.proposalPeriod.start.toString('dd-MM-YYY HH:mm')} - ${config.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}'/>
-					</c:forEach>
-				</select>
-			</form>
-			</c:if>
-		</div>
-	</div>
-	<div class="well">
-		<p><spring:message code="label.proposals.well"/></p>
-	</div>
+<div class="well">
+	<p>
+		<spring:message code="label.proposals.admin.well"/>
+	</p>
+</div>
+<script type="text/javascript">
 	
-</p>
+	$(document).ready(function() {
+		$("input[name=isVisible][value=${isVisible}]").prop('checked', 'true');
+		$("input[name=isAttributed][value=${isAttributed}]").prop('checked', 'true');
+		$("input[name=hasCandidacy][value=${hasCandidacy}]").prop('checked', 'true');
+		$(".filter").change(function() {
+			$("#search").submit();
+		});
+	});
+</script>
 
-<c:if test="${not empty thesisProposalsList}">
+<div class="panel panel-default">
+  <div class="panel-heading"><spring:message code="label.filter"/></div>
+  <div class="panel-body">
+    <form class="form" method="GET" id="search">
+		<table class="table table-condensed">
+			<thead>
+				<tr>
+					<th><spring:message code="label.visibility"/></th>
+					<th><spring:message code="label.attribution"/></th>
+					<th><spring:message code="label.candidacies"/></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<input name="isVisible" class="filter" type="radio" value=""> <spring:message code="label.all"/></br>
+					</td>
+					<td>
+						<input name="isAttributed" class="filter" type="radio" value=""> <spring:message code="label.all"/></br>
+					</td>
+					<td>
+						<input name="hasCandidacy" class="filter" type="radio" value=""> <spring:message code="label.all"/></br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input name="isVisible" class="filter" type="radio" value="true"> <spring:message code="label.visible"/></br>
+					</td>
+					<td>
+						<input name="isAttributed" class="filter" type="radio" value="true"> <spring:message code="label.is.attributed"/></br>
+					</td>
+					<td>
+						<input name="hasCandidacy" class="filter" type="radio" value="true"> <spring:message code="label.with.candidates"/></br>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input name="isVisible" class="filter" type="radio" value="false"> <spring:message code="label.hidden.state"/></br>
+					</td>
+					<td>
+						<input name="isAttributed" class="filter" type="radio" value="false"> <spring:message code="label.not.attributed"/></br>
+					</td>
+					<td>
+						<input name="hasCandidacy" class="filter" type="radio" value="false"> <spring:message code="label.without.candidates"/></br>
+					</td>
+				</tr>	
+			</tbody>
+		</table>
+	</form>
+  </div>
+</div>
+
+
+<br />
+
+<c:if test="${empty coordinatorProposals}">
+	<p><spring:message code="label.proposals.search.result.empty"/></p>
+</c:if>
+
+<c:forEach items="${coordinatorProposals}" var="node">
+	<h4><spring:message code="label.proposals.search.result" arguments="${node.value.size()}"/></h4>
+	<h3><spring:message code='label.proposals.coordinator' arguments="${node.key.presentationName}"/></h3>
+	
 	<div class="table-responsive">
 		<table class="table">
 			<thead>
@@ -86,9 +119,9 @@ ${portal.toolkit()}
 					<th>
 						<spring:message code='label.thesis.id'/>
 					</th>
-					<th>
-						<spring:message code='label.year'/>
-					</th>
+<!-- 					<th> -->
+<%-- 						<spring:message code='label.year'/> --%>
+<!-- 					</th> -->
 					<th>
 						<spring:message code='label.title'/>
 					</th>
@@ -98,16 +131,17 @@ ${portal.toolkit()}
 					<th>
 						<spring:message code='label.proposal.status'/>
 					</th>
+					<th>
+						<spring:message code='label.number.of.participants' text='numero participantes'/>
+					</th>
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach items="${thesisProposalsList}" var="thesisProposal">
+				<c:forEach items="${node.value}" var="thesisProposal">
 					<tr>
 						<td>${thesisProposal.identifier}</td>
-						<td>
-							${thesisProposal.getSingleThesisProposalsConfiguration().executionDegree.executionYear.year}
-						</td>
+<%-- 						<td>${thesisProposal.getSingleThesisProposalsConfiguration().executionDegree.executionYear.year}</td> --%>
 						<td>${thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
@@ -121,10 +155,12 @@ ${portal.toolkit()}
 							<c:if test="${!thesisProposal.hidden}">
 								<spring:message code='label.proposal.status.visible'/>
 							</c:if>
-							</td>
+						</td>
+						<td>
+							${thesisProposal.getStudentThesisCandidacySet().size()}
+						</td>
 						<td>
 							<form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">
-								<input type="hidden" name="configuration" value="${configuration.externalId}"/>
 								<div class="btn-group btn-group-xs">
 									<button type="submit" class="btn btn-default" id="editButton">
 										<spring:message code='button.edit'/>
@@ -152,7 +188,7 @@ ${portal.toolkit()}
 			</tbody>
 		</table>
 	</div>
-</c:if>
+</c:forEach>
 
 <style>
 form{
@@ -221,9 +257,6 @@ form{
 </style>
 
 <script type="text/javascript">
-
-
-
 $(".manageButton").on("click", function(){
 	var id = $(this).data('thesis-proposal')
 	$("#" + id).submit();
@@ -234,10 +267,6 @@ jQuery(document).ready(function(){
 	jQuery('.detailsButton').on('click', function(event) {
 		$("#details" + $(this).data("thesis")).toggle('show');
 
-	});
-
-	$("select[name=configuration]").change(function() {
-		$("#thesisConfigForm").submit();
 	});
 });
 
