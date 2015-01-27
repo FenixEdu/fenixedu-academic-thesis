@@ -1,0 +1,90 @@
+<%--
+
+    Copyright © 2014 Instituto Superior Técnico
+
+    This file is part of FenixEdu Academic Thesis.
+
+    FenixEdu Academic Thesis is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    FenixEdu Academic Thesis is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with FenixEdu Academic Thesis.  If not, see <http://www.gnu.org/licenses/>.
+
+--%>
+<!DOCTYPE html>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+
+
+${portal.toolkit()}
+
+<div class="page-header">
+	<h1><spring:message code="title.thesisProposal.management"/></h1>
+</div>
+
+<div class="well">
+	<p>
+		<spring:message code='label.candidates.admin.well'/>
+	</p>
+</div>
+
+	<h3>Candidaturas existentes em ${configuration.executionDegree.degree.presentationName}</h3>
+
+	<div class="table-responsive">
+		<table class="table table-condensed">
+			<thead>
+				<tr>
+					<th><spring:message code="label.candidate"/></th>
+					<th><spring:message code='label.proposal' text="Proposta"/></th>
+					<th><spring:message code='label.student.candidacy.accepted'/></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<c:forEach items="${registrations}" var="registration">
+					<tr>
+						<td rowspan="${registration.value.size()}">
+							${registration.key.student.person.name} (${registration.key.student.person.username})
+						</td>
+						<c:forEach items="${registration.value}" var="candidacy" varStatus="loop">
+							<c:if test="${loop.index == 0}">
+								<c:set var="anyAccepted" value="false"/>
+							</c:if>
+								<td>
+									${candidacy.preferenceNumber} ) ${candidacy.thesisProposal.identifier} - ${candidacy.thesisProposal.title}
+									<c:if test="${!anyAccepted && candidacy.acceptedByAdvisor}">
+										<c:set var="anyAccepted" value="true"/>
+										<span class="badge">	<spring:message code='label.proposal.attributed'/></span>
+									</c:if>
+								</td>
+								<td>
+									<c:if test="${candidacy.acceptedByAdvisor}">
+										<spring:message code='label.yes'/>
+									</c:if>
+									<c:if test="${!candidacy.acceptedByAdvisor}">
+										<spring:message code='label.no'/>
+									</c:if>
+									</td>
+								<td>
+									<a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}">Atribuir</a> |
+									<a href="${pageContext.request.contextPath}/admin-proposals/deleteCandidacy/${candidacy.externalId}">Apagar candidatura</a>
+								</td>
+							</tr>
+						</c:forEach>
+					</tr>
+				</c:forEach>
+			</tbody>
+		</table>
+	</div>
+
+	<a href="${pageContext.request.contextPath}/admin-proposals/candidates"> Vista por candidatos </a>

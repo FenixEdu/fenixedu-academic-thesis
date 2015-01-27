@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -366,5 +367,30 @@ public class ThesisProposalsService {
             recentProposals.add(proposalTitleMap.get(key).stream().max(ThesisProposal.COMPARATOR_BY_PROPOSAL_PERIOD).get());
         }
         return recentProposals;
+    }
+
+    public Map<Registration, TreeSet<StudentThesisCandidacy>> getCoordinatorCandidacies(ThesisProposalsConfiguration configuration) {
+
+        Map<Registration, TreeSet<StudentThesisCandidacy>> map = new HashMap<Registration, TreeSet<StudentThesisCandidacy>>();
+
+        configuration
+                .getThesisProposalSet()
+                .stream()
+                .flatMap(proposal -> proposal.getStudentThesisCandidacySet().stream())
+                .collect(Collectors.toSet())
+                .forEach(
+                        candidacy -> {
+                            if (!map.containsKey(candidacy.getRegistration())) {
+                                map.put(candidacy.getRegistration(), new TreeSet<StudentThesisCandidacy>(
+                                        StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER));
+                            }
+                            map.get(candidacy.getRegistration()).add(candidacy);
+                        });
+        return map;
+    }
+
+    @Atomic(mode = TxMode.WRITE)
+    public void delete(StudentThesisCandidacy studentThesisCandidacy) {
+        studentThesisCandidacy.delete();
     }
 }

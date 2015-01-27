@@ -49,6 +49,8 @@ ${portal.toolkit()}
 	});
 </script>
 
+<a href="${pageContext.request.contextPath}/admin-proposals/candidates"> Vista por candidatos </a>
+
 <div class="panel panel-default">
   <div class="panel-heading"><spring:message code="label.filter"/></div>
   <div class="panel-body">
