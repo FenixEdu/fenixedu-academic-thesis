@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,12 +66,7 @@ public class StudentCandidaciesController {
         Student student = Authenticate.getUser().getPerson().getStudent();
 
         Set<ThesisProposalsConfiguration> configs =
-                student.getActiveRegistrations()
-                        .stream()
-                        .flatMap(reg -> reg.getDegree().getExecutionDegrees().stream())
-                        .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(
-                                ExecutionYear.readCurrentExecutionYear()))
-                        .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream())
+                student.getActiveRegistrations().stream().flatMap(reg -> getConfigurationsForRegistration(reg).stream())
                         .collect(Collectors.toSet());
 
         List<ThesisProposalsConfiguration> openConfigs =
@@ -111,15 +107,7 @@ public class StudentCandidaciesController {
 
         student.getActiveRegistrations().forEach(
                 reg -> {
-                    Set<ThesisProposalsConfiguration> regConfigs =
-                            reg.getDegree()
-                                    .getExecutionDegrees()
-                                    .stream()
-                                    .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
-                                            ExecutionYear.readCurrentExecutionYear()))
-                                    .flatMap(
-                                            (ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet()
-                                                    .stream()).collect(Collectors.toSet());
+                    Set<ThesisProposalsConfiguration> regConfigs = getConfigurationsForRegistration(reg);
 
                     Set<ThesisProposalsConfiguration> openRegConfigs =
                             regConfigs.stream().filter(config -> config.getCandidacyPeriod().containsNow())
@@ -153,6 +141,20 @@ public class StudentCandidaciesController {
         model.addAttribute("suggestedConfigs", suggestedConfigs);
 
         return "studentCandidacies/list";
+    }
+
+    private Set<ThesisProposalsConfiguration> getConfigurationsForRegistration(Registration reg) {
+        return reg
+                .getAllCurriculumGroups()
+                .stream()
+                .map(group -> group.getDegreeCurricularPlanOfDegreeModule())
+                .filter(Objects::nonNull)
+                .map(dcp -> dcp.getDegree())
+                .flatMap(degree -> degree.getExecutionDegrees().stream())
+                .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
+                        ExecutionYear.readCurrentExecutionYear()))
+                .flatMap((ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet().stream())
+                .collect(Collectors.toSet());
     }
 
     @RequestMapping(value = "/candidate/{oid}", method = RequestMethod.POST)

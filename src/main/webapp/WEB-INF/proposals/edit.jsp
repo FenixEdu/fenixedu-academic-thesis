@@ -37,7 +37,7 @@ ${portal.toolkit()}
 
 <form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/edit" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalBean">
 	<input type="hidden" name="configuration" value="${configuration.externalId}"/>
-	
+
 <c:if test="${!empty error}">
 <p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
@@ -182,7 +182,7 @@ ${portal.toolkit()}
 			<div class="form-group">
 				<div class="col-sm-10">
 					<select id="selectParticipantType" class="form-control">
-						<option value="NONE" label="${selectParticipantType}"/>
+						<option value="" label="${selectParticipantType}"/>
 						<c:forEach var="participantType" items="${participantTypeList}">
 						<option value="${participantType.externalId}" label="${participantType.name.content}"/>
 					</c:forEach>

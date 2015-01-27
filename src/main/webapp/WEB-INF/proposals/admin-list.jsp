@@ -38,7 +38,7 @@ ${portal.toolkit()}
 	</p>
 </div>
 <script type="text/javascript">
-	
+
 	$(document).ready(function() {
 		$("input[name=isVisible][value=${isVisible}]").prop('checked', 'true');
 		$("input[name=isAttributed][value=${isAttributed}]").prop('checked', 'true');
@@ -86,7 +86,7 @@ ${portal.toolkit()}
 				</tr>
 				<tr>
 					<td>
-						<input name="isVisible" class="filter" type="radio" value="false"> <spring:message code="label.hidden.state"/></br>
+						<input name="isVisible" class="filter" type="radio" value="false"> <spring:message code="label.proposal.status.hidden"/></br>
 					</td>
 					<td>
 						<input name="isAttributed" class="filter" type="radio" value="false"> <spring:message code="label.not.attributed"/></br>
@@ -94,7 +94,7 @@ ${portal.toolkit()}
 					<td>
 						<input name="hasCandidacy" class="filter" type="radio" value="false"> <spring:message code="label.without.candidates"/></br>
 					</td>
-				</tr>	
+				</tr>
 			</tbody>
 		</table>
 	</form>
@@ -109,9 +109,9 @@ ${portal.toolkit()}
 </c:if>
 
 <c:forEach items="${coordinatorProposals}" var="node">
-	<h4><spring:message code="label.proposals.search.result" arguments="${node.value.size()}"/></h4>
+	<h4><spring:message code='label.proposals.search.result' arguments="${node.value.size()}"/></h4>
 	<h3><spring:message code='label.proposals.coordinator' arguments="${node.key.presentationName}"/></h3>
-	
+
 	<div class="table-responsive">
 		<table class="table">
 			<thead>

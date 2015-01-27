@@ -190,7 +190,7 @@ ${portal.toolkit()}
      <div class="form-group">
        <div class="col-sm-10">
         <select id="selectParticipantType" class="form-control">
-          <option value="NONE"> ${selectParticipantType} </option>
+          <option value=""> ${selectParticipantType} </option>
           <c:forEach var="participantType" items="${participantTypeList}">
           <option value="${participantType.externalId}"> ${participantType.name.content} </option>
         </c:forEach>
