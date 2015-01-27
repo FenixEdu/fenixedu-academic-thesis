@@ -18,10 +18,10 @@
  */
 package org.fenixedu.academic.thesis.ui.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
@@ -44,14 +44,25 @@ public class AdminThesisProposalsController {
     ThesisProposalsService service;
 
     @RequestMapping(method = RequestMethod.GET)
-    public String listProposals(Model model, @RequestParam(required = false) Boolean isVisible,
-            @RequestParam(required = false) Boolean isAttributed, @RequestParam(required = false) Boolean hasCandidacy) {
+    public String listProposals(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
+            @RequestParam(required = false) Boolean isVisible, @RequestParam(required = false) Boolean isAttributed,
+            @RequestParam(required = false) Boolean hasCandidacy) {
 
+        List<ThesisProposalsConfiguration> configurations =
+                service.getThesisProposalsConfigurationsForCoordinator(Authenticate.getUser());
+
+        if (configuration == null && !configurations.isEmpty()) {
+            configuration = configurations.iterator().next();
+        }
+
+        model.addAttribute("configuration", configuration);
+        model.addAttribute("configurations", configurations);
         model.addAttribute("isVisible", isVisible);
         model.addAttribute("isAttributed", isAttributed);
         model.addAttribute("hasCandidacy", hasCandidacy);
-        model.addAttribute("coordinatorProposals", service.getCoordinatorProposals(Authenticate.getUser(),
-                ExecutionYear.readCurrentExecutionYear(), isVisible, isAttributed, hasCandidacy));
+        model.addAttribute("service", service);
+        model.addAttribute("coordinatorProposals",
+                service.getCoordinatorProposals(configuration, isVisible, isAttributed, hasCandidacy));
         return "proposals/admin-list";
     }
 

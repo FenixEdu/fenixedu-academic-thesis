@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
@@ -89,12 +88,6 @@ public class ThesisProposalsController {
         model.addAttribute("configuration", configuration);
 
         model.addAttribute("thesisProposalsList", service.getThesisProposals(Authenticate.getUser(), configuration));
-
-        model.addAttribute("isVisible", isVisible);
-        model.addAttribute("isAttributed", isAttributed);
-        model.addAttribute("hasCandidacy", hasCandidacy);
-        model.addAttribute("coordinatorProposals", service.getCoordinatorProposals(Authenticate.getUser(),
-                ExecutionYear.readCurrentExecutionYear(), isVisible, isAttributed, hasCandidacy));
 
         return "proposals/list";
     }

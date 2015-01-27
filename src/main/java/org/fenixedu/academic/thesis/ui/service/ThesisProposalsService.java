@@ -50,58 +50,38 @@ import com.google.gson.JsonParser;
 @Service
 public class ThesisProposalsService {
 
-    public Map<Degree, List<ThesisProposal>> getCoordinatorProposals(User user, ExecutionYear year) {
-        return getCoordinatorProposals(user, year, null, null, null);
+    public List<ThesisProposal> getCoordinatorProposals(ThesisProposalsConfiguration configuration) {
+        return getCoordinatorProposals(configuration, null, null, null);
     }
 
-    public Map<Degree, List<ThesisProposal>> getCoordinatorProposals(User user, ExecutionYear year, Boolean isVisible,
+    public List<ThesisProposal> getCoordinatorProposals(ThesisProposalsConfiguration configuration, Boolean isVisible,
             Boolean isAttributed, Boolean hasCandidacy) {
-        Map<Degree, List<ThesisProposal>> coordinatorProposals = new HashMap<Degree, List<ThesisProposal>>();
 
-        for (Degree degree : Degree.readBolonhaDegrees()) {
+        Stream<ThesisProposal> proposalsStream = configuration.getThesisProposalSet().stream();
 
-            Stream<ThesisProposal> proposalsStream = getThesisProposals(user, year, degree);
-
-            if (isVisible != null) {
-                Predicate<ThesisProposal> visiblePredicate = proposal -> isVisible.equals(!proposal.getHidden());
-                proposalsStream = proposalsStream.filter(visiblePredicate);
-            }
-
-            if (hasCandidacy != null) {
-                Predicate<ThesisProposal> hasCandidacyPredicate =
-                        proposal -> hasCandidacy ? proposal.getStudentThesisCandidacySet().size() > 0 : proposal
-                                .getStudentThesisCandidacySet().size() == 0;
-
-                proposalsStream = proposalsStream.filter(hasCandidacyPredicate);
-            }
-
-            if (isAttributed != null) {
-                Predicate<StudentThesisCandidacy> attributedPredicate =
-                        isAttributed ? StudentThesisCandidacy::getAcceptedByAdvisor : candidacy -> !candidacy
-                                .getAcceptedByAdvisor();
-
-                proposalsStream =
-                        proposalsStream.filter(p -> p.getStudentThesisCandidacySet().isEmpty() ? !isAttributed : p
-                                .getStudentThesisCandidacySet().stream().anyMatch(attributedPredicate));
-            }
-
-            List<ThesisProposal> proposals = proposalsStream.collect(Collectors.toList());
-
-            if (!proposals.isEmpty()) {
-                coordinatorProposals.put(degree, proposals);
-            }
+        if (isVisible != null) {
+            Predicate<ThesisProposal> visiblePredicate = proposal -> isVisible.equals(!proposal.getHidden());
+            proposalsStream = proposalsStream.filter(visiblePredicate);
         }
 
-        return coordinatorProposals;
-    }
+        if (hasCandidacy != null) {
+            Predicate<ThesisProposal> hasCandidacyPredicate =
+                    proposal -> hasCandidacy ? proposal.getStudentThesisCandidacySet().size() > 0 : proposal
+                            .getStudentThesisCandidacySet().size() == 0;
 
-    public Stream<ThesisProposal> getThesisProposals(User user, ExecutionYear year, Degree degree) {
-        return degree.getExecutionDegrees().stream()
-                .filter(executionDegree -> CoordinatorGroup.get(executionDegree.getDegree()).isMember(user))
-                .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(year))
-                .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream())
-                .flatMap(config -> config.getThesisProposalSet().stream())
-                .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES);
+            proposalsStream = proposalsStream.filter(hasCandidacyPredicate);
+        }
+
+        if (isAttributed != null) {
+            Predicate<StudentThesisCandidacy> attributedPredicate =
+                    isAttributed ? StudentThesisCandidacy::getAcceptedByAdvisor : candidacy -> !candidacy.getAcceptedByAdvisor();
+
+            proposalsStream =
+                    proposalsStream.filter(p -> p.getStudentThesisCandidacySet().isEmpty() ? !isAttributed : p
+                            .getStudentThesisCandidacySet().stream().anyMatch(attributedPredicate));
+        }
+
+        return proposalsStream.collect(Collectors.toList());
     }
 
     public List<ThesisProposal> getThesisProposals(User user, ThesisProposalsConfiguration configuration) {
@@ -109,11 +89,18 @@ public class ThesisProposalsService {
                 .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES).collect(Collectors.toList());
     }
 
-    public List<ThesisProposalsConfiguration> getThesisProposalsConfigurations(User user) {
-        return user.getThesisProposalParticipantSet().stream().map(participant -> participant.getThesisProposal())
+    public List<ThesisProposalsConfiguration> getThesisProposalsConfigurations(User participant) {
+        return participant.getThesisProposalParticipantSet().stream().map(p -> p.getThesisProposal())
                 .flatMap(proposal -> proposal.getThesisConfigurationSet().stream())
                 .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).distinct()
                 .collect(Collectors.toList());
+    }
+
+    public List<ThesisProposalsConfiguration> getThesisProposalsConfigurationsForCoordinator(User coordinator) {
+        return Degree.readBolonhaDegrees().stream().flatMap(degree -> degree.getExecutionDegrees().stream())
+                .filter(executionDegree -> CoordinatorGroup.get(executionDegree.getDegree()).isMember(coordinator))
+                .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct()
+                .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
     }
 
     public Set<ThesisProposalsConfiguration> getNotPastExecutionDegrees(User user, ExecutionYear year) {
@@ -392,5 +379,10 @@ public class ThesisProposalsService {
     @Atomic(mode = TxMode.WRITE)
     public void delete(StudentThesisCandidacy studentThesisCandidacy) {
         studentThesisCandidacy.delete();
+    }
+
+    public String[] getThesisProposalDegrees(ThesisProposal proposal) {
+        return proposal.getExecutionDegreeSet().stream().map(executionDegree -> executionDegree.getDegree().getSigla())
+                .collect(Collectors.toList()).toArray(new String[0]);
     }
 }

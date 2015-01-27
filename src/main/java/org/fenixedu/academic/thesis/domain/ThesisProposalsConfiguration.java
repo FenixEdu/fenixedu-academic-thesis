@@ -20,6 +20,7 @@ package org.fenixedu.academic.thesis.domain;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -119,11 +120,36 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
     public String toString() {
         return getProposalPeriod() + " , " + getCandidacyPeriod() + " w/ " + getMaxThesisProposalsByUser() + " , "
                 + getMaxThesisProposalsByUser();
-
     }
 
     public static Set<ThesisProposalsConfiguration> getConfigurationsWithOpenProposalPeriod(ExecutionDegree executionDegree) {
         return executionDegree.getThesisProposalsConfigurationSet().stream()
                 .filter(config -> config.getProposalPeriod().containsNow()).collect(Collectors.toSet());
+    }
+
+    public String getPresentationName() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(getExecutionDegree().getDegree().getSigla());
+        builder.append(" ");
+        builder.append(getExecutionDegree().getExecutionYear().getQualifiedName());
+
+        List<ThesisProposalsConfiguration> configurations =
+                getExecutionDegree().getThesisProposalsConfigurationSet().stream().collect(Collectors.toList());
+
+        if (configurations.size() > 1) {
+            configurations =
+                    configurations.stream().sorted(ThesisProposalsConfiguration.COMPARATOR_BY_CANDIDACY_PERIOD_START_ASC)
+                            .collect(Collectors.toList());
+
+            Integer configurationNumber = configurations.indexOf(this) + 1;
+
+            builder.append(" ");
+
+            builder.append(BundleUtil.getString("resources.FenixEduThesisProposalsResources", "label.configuration.number",
+                    configurationNumber.toString()));
+        }
+
+        return builder.toString();
     }
 }

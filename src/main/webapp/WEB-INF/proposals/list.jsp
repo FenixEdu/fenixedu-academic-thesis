@@ -65,7 +65,7 @@ ${portal.toolkit()}
 				<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form-horizontal" id="thesisConfigForm">
 				<select name="configuration" class="form-control">
 					<c:forEach items="${configsList}" var="config">
-						<option <c:if test="${config.externalId eq configuration.externalId}">selected="selected"</c:if> value="${config.externalId}" label='${config.executionDegree.executionYear.qualifiedName} ${config.executionDegree.degree.sigla}: ${config.proposalPeriod.start.toString('dd-MM-YYY HH:mm')} - ${config.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}'/>
+						<option <c:if test="${config.externalId eq configuration.externalId}">selected="selected"</c:if> value="${config.externalId}" label='${config.presentationName}'/>
 					</c:forEach>
 				</select>
 			</form>
