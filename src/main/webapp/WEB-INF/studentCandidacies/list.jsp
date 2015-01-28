@@ -353,7 +353,7 @@ $("#savePreferencesButton").on("click", function(e) {
 
 		studentThesisCandidaciesJSON.studentCandidacies.push({
 			"externalId" : externalId,
-			"preference" : index
+			"preference" : index+1
 		});
 	}
 

@@ -194,7 +194,7 @@ public class StudentCandidaciesController {
                 throw new MaxNumberStudentThesisCandidaciesException(registration.getStudent());
             } else {
                 StudentThesisCandidacy studentThesisCandidacy =
-                        new StudentThesisCandidacy(registration, (int) candidaciesCount, thesisProposal);
+                        new StudentThesisCandidacy(registration, (int) candidaciesCount + 1, thesisProposal);
                 registration.getStudentThesisCandidacySet().add(studentThesisCandidacy);
             }
         }

@@ -41,7 +41,7 @@ ${portal.toolkit()}
 	<h3>Candidaturas existentes em ${configuration.executionDegree.degree.presentationName}</h3>
 
 	<div class="table-responsive">
-		<table class="table table-condensed">
+		<table class="table table-condensed table table-bordered">
 			<thead>
 				<tr>
 					<th><spring:message code="label.candidate"/></th>
@@ -52,7 +52,6 @@ ${portal.toolkit()}
 			</thead>
 			<tbody>
 				<c:forEach items="${registrations}" var="registration">
-					<tr>
 						<td rowspan="${registration.value.size()}">
 							${registration.key.student.person.name} (${registration.key.student.person.username})
 						</td>
@@ -61,11 +60,16 @@ ${portal.toolkit()}
 								<c:set var="anyAccepted" value="false"/>
 							</c:if>
 								<td>
-									${candidacy.preferenceNumber} ) ${candidacy.thesisProposal.identifier} - ${candidacy.thesisProposal.title}
-									<c:if test="${!anyAccepted && candidacy.acceptedByAdvisor}">
-										<c:set var="anyAccepted" value="true"/>
-										<span class="badge">	<spring:message code='label.proposal.attributed'/></span>
-									</c:if>
+									<c:set var="title" value="${candidacy.preferenceNumber} ) ${candidacy.thesisProposal.identifier} - ${candidacy.thesisProposal.title}"/>
+									<c:choose>
+										<c:when test="${!anyAccepted && candidacy.acceptedByAdvisor}">
+											<b>${title}</b>
+											<c:set var="anyAccepted" value="true"/>
+										</c:when>
+										<c:otherwise>
+											${title}
+										</c:otherwise>
+									</c:choose>
 								</td>
 								<td>
 									<c:if test="${candidacy.acceptedByAdvisor}">
@@ -76,8 +80,10 @@ ${portal.toolkit()}
 									</c:if>
 									</td>
 								<td>
-									<a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}">Atribuir</a> |
-									<a href="${pageContext.request.contextPath}/admin-proposals/deleteCandidacy/${candidacy.externalId}">Apagar candidatura</a>
+									<a href="${pageContext.request.contextPath}/admin-proposals/deleteCandidacy/${candidacy.externalId}"> Apagar candidatura </a>
+									<c:if test="${!candidacy.acceptedByAdvisor}">
+									| <a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}"> Aceitar candidatura </a>
+								</c:if>
 								</td>
 							</tr>
 						</c:forEach>
