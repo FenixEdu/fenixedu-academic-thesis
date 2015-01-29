@@ -19,6 +19,7 @@ import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
+import org.fenixedu.academic.domain.util.email.Message;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
@@ -33,10 +34,17 @@ import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantException;
+import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
+import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
+import org.fenixedu.commons.i18n.I18N;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import pt.ist.fenixframework.Atomic;
@@ -50,12 +58,21 @@ import com.google.gson.JsonParser;
 @Service
 public class ThesisProposalsService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ThesisProposalsService.class);
+
+    @Autowired
+    MessageSource messageSource;
+
     public List<ThesisProposal> getCoordinatorProposals(ThesisProposalsConfiguration configuration) {
         return getCoordinatorProposals(configuration, null, null, null);
     }
 
     public List<ThesisProposal> getCoordinatorProposals(ThesisProposalsConfiguration configuration, Boolean isVisible,
             Boolean isAttributed, Boolean hasCandidacy) {
+
+        if (configuration == null) {
+            return new ArrayList<ThesisProposal>();
+        }
 
         Stream<ThesisProposal> proposalsStream = configuration.getThesisProposalSet().stream();
 
@@ -290,11 +307,57 @@ public class ThesisProposalsService {
 
     @Atomic(mode = TxMode.WRITE)
     public void accept(StudentThesisCandidacy studentThesisCandidacy) {
-        for (StudentThesisCandidacy candidacy : studentThesisCandidacy.getThesisProposal().getStudentThesisCandidacySet()) {
+        final ThesisProposal thesisProposal = studentThesisCandidacy.getThesisProposal();
+
+        for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
             candidacy.setAcceptedByAdvisor(false);
         }
 
         studentThesisCandidacy.setAcceptedByAdvisor(true);
+
+        int orderOfPreference = studentThesisCandidacy.getPreferenceNumber();
+
+        final Registration registration = studentThesisCandidacy.getRegistration();
+
+        Optional<StudentThesisCandidacy> max =
+                registration
+                        .getStudentThesisCandidacySet()
+                        .stream()
+                        .filter(candidacy -> candidacy.getAcceptedByAdvisor()
+                                && candidacy.getPreferenceNumber() > orderOfPreference)
+                        .max(StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
+
+        if (max.isPresent()) {
+            sendStolenProposalMessage(max.get(), studentThesisCandidacy);
+        }
+    }
+
+    private void sendStolenProposalMessage(StudentThesisCandidacy oldCandidacy, StudentThesisCandidacy newCandidacy) {
+
+        ThesisProposalParticipant newParticipant =
+                newCandidacy.getThesisProposal().getThesisProposalParticipantSet().stream()
+                        .max(ThesisProposalParticipant.COMPARATOR_BY_WEIGHT).get();
+
+        Set<String> bccs =
+                oldCandidacy.getThesisProposal().getThesisProposalParticipantSet().stream()
+                        .map(p -> p.getUser().getProfile().getEmail()).collect(Collectors.toSet());
+
+        String link =
+                CoreConfiguration.getConfiguration().applicationUrl() + "/proposals/manage/"
+                        + oldCandidacy.getThesisProposal().getExternalId();
+
+        String subject =
+                messageSource.getMessage("stolen.proposal.message.subject", new Object[] { oldCandidacy.getThesisProposal()
+                        .getIdentifier() }, I18N.getLocale());
+
+        String body =
+                messageSource.getMessage("stolen.proposal.message.body", new Object[] {
+                        oldCandidacy.getRegistration().getStudent().getPerson().getUser().getProfile().getDisplayName(),
+                        oldCandidacy.getThesisProposal().getTitle(), oldCandidacy.getPreferenceNumber(),
+                        newCandidacy.getThesisProposal().getTitle(), newParticipant.getUser().getProfile().getDisplayName(),
+                        newCandidacy.getPreferenceNumber(), link }, I18N.getLocale());
+
+        new Message(Bennu.getInstance().getSystemSender(), null, null, subject, body, bccs);
     }
 
     @Atomic(mode = TxMode.WRITE)
@@ -377,8 +440,13 @@ public class ThesisProposalsService {
     }
 
     @Atomic(mode = TxMode.WRITE)
-    public void delete(StudentThesisCandidacy studentThesisCandidacy) {
-        studentThesisCandidacy.delete();
+    public boolean delete(StudentThesisCandidacy studentThesisCandidacy) {
+        try {
+            studentThesisCandidacy.delete();
+            return true;
+        } catch (DomainException de) {
+            return false;
+        }
     }
 
     public String[] getThesisProposalDegrees(ThesisProposal proposal) {

@@ -143,12 +143,12 @@ public class ThesisProposalsController {
     @RequestMapping(value = "/delete/{oid}", method = RequestMethod.POST)
     public ModelAndView deleteThesisProposals(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
 
-        if (service.delete(thesisProposal)) {
-            return new ModelAndView("redirect:/proposals");
+        if (!service.delete(thesisProposal)) {
+            model.addAttribute("deleteException", true);
+            return new ModelAndView(listProposals(model, null));
         }
 
-        model.addAttribute("deleteException", true);
-        return new ModelAndView(listProposals(model, null));
+        return new ModelAndView("redirect:/proposals");
     }
 
     @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)

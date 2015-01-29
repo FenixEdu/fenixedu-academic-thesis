@@ -32,6 +32,20 @@ ${portal.toolkit()}
 	<h1><spring:message code="title.thesisProposal.management"/></h1>
 </div>
 
+<div class="well">
+	<p><spring:message code="label.proposals.well"/></p>
+	<p><spring:message code="label.configuration"/></p>
+	<c:if test="${!empty configsList}">
+				<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form-horizontal" id="thesisConfigForm">
+				<select name="configuration" class="form-control">
+					<c:forEach items="${configsList}" var="config">
+						<option <c:if test="${config.externalId eq configuration.externalId}">selected="selected"</c:if> value="${config.externalId}" label='${config.presentationName}'/>
+					</c:forEach>
+				</select>
+			</form>
+	</c:if>
+</div>
+
 <c:if test="${!empty deleteException}">
 	<p class="text-danger"><spring:message code="error.thesisProposal.delete"/></p>
 </c:if>
@@ -44,14 +58,14 @@ ${portal.toolkit()}
 	<div class="alert alert-info">
 		<c:forEach items="${suggestedConfigs}" var="config">
 			<p>
-				<spring:message code="label.thesis.proposal.info" arguments="${config.executionDegree.degree.sigla},${config.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${config.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/>
+				<p><spring:message code="label.thesis.proposal.info" arguments="${configuration.presentationName},${configuration.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
+				<p><spring:message code="label.thesis.candidacy.info" arguments="${configuration.presentationName},${configuration.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
 			</p>
 		</c:forEach>
 	</div>
 </c:if>
 
-<p>
-	<div class="row">
+	<span class="row">
 		<div class="col-sm-8">
 			<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/create" class="form-horizontal" id="thesisProposalCreateForm">
 				<button type="submit" class="btn btn-default"><spring:message code="button.create"/></button>
@@ -60,24 +74,8 @@ ${portal.toolkit()}
 				<button type="submit" class="btn btn-default"><spring:message code="button.transpose"/></button>
 			</form>
 		</div>
-		<div class="col-sm-4">
-			<c:if test="${!empty configsList}">
-				<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form-horizontal" id="thesisConfigForm">
-				<select name="configuration" class="form-control">
-					<c:forEach items="${configsList}" var="config">
-						<option <c:if test="${config.externalId eq configuration.externalId}">selected="selected"</c:if> value="${config.externalId}" label='${config.presentationName}'/>
-					</c:forEach>
-				</select>
-			</form>
-			</c:if>
-		</div>
-	</div>
-	<div class="well">
-		<p><spring:message code="label.proposals.well"/></p>
-	</div>
+	</span>
 	
-</p>
-
 <c:if test="${not empty thesisProposalsList}">
 	<div class="table-responsive">
 		<table class="table">

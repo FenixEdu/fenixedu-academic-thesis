@@ -32,11 +32,6 @@ ${portal.toolkit()}
 	<h1><spring:message code="title.thesisProposal.management"/></h1>
 </div>
 
-<div class="well">
-	<p>
-		<spring:message code="label.proposals.admin.well"/>
-	</p>
-</div>
 <script type="text/javascript">
 
 	$(document).ready(function() {
@@ -50,13 +45,22 @@ ${portal.toolkit()}
 		$("#configuration").change(function() {
 			$("#chooseConfiguration").submit();
 		});
-
-// 		$("#${configuration.externalId}").prop('selected', true);
 	});
 </script>
 
+<c:if test="${empty configuration}">
+	<div class="alert alert-info" role="alert"><spring:message code="label.no.configurations.available"/></div>
+</c:if>
+
+<c:if test="${not empty configuration}">
 <c:url var="viewCandidatesUrl" value="/admin-proposals/candidates?configuration=${configuration.externalId}"/>
 <c:url var="exportToExcelUrl" value="/admin-proposals/export?configuration=${configuration.externalId}"/>
+
+<div class="well">
+	<p>
+		<spring:message code="label.proposals.admin.well"/>
+	</p>
+</div>
 <form class="form" id="chooseConfiguration" method="GET">
 	<div class="form-group">
 		<label for="configuration"><spring:message code="label.configuration"/></label>
@@ -271,6 +275,8 @@ form{
 		</div>
 	</div>
 </div>
+
+</c:if>
 
 <style type="text/css">
 .information{
