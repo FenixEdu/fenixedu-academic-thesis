@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
@@ -104,7 +105,7 @@ public class StudentCandidaciesController {
     }
 
     @RequestMapping(value = "/updatePreferences", method = RequestMethod.POST)
-    public String updateStudentThesisCandidaciesWeights(@RequestParam String json, Model model) {
+    public String updateStudentThesisCandidaciesWeights(@RequestParam String json, Model model, RedirectAttributes redirectAttrs) {
 
         JsonParser parser = new JsonParser();
         JsonArray jsonArray = (JsonArray) parser.parse(json);
@@ -112,10 +113,10 @@ public class StudentCandidaciesController {
         try {
             service.updateStudentThesisCandidaciesWeights(jsonArray);
         } catch (ThesisProposalException e) {
-            model.addAttribute("error", e.getClass().getSimpleName());
+            redirectAttrs.addAttribute("error", e.getClass().getSimpleName());
         }
 
-        return listProposals(model);
+        return "redirect:/studentCandidacies";
     }
 
 }
