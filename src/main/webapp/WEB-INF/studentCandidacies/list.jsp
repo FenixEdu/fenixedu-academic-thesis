@@ -77,82 +77,101 @@
 				</p>
 			</div>
 
-			<form:form role="form" method="POST" action="${pageContext.request.contextPath}/studentCandidacies/updatePreferences" class="form-horizontal">
-			<input type="hidden" name="json" id="json" />
-			<button type="submit" class="btn btn-default" id="savePreferencesButton" style="display:none;"><spring:message code="button.preferences.save"/></button>
-		</form:form>
-
-		<c:if test="${!empty studentThesisCandidacies}">
-		<div class="table-responsive">
-			<table class="table" id="candidaciesTable">
-				<thead>
-					<tr>
-						<th>
-							<spring:message code='label.thesis.id' />
-						</th>
-						<th>
-							<spring:message code='label.title' />
-						</th>
-						<th>
-							<spring:message code='label.participants' />
-						</th>
-						<th>
-							<spring:message code='label.student.candidacy.accepted'/>
-						</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<c:set var="anyAccepted" scope="session" value="false"/>
-					<c:forEach items="${studentThesisCandidacies}" var="studentThesisCandidacy">
-					<tr class="studentThesisCandidacyRow  ${(studentThesisCandidacy.acceptedByAdvisor && !anyAccepted) ? 'thesis-selected' : '' } sortableRow" data-studentThesisCandidacy-id="${studentThesisCandidacy.externalId}">
-
-						<c:if test="${!(studentThesisCandidacy.acceptedByAdvisor && !anyAccepted)}" >
-							<td>${studentThesisCandidacy.thesisProposal.identifier}</td>
-						</c:if>
-						<c:if test="${studentThesisCandidacy.acceptedByAdvisor && !anyAccepted}" >
-							<c:set var="anyAccepted" scope="session" value="true"/>
-							<td>${studentThesisCandidacy.thesisProposal.identifier}<span class="badge">	<spring:message code='label.proposal.attributed'/></span></td>
-						</c:if>
-
-						<td>${studentThesisCandidacy.thesisProposal.title}</td>
-						<td>
-							<c:forEach items="${studentThesisCandidacy.thesisProposal.getSortedParticipants()}" var="participant">
-							<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
-							</div>
-						</c:forEach>
-					</td>
-					<td>
-						<c:if test="${studentThesisCandidacy.acceptedByAdvisor}">
-							<spring:message code='label.yes'/>
-						</c:if>
-						<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
-							<spring:message code='label.no'/>
-						</c:if>
-					</td>
-					<td>
-						<form:form method="GET" action="${pageContext.request.contextPath}/studentCandidacies/delete/${studentThesisCandidacy.externalId}">
-						<div class="btn-group btn-group-xs">
-
-							<button type="submit" class="btn btn-default" id="removeCandidacyButton"><spring:message code="button.proposal.unapply"/></button>
-
-							<c:set var="result" scope="session" value='' />
-							<c:forEach items="${studentThesisCandidacy.thesisProposal.executionDegreeSet}" var="executionDegree" varStatus="i">
-							<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
-							<c:if test="${i.index != studentThesisCandidacy.thesisProposal.executionDegreeSet.size() - 1}">
-							<c:set var="result" scope="session" value="${result}, " />
-						</c:if>
-					</c:forEach>
-
-					<input type='button' class='detailsButton btn btn-default' data-observations="${studentThesisCandidacy.thesisProposal.observations}" data-requirements="${studentThesisCandidacy.thesisProposal.requirements}" data-goals="${studentThesisCandidacy.thesisProposal.goals}" data-localization="${studentThesisCandidacy.thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${studentThesisCandidacy.thesisProposal.externalId}">
+			<c:if test="${candidaciesSize <= 0}">
+					<div class="alert alert-warning" role="alert">
+						<p>
+							<spring:message code='label.student.candidacies.empty'/>
+						</p>
+					</p>
 				</div>
-			</form:form>
-		</td>
-	</tr>
-</c:forEach>
-</tbody>
-</table>
+			</c:if>
+			<c:if test="${candidaciesSize > 0}">
+				<form:form role="form" method="POST" action="${pageContext.request.contextPath}/studentCandidacies/updatePreferences" class="form-horizontal">
+					<input type="hidden" name="json" id="json" />
+					<button type="submit" class="btn btn-default" id="savePreferencesButton" style="display:none;"><spring:message code="button.preferences.save"/></button>
+				</form:form>
+
+				<c:forEach items="${candidaciesByConfig}" var="node">
+					<c:if test="${!empty node.value}">
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h3 class="panel-title">${node.key.presentationName}</h3>
+							</div>
+							<div class="panel-body">
+					<div class="table-responsive">
+						<table class="table" id="${(node.key.candidacyPeriod.containsNow()) ? 'candidaciesTable' : ''}">
+							<thead>
+								<tr>
+									<th>
+										<spring:message code='label.thesis.id' />
+									</th>
+									<th>
+										<spring:message code='label.title' />
+									</th>
+									<th>
+										<spring:message code='label.participants' />
+									</th>
+									<th>
+										<spring:message code='label.student.candidacy.accepted'/>
+									</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								<c:set var="anyAccepted" scope="session" value="false"/>
+								<c:forEach items="${node.value}" var="candidacy">
+									<tr class="studentThesisCandidacyRow  ${(candidacy.acceptedByAdvisor && !anyAccepted) ? 'thesis-selected' : '' } sortableRow" data-studentThesisCandidacy-id="${candidacy.externalId}" data-preference="${candidacy.preferenceNumber}">
+
+										<c:if test="${!(candidacy.acceptedByAdvisor && !anyAccepted)}" >
+											<td>${candidacy.thesisProposal.identifier}</td>
+										</c:if>
+										<c:if test="${candidacy.acceptedByAdvisor && !anyAccepted}" >
+											<c:set var="anyAccepted" scope="session" value="true"/>
+											<td>${candidacy.thesisProposal.identifier}<span class="badge">	<spring:message code='label.proposal.attributed'/></span></td>
+										</c:if>
+							<td>${candidacy.thesisProposal.title}</td>
+							<td>
+								<c:forEach items="${candidacy.thesisProposal.getSortedParticipants()}" var="participant">
+									<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
+								</div>
+							</c:forEach>
+						</td>
+						<td>
+							<c:if test="${candidacy.acceptedByAdvisor}">
+								<spring:message code='label.yes'/>
+							</c:if>
+							<c:if test="${!candidacy.acceptedByAdvisor}">
+								<spring:message code='label.no'/>
+							</c:if>
+						</td>
+						<td>
+							<form:form method="GET" action="${pageContext.request.contextPath}/studentCandidacies/delete/${candidacy.externalId}">
+								<div class="btn-group btn-group-xs">
+
+									<button type="submit" class="btn btn-default" id="removeCandidacyButton"><spring:message code="button.proposal.unapply"/></button>
+
+									<c:set var="result" scope="session" value='' />
+									<c:forEach items="${candidacy.thesisProposal.executionDegreeSet}" var="executionDegree" varStatus="i">
+										<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
+										<c:if test="${i.index != candidacy.thesisProposal.executionDegreeSet.size() - 1}">
+											<c:set var="result" scope="session" value="${result}, " />
+										</c:if>
+									</c:forEach>
+
+									<input type='button' class='detailsButton btn btn-default' data-observations="${candidacy.thesisProposal.observations}" data-requirements="${candidacy.thesisProposal.requirements}" data-goals="${candidacy.thesisProposal.goals}" data-localization="${candidacy.thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${candidacy.thesisProposal.externalId}">
+								</div>
+							</form:form>
+						</td>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
+	</div>
 </div>
+	</c:if>
+				</c:forEach>
+
 
 <style media="screen">
 	.thesis-selected{
@@ -170,14 +189,6 @@ $(document).ready(function() {
 });
 </script>
 
-</c:if>
-<c:if test="${empty studentThesisCandidacies}">
-<div class="alert alert-warning" role="alert">
-	<p>
-		<spring:message code='label.student.candidacies.empty'/>
-	</p>
-</p>
-</div>
 </c:if>
 
 <style type="text/css">
@@ -217,7 +228,15 @@ $(function(){
 		</p>
 	</div>
 
-	<c:if test="${availableProposals}">
+	<c:if test="${!(proposalsSize > 0)}">
+		<div class="alert alert-warning" role="alert">
+			<p>
+				<spring:message code='label.student.proposals.empty'/>
+			</p>
+		</p>
+	</div>
+</c:if>
+	<c:if test="${proposalsSize > 0}">
 	<div class="table-responsive">
 		<table class="table" id="candidaciesTable">
 			<thead>
@@ -235,7 +254,7 @@ $(function(){
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach items="${proposals}" var="node">
+				<c:forEach items="${proposalsByReg}" var="node">
 
 				<c:forEach items="${node.value}" var="proposal">
 
@@ -271,14 +290,6 @@ $(function(){
 </c:forEach>
 </tbody>
 </table>
-</div>
-</c:if>
-<c:if test="${!availableProposals}">
-<div class="alert alert-warning" role="alert">
-	<p>
-		<spring:message code='label.student.proposals.empty'/>
-	</p>
-</p>
 </div>
 </c:if>
 </div>

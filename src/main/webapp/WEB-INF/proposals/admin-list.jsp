@@ -46,16 +46,16 @@ ${portal.toolkit()}
 		$(".filter").change(function() {
 			$("#search").submit();
 		});
-		
+
 		$("#configuration").change(function() {
 			$("#chooseConfiguration").submit();
 		});
-		
+
 // 		$("#${configuration.externalId}").prop('selected', true);
 	});
 </script>
 
-<a href="${pageContext.request.contextPath}/admin-proposals/candidates"> Vista por candidatos </a>
+<a href="${pageContext.request.contextPath}/admin-proposals/candidates?configuration=${configuration.externalId}"> Vista por candidatos </a>
 <form class="form" id="chooseConfiguration" method="GET">
 	<div class="form-group">
 		<label for="configuration"><spring:message code="label.configuration"/></label>
@@ -72,7 +72,7 @@ ${portal.toolkit()}
 	<p><spring:message code="label.thesis.proposal.info" arguments="${configuration.executionDegree.degree.sigla},${configuration.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
 	<p><spring:message code="label.thesis.candidacy.info" arguments="${configuration.executionDegree.degree.sigla},${configuration.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
 </div>
-	
+
 <div class="panel panel-default">
   <div class="panel-heading"><spring:message code="label.filter" /></div>
   <div class="panel-body">
@@ -190,7 +190,7 @@ ${portal.toolkit()}
 									<button type="submit" class="btn btn-default" id="editButton">
 										<spring:message code='button.edit'/>
 									</button>
-									
+
 									<input type='button' class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
 
 <%-- 									<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}"> --%>

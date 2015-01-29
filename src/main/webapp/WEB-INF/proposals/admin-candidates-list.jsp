@@ -38,14 +38,18 @@ ${portal.toolkit()}
 	</p>
 </div>
 
-	<h3>Candidaturas existentes em ${configuration.executionDegree.degree.presentationName}</h3>
+	<h3><spring:message code="label.available.candidacies" arguments="${configuration.executionDegree.degree.presentationName}"/></h3>
 
+	<c:if test="${empty registrations}">
+		<spring:message code="label.candidacies.empty"/>
+	</c:if>
+	<c:if test="${!empty registrations}">
 	<div class="table-responsive">
 		<table class="table table-condensed table table-bordered">
 			<thead>
 				<tr>
 					<th><spring:message code="label.candidate"/></th>
-					<th><spring:message code='label.proposal' text="Proposta"/></th>
+					<th><spring:message code='label.proposal'/></th>
 					<th><spring:message code='label.student.candidacy.accepted'/></th>
 					<th></th>
 				</tr>
@@ -80,9 +84,9 @@ ${portal.toolkit()}
 									</c:if>
 									</td>
 								<td>
-									<a href="${pageContext.request.contextPath}/admin-proposals/deleteCandidacy/${candidacy.externalId}"> Apagar candidatura </a>
+									<a href="${pageContext.request.contextPath}/admin-proposals/deleteCandidacy/${candidacy.externalId}"> <spring:message code="button.proposal.unapply"/> </a>
 									<c:if test="${!candidacy.acceptedByAdvisor}">
-									| <a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}"> Aceitar candidatura </a>
+									| <a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}"> <spring:message code="button.candidacy.accept"/>  </a>
 								</c:if>
 								</td>
 							</tr>
@@ -92,5 +96,7 @@ ${portal.toolkit()}
 			</tbody>
 		</table>
 	</div>
+</c:if>
+
 
 	<a href="${pageContext.request.contextPath}/admin-proposals/candidates"> Vista por candidatos </a>
