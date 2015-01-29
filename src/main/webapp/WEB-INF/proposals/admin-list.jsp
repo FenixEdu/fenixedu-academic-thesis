@@ -168,6 +168,9 @@ ${portal.toolkit()}
 					<th>
 						<spring:message code='label.number.of.candidacies'/>
 					</th>
+					<th>
+						<spring:message code='label.student.candidacy.accepted'/>
+					</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -194,21 +197,31 @@ ${portal.toolkit()}
 							${thesisProposal.getStudentThesisCandidacySet().size()}
 						</td>
 						<td>
+							<spring:message code="label.${service.isAccepted(thesisProposal) ? 'yes' : 'no'}"/>
+						</td>
+						<td>
 							<c:set var="degreesLabels" value="${fn:join(service.getThesisProposalDegrees(thesisProposal), ',')}"/>
+							<c:url var="toggleVisibilityUrl" value="/admin-proposals/toggle/${thesisProposal.externalId}?configuration=${configuration.externalId}&isVisible=${isVisible}&isAttributed=${isAttributed}&hasCandidacy=${hasCandidacy}"/>
 							<p></p>
-							<form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">
-								<div class="btn-group btn-group-xs">
-									<button type="submit" class="btn btn-default" id="editButton">
-										<spring:message code='button.edit'/>
-									</button>
+							<div class="btn-group btn-group-xs">
+							<a href="${toggleVisibilityUrl}" class="btn btn-default"><spring:message code="label.toggle.visibility"/></a>
+							<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
+								<spring:message code="label.details"/>
+							</button>
+<%-- 							<form:form method="GET" action="${pageContext.request.contextPath}/admin-proposals/edit/${thesisProposal.externalId}"> --%>
+<!-- 								<div class="btn-group btn-group-xs"> -->
+<!-- 									<button type="submit" class="btn btn-default" id="editButton"> -->
+<%-- 										<spring:message code='button.edit'/> --%>
+<!-- 									</button> -->
 
-									<input type='button' class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
+									
 
 <%-- 									<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}"> --%>
 <%-- 										<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage"/></button> --%>
 <%-- 									</c:if> --%>
-<!-- 								</div> -->
-							</form:form>
+
+								</div>
+<%-- 							</form:form> --%>
 <%-- 							<form method="GET" action="${pageContext.request.contextPath}/proposals/manage/${thesisProposal.externalId}" id='${thesisProposal.externalId}'></form> --%>
 						</td>
 					</tr>

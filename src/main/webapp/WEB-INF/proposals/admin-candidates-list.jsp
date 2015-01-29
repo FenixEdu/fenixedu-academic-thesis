@@ -86,9 +86,9 @@ ${portal.toolkit()}
 									</c:if>
 									</td>
 								<td>
-									<a href="${pageContext.request.contextPath}/admin-proposals/deleteCandidacy/${candidacy.externalId}"> <spring:message code="button.proposal.unapply"/> </a>
+									<a href="${pageContext.request.contextPath}/admin-proposals/deleteCandidacy/${candidacy.externalId}?configuration=${configuration.externalId}"> <spring:message code="button.proposal.unapply"/> </a>
 									<c:if test="${!candidacy.acceptedByAdvisor}">
-									| <a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}"> <spring:message code="button.candidacy.accept"/>  </a>
+									| <a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}?configuration=${configuration.externalId}"> <spring:message code="button.candidacy.accept"/>  </a>
 								</c:if>
 								</td>
 							</tr>

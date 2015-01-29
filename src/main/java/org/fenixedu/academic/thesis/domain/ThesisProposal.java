@@ -176,13 +176,4 @@ public class ThesisProposal extends ThesisProposal_Base {
                 proposal.getLocalization(), proposal.getThesisProposalParticipantSet(), configs);
     }
 
-    @Override
-    public boolean getHidden() {
-        if (super.getHidden()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 }

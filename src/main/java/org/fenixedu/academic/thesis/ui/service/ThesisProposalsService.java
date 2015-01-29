@@ -453,4 +453,15 @@ public class ThesisProposalsService {
         return proposal.getExecutionDegreeSet().stream().map(executionDegree -> executionDegree.getDegree().getSigla())
                 .collect(Collectors.toList()).toArray(new String[0]);
     }
+
+    public boolean isAccepted(ThesisProposal proposal) {
+        return proposal.getStudentThesisCandidacySet().stream().anyMatch(StudentThesisCandidacy::getAcceptedByAdvisor);
+    }
+
+    @Atomic(mode = TxMode.WRITE)
+    public boolean toggleVisibility(ThesisProposal proposal) {
+        final boolean state = !proposal.getHidden();
+        proposal.setHidden(state);
+        return state;
+    }
 }

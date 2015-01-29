@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
+import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.ui.service.ExportThesisProposalsService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
@@ -87,15 +88,19 @@ public class AdminThesisProposalsController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "deleteCandidacy/{oid}")
-    public String deleteCandidacy(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy) {
+    public String deleteCandidacy(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy,
+            @RequestParam ThesisProposalsConfiguration configuration) {
         service.delete(studentThesisCandidacy);
-        return "redirect:/admin-proposals";
+
+        return "redirect:/admin-proposals/candidates?configuration=" + configuration.getExternalId();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "acceptCandidacy/{oid}")
-    public String attributeProposal(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy) {
+    public String attributeProposal(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy,
+            @RequestParam ThesisProposalsConfiguration configuration) {
         service.accept(studentThesisCandidacy);
-        return "proposals/admin-candidates-list";
+
+        return "redirect:/admin-proposals/candidates?configuration=" + configuration.getExternalId();
     }
 
     @RequestMapping(value = "/export", method = RequestMethod.GET)
@@ -109,5 +114,14 @@ public class AdminThesisProposalsController {
         try (OutputStream outputStream = response.getOutputStream()) {
             exportService.exportThesisProposalsToExcel(configuration, outputStream);
         }
+    }
+
+    @RequestMapping(value = "/toggle/{proposal}", method = RequestMethod.GET)
+    public String toggleVisibility(@PathVariable ThesisProposal proposal, Model model,
+            @RequestParam(required = false) ThesisProposalsConfiguration configuration,
+            @RequestParam(required = false) Boolean isVisible, @RequestParam(required = false) Boolean isAttributed,
+            @RequestParam(required = false) Boolean hasCandidacy) {
+        service.toggleVisibility(proposal);
+        return listProposals(model, configuration, isVisible, isAttributed, hasCandidacy);
     }
 }
