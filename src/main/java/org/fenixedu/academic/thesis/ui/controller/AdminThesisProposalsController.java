@@ -18,13 +18,19 @@
  */
 package org.fenixedu.academic.thesis.ui.controller;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletResponse;
+
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
+import org.fenixedu.academic.thesis.ui.service.ExportThesisProposalsService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -42,6 +48,9 @@ public class AdminThesisProposalsController {
 
     @Autowired
     ThesisProposalsService service;
+
+    @Autowired
+    ExportThesisProposalsService exportService;
 
     @RequestMapping(method = RequestMethod.GET)
     public String listProposals(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
@@ -87,5 +96,18 @@ public class AdminThesisProposalsController {
     public String attributeProposal(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy) {
         service.accept(studentThesisCandidacy);
         return "proposals/admin-candidates-list";
+    }
+
+    @RequestMapping(value = "/export", method = RequestMethod.GET)
+    public void exportCSV(@RequestParam ThesisProposalsConfiguration configuration, HttpServletResponse response)
+            throws IOException, UnavailableException {
+
+        String filename = "proposals_" + configuration.getPresentationName();
+
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-disposition", "attachment; filename=" + filename + ".xls");
+        try (OutputStream outputStream = response.getOutputStream()) {
+            exportService.exportThesisProposalsToExcel(configuration, outputStream);
+        }
     }
 }

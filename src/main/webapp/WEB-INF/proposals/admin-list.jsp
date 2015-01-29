@@ -55,7 +55,8 @@ ${portal.toolkit()}
 	});
 </script>
 
-<a href="${pageContext.request.contextPath}/admin-proposals/candidates?configuration=${configuration.externalId}"> Vista por candidatos </a>
+<c:url var="viewCandidatesUrl" value="/admin-proposals/candidates?configuration=${configuration.externalId}"/>
+<c:url var="exportToExcelUrl" value="/admin-proposals/export?configuration=${configuration.externalId}"/>
 <form class="form" id="chooseConfiguration" method="GET">
 	<div class="form-group">
 		<label for="configuration"><spring:message code="label.configuration"/></label>
@@ -67,11 +68,17 @@ ${portal.toolkit()}
 	</div>
 </form>
 
-
 <div class="alert alert-info">
 	<p><spring:message code="label.thesis.proposal.info" arguments="${configuration.executionDegree.degree.sigla},${configuration.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
 	<p><spring:message code="label.thesis.candidacy.info" arguments="${configuration.executionDegree.degree.sigla},${configuration.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
 </div>
+
+
+<p>
+	<a href="${viewCandidatesUrl}"><spring:message code="label.view.candidates"/></a>
+	<br />
+	<a href="${exportToExcelUrl}"><spring:message code="label.proposals.export.to.excel"/></a>
+</p>
 
 <div class="panel panel-default">
   <div class="panel-heading"><spring:message code="label.filter" /></div>

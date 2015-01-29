@@ -18,17 +18,10 @@
  */
 package org.fenixedu.academic.thesis.ui.controller;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServletResponse;
-
-import org.fenixedu.academic.domain.ExecutionDegree;
-import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
@@ -41,7 +34,6 @@ import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationException;
-import org.fenixedu.academic.thesis.ui.service.ExportThesisProposalsService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -72,9 +64,6 @@ public class ThesisProposalsController {
 
     @Autowired
     ThesisProposalsService service;
-
-    @Autowired
-    ExportThesisProposalsService exportService;
 
     private String listProposals(Model model, ThesisProposalsConfiguration configuration) {
         return listProposals(model, configuration, null, null, null);
@@ -281,16 +270,4 @@ public class ThesisProposalsController {
         return view;
     }
 
-    @RequestMapping(value = "/export/{executionDegree}", method = RequestMethod.GET)
-    public void exportCSV(@PathVariable ExecutionDegree executionDegree, HttpServletResponse response) throws IOException,
-            UnavailableException {
-        String filename =
-                "proposals_" + executionDegree.getDegreeName() + "_" + executionDegree.getAcademicInterval().getStart().getYear()
-                        + "_" + executionDegree.getAcademicInterval().getEnd().getYear();
-        response.setContentType("application/vnd.ms-excel");
-        response.setHeader("Content-disposition", "attachment; filename=" + filename + ".xls");
-        try (OutputStream outputStream = response.getOutputStream()) {
-            exportService.exportThesisProposalsToExcel(executionDegree, outputStream);
-        }
-    }
 }

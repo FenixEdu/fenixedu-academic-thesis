@@ -17,6 +17,7 @@ import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
+import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,6 @@ public class ExportThesisProposalsService {
 
     private List<Object> getGroupHeaders() {
         final List<Object> headers = new ArrayList<Object>();
-        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.group"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.student") + 1);
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.prefAttr"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.pref") + 1);
@@ -76,10 +76,10 @@ public class ExportThesisProposalsService {
         return headers;
     }
 
-    private void exportToXls(ExecutionDegree executionDegree, OutputStream outputStream) throws IOException {
-        List<ThesisProposal> thesisProposals =
-                executionDegree.getThesisProposalsConfigurationSet().stream().flatMap(tpc -> tpc.getThesisProposalSet().stream())
-                        .collect(Collectors.toList());
+    public void exportThesisProposalsToExcel(ThesisProposalsConfiguration configuration, OutputStream outputStream)
+            throws IOException {
+        ExecutionDegree executionDegree = configuration.getExecutionDegree();
+        List<ThesisProposal> thesisProposals = configuration.getThesisProposalSet().stream().collect(Collectors.toList());
         List<String> metaKeys = new ArrayList<String>();
         final List<Object> headers = getHeaders();
         final Spreadsheet spreadsheet =
@@ -96,13 +96,11 @@ public class ExportThesisProposalsService {
     }
 
     private void fillGroups(List<Set<StudentThesisCandidacy>> studentCandidacies, Spreadsheet spreadsheet) {
-        int counter = 1;
         for (Set<StudentThesisCandidacy> stc : studentCandidacies) {
             if (stc.isEmpty()) {
                 continue;
             }
             final Row row = spreadsheet.addRow();
-            row.setCell("" + counter);
             row.setCell(stc.iterator().next().getRegistration().getNumber());
             row.setCell(stc.stream().sorted(StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER)
                     .filter(cand -> cand.getAcceptedByAdvisor() == true).findFirst()
@@ -110,7 +108,6 @@ public class ExportThesisProposalsService {
             stc.stream().sorted(StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER).forEach(cand -> {
                 row.setCell(cand.getThesisProposal().getIdentifier());
             });
-
         }
     }
 
@@ -178,15 +175,6 @@ public class ExportThesisProposalsService {
                 fillProposalInfo(proposal, spreadsheet);
             }
             studentCandidacies.add(proposal.getStudentThesisCandidacySet());
-        }
-    }
-
-    public void exportThesisProposalsToExcel(ExecutionDegree executionDegree, OutputStream outputStream) {
-        try {
-            exportToXls(executionDegree, outputStream);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
     }
 }
