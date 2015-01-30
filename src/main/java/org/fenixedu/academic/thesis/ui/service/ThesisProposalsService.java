@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
+import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
@@ -106,11 +108,21 @@ public class ThesisProposalsService {
                 .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES).collect(Collectors.toList());
     }
 
-    public List<ThesisProposalsConfiguration> getThesisProposalsConfigurations(User participant) {
-        return participant.getThesisProposalParticipantSet().stream().map(p -> p.getThesisProposal())
-                .flatMap(proposal -> proposal.getThesisConfigurationSet().stream())
-                .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).distinct()
-                .collect(Collectors.toList());
+    public List<ThesisProposalsConfiguration> getThesisProposalsConfigurations(User user) {
+
+        Objects.nonNull(user);
+        Objects.nonNull(user.getPerson());
+
+        final Teacher teacher = user.getPerson().getTeacher();
+
+        if (teacher == null) {
+            return new ArrayList<>();
+        }
+
+        return teacher.getTeacherAuthorizationStream().flatMap(auth -> auth.getDepartment().getDegreesSet().stream())
+                .flatMap(degree -> degree.getExecutionDegrees().stream())
+                .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct()
+                .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
     }
 
     public List<ThesisProposalsConfiguration> getThesisProposalsConfigurationsForCoordinator(User coordinator) {

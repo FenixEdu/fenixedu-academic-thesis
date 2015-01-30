@@ -76,7 +76,14 @@ public class ThesisProposalsController {
 
         List<ThesisProposalsConfiguration> configs = service.getThesisProposalsConfigurations(Authenticate.getUser());
 
-        configuration = configuration == null && !configs.isEmpty() ? configs.iterator().next() : configuration;
+        if (configuration == null && !configs.isEmpty()) {
+            configuration = configs.iterator().next();
+        }
+
+        if (configuration == null) {
+            model.addAttribute("error", "cant.manage.list.proposals");
+            return "proposals/list";
+        }
 
         if (Authenticate.getUser().getPerson().getTeacher() != null) {
             model.addAttribute("suggestedConfigs", service.getNotPastExecutionDegrees(Authenticate.getUser(), configuration

@@ -54,7 +54,7 @@ ${portal.toolkit()}
 	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 
-<c:if test="${!empty suggestedConfigs}">
+<c:if test="${!empty suggestedConfigs and !empty configuration}">
 	<div class="alert alert-info">
 		<c:forEach items="${suggestedConfigs}" var="config">
 			<p>

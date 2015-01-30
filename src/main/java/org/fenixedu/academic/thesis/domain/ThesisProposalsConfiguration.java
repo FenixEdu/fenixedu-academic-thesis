@@ -53,12 +53,7 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
             };
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC =
-            new Comparator<ThesisProposalsConfiguration>() {
-                @Override
-                public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
-                    return o2.getProposalPeriod().getStart().compareTo(o1.getProposalPeriod().getStart());
-                }
-            };
+            COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC.reversed();
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_CANDIDACY_PERIOD_START_ASC =
             new Comparator<ThesisProposalsConfiguration>() {
