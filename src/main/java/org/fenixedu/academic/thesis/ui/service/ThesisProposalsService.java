@@ -90,12 +90,12 @@ public class ThesisProposalsService {
         }
 
         if (isAttributed != null) {
-            Predicate<StudentThesisCandidacy> attributedPredicate =
-                    isAttributed ? StudentThesisCandidacy::getAcceptedByAdvisor : candidacy -> !candidacy.getAcceptedByAdvisor();
+            Predicate<ThesisProposal> attributedPredicate =
+                    isAttributed ? p -> p.getStudentThesisCandidacySet().stream()
+                            .anyMatch(StudentThesisCandidacy::getAcceptedByAdvisor) : p -> p.getStudentThesisCandidacySet()
+                            .stream().noneMatch(StudentThesisCandidacy::getAcceptedByAdvisor);
 
-            proposalsStream =
-                    proposalsStream.filter(p -> p.getStudentThesisCandidacySet().isEmpty() ? !isAttributed : p
-                            .getStudentThesisCandidacySet().stream().anyMatch(attributedPredicate));
+            proposalsStream = proposalsStream.filter(attributedPredicate);
         }
 
         return proposalsStream.collect(Collectors.toList());
