@@ -39,7 +39,10 @@ ${portal.toolkit()}
 	</p>
 </div>
 
-
+<c:if test="${empty recentProposals}">
+	<spring:message code='label.proposals.empty'/>
+</c:if>
+<c:if test="${!empty recentProposals}">
 <div class="table-responsive">
 	<table class="table">
 		<thead>
@@ -82,61 +85,7 @@ ${portal.toolkit()}
 		</tbody>
 	</table>
 </div>
-
-<c:forEach items="${coordinatorProposals}" var="node">
-	<hr/>
-	<caption>${node.key.presentationName}</caption>
-	<div class="table-responsive">
-		<table class="table">
-			<thead>
-				<tr>
-					<th>
-						<spring:message code='label.thesis.id'/>
-					</th>
-					<th>
-						<spring:message code='label.title'/>
-					</th>
-					<th>
-						<spring:message code='label.participants'/>
-					</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				<c:forEach items="${node.value}" var="thesisProposal">
-					<tr>
-						<td>${thesisProposal.identifier}</td>
-						<td>${thesisProposal.title}</td>
-						<td>
-							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
-								<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
-							</c:forEach>
-						</td>
-						<td>
-							<form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">
-								<div class="btn-group btn-group-xs">
-									<button type="submit" class="btn btn-default" id="editButton">
-										<spring:message code='button.edit'/>
-									</button>
-
-									<c:set var="result" scope="session" value=''/>
-									<c:forEach items="${thesisProposal.executionDegreeSet}" var="executionDegree" varStatus="i">
-										<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
-										<c:if test="${i.index != thesisProposal.executionDegreeSet.size() - 1}">
-											<c:set var="result" scope="session" value="${result}, " />
-										</c:if>
-									</c:forEach>
-
-									<input type='button' class='detailsButton btn btn-default' data-observations="${thesisProposal.observations}" data-requirements="${thesisProposal.requirements}" data-goals="${thesisProposal.goals}" data-localization="${thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
-								</div>
-							</form:form>
-						</td>
-					</tr>
-				</c:forEach>
-			</tbody>
-		</table>
-	</div>
-</c:forEach>
+</c:if>
 
 <style>
 form{
