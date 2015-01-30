@@ -68,6 +68,16 @@ ${ portal.toolkit() }
 </div>
 </p>
 
+<c:if test="${empty configurationsList}">
+	<div id='emptyConfigs'>
+	<spring:message code='label.configuration.empty'/>
+	</div>
+</c:if>
+<c:if test="${!empty configurationsList}">
+	<div hidden id='emptyConfigs'>
+		<spring:message code='label.configuration.empty'/>
+	</div>
+
 <div class="table-responsive">
 	<table class="table">
 		<colgroup>
@@ -126,21 +136,29 @@ ${ portal.toolkit() }
 		</tbody>
 	</table>
 </div>
+</c:if>
+
 
 <script type="text/javascript">
 $("#executionYearSelect").change(function() {
 	var year = $("#executionYearSelect").val();
 
 	$('tr').hide();
+	$('#emptyConfigs').hide()
 
 	if(year == "NONE") {
 		$("tr").show();
 	}
 	else {
-		$("tr[data-execution-year= '" + year.toString() + "']").show();
+		var result = $("tr[data-execution-year= '" + year.toString() + "']");
+		if(result.length > 0) {
+			$(result).show();
+			$(".tr-head").show();
+		}
+		else {
+			$('#emptyConfigs').show()
+		}
 	}
-
-	$(".tr-head").show();
 });
 
 $(".deleteConfiguration").on("click", function() {

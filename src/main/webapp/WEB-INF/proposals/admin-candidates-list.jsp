@@ -39,9 +39,11 @@ ${portal.toolkit()}
 </div>
 
 	<h3><spring:message code="label.available.candidacies" arguments="${configuration.executionDegree.degree.presentationName}"/></h3>
-	
+
+	<br>
 	<a href="${pageContext.request.contextPath}/admin-proposals?configuration=${configuration.externalId}"><spring:message code="label.back"/></a>
-	
+	<br>
+		
 	<c:if test="${empty registrations}">
 		<spring:message code="label.candidacies.empty"/>
 	</c:if>
