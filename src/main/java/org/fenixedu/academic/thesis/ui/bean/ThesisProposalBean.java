@@ -208,10 +208,6 @@ public class ThesisProposalBean {
 
             ThesisProposalsConfiguration baseConfig = configurations.iterator().next();
 
-            if (!baseConfig.getProposalPeriod().containsNow()) {
-                throw new OutOfProposalPeriodException();
-            }
-
             for (ThesisProposalParticipant participant : participants) {
                 for (ThesisProposalsConfiguration configuration : configurations) {
                     int proposalsCount =

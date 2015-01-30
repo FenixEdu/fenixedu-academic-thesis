@@ -20,8 +20,10 @@ package org.fenixedu.academic.thesis.ui.controller;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.servlet.UnavailableException;
@@ -31,16 +33,22 @@ import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
+import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
+import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
+import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
+import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationException;
 import org.fenixedu.academic.thesis.ui.service.ExportThesisProposalsService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.thesisProposal.admin.management",
         accessGroup = "thesisSystemManagers | thesisCreators")
@@ -123,5 +131,55 @@ public class AdminThesisProposalsController {
             @RequestParam(required = false) Boolean hasCandidacy) {
         service.toggleVisibility(proposal);
         return listProposals(model, configuration, isVisible, isAttributed, hasCandidacy);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/createProposal")
+    public ModelAndView createProposalForm(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration) {
+
+        ModelAndView modelAndview = new ModelAndView("proposals/create", "command", new ThesisProposalBean());
+
+        Set<ThesisProposalsConfiguration> currentThesisProposalsConfigurations =
+                new HashSet<ThesisProposalsConfiguration>(
+                        service.getCurrentThesisProposalsConfigurations(ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE));
+        currentThesisProposalsConfigurations.add(configuration);
+
+        modelAndview.addObject("configurations", currentThesisProposalsConfigurations);
+        modelAndview.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
+
+        modelAndview.addObject("action", "admin-proposals/createProposal");
+
+        return modelAndview;
+    }
+
+    @RequestMapping(value = "/createProposal", method = RequestMethod.POST)
+    public ModelAndView createThesisProposals(@ModelAttribute ThesisProposalBean proposalBean,
+            @RequestParam String participantsJson, @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations,
+            Model model) {
+
+        try {
+            if (thesisProposalsConfigurations == null || thesisProposalsConfigurations.isEmpty()) {
+                throw new UnexistentConfigurationException();
+            }
+
+            ThesisProposalsConfiguration base = thesisProposalsConfigurations.iterator().next();
+
+            for (ThesisProposalsConfiguration configuration : thesisProposalsConfigurations) {
+                if (!base.isEquivalent(configuration)) {
+                    throw new UnequivalentThesisConfigurationsException(base, configuration);
+                }
+            }
+
+            proposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
+            service.createThesisProposal(proposalBean, participantsJson);
+        } catch (ThesisProposalException exception) {
+            model.addAttribute("error", exception.getClass().getSimpleName());
+            model.addAttribute("configurations", service.getCurrentThesisProposalsConfigurations());
+            model.addAttribute("participantTypeList", service.getThesisProposalParticipantTypes());
+            model.addAttribute("command", proposalBean);
+            model.addAttribute("action", "admin-proposals/createProposal");
+            return new ModelAndView("proposals/create", model.asMap());
+        }
+
+        return new ModelAndView("redirect:/admin-proposals");
     }
 }

@@ -137,8 +137,10 @@ ${portal.toolkit()}
   </div>
 </div>
 
-
 <br />
+
+<c:url var="createProposalUrl" value="/admin-proposals/createProposal?configuration=${configuration.externalId}"/>
+<a href="${createProposalUrl}" class='btn btn-default'><spring:message code='title.thesisProposal.create'/></a>
 
 <c:if test="${empty coordinatorProposals}">
 	<p><spring:message code="label.proposals.search.result.empty"/></p>
@@ -214,7 +216,7 @@ ${portal.toolkit()}
 <%-- 										<spring:message code='button.edit'/> --%>
 <!-- 									</button> -->
 
-									
+
 
 <%-- 									<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}"> --%>
 <%-- 										<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage"/></button> --%>

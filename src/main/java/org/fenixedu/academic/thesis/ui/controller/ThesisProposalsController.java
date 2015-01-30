@@ -109,6 +109,8 @@ public class ThesisProposalsController {
 
         modelAndview.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
 
+        modelAndview.addObject("action", "proposals/create");
+
         return modelAndview;
     }
 
@@ -128,6 +130,10 @@ public class ThesisProposalsController {
                 if (!base.isEquivalent(configuration)) {
                     throw new UnequivalentThesisConfigurationsException(base, configuration);
                 }
+            }
+
+            if (!base.getProposalPeriod().containsNow()) {
+                throw new OutOfProposalPeriodException();
             }
 
             proposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
