@@ -43,7 +43,7 @@ ${portal.toolkit()}
 	<br>
 	<a href="${pageContext.request.contextPath}/admin-proposals?configuration=${configuration.externalId}"><spring:message code="label.back"/></a>
 	<br>
-		
+
 	<c:if test="${empty registrations}">
 		<spring:message code="label.candidacies.empty"/>
 	</c:if>
@@ -88,9 +88,11 @@ ${portal.toolkit()}
 									</c:if>
 									</td>
 								<td>
-									<a href="${pageContext.request.contextPath}/admin-proposals/deleteCandidacy/${candidacy.externalId}?configuration=${configuration.externalId}"> <spring:message code="button.proposal.unapply"/> </a>
 									<c:if test="${!candidacy.acceptedByAdvisor}">
-									| <a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}?configuration=${configuration.externalId}"> <spring:message code="button.candidacy.accept"/>  </a>
+										<a href="${pageContext.request.contextPath}/admin-proposals/acceptCandidacy/${candidacy.externalId}?configuration=${configuration.externalId}"> <spring:message code="button.candidacy.accept"/>  </a>
+								</c:if>
+								<c:if test="${candidacy.acceptedByAdvisor}">
+									<a href="${pageContext.request.contextPath}/admin-proposals/revokeCandidacyAcceptance/${candidacy.externalId}?configuration=${configuration.externalId}"> <spring:message code="label.candidacy.reject"/>  </a>
 								</c:if>
 								</td>
 							</tr>

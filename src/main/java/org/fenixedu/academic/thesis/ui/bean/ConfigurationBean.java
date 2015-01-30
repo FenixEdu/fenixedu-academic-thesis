@@ -166,10 +166,6 @@ public class ConfigurationBean {
             Interval proposalPeriod = new Interval(proposalPeriodStartDT, proposalPeriodEndDT);
             Interval candidacyPeriod = new Interval(candidacyPeriodStartDT, candidacyPeriodEndDT);
 
-            if (proposalPeriod.overlaps(candidacyPeriod)) {
-                throw new OverlappingIntervalsException();
-            }
-
             for (ThesisProposalsConfiguration config : executionDegree.getThesisProposalsConfigurationSet()) {
 
                 if (config.getProposalPeriod().overlaps(proposalPeriod) || config.getCandidacyPeriod().overlaps(candidacyPeriod)

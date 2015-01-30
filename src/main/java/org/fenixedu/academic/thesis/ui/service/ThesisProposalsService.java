@@ -344,6 +344,11 @@ public class ThesisProposalsService {
         }
     }
 
+    @Atomic(mode = TxMode.WRITE)
+    public void revoke(StudentThesisCandidacy studentThesisCandidacy) {
+        studentThesisCandidacy.setAcceptedByAdvisor(false);
+    }
+
     private void sendStolenProposalMessage(StudentThesisCandidacy oldCandidacy, StudentThesisCandidacy newCandidacy) {
 
         ThesisProposalParticipant newParticipant =
@@ -449,16 +454,6 @@ public class ThesisProposalsService {
                             map.get(candidacy.getRegistration()).add(candidacy);
                         });
         return map;
-    }
-
-    @Atomic(mode = TxMode.WRITE)
-    public boolean delete(StudentThesisCandidacy studentThesisCandidacy) {
-        try {
-            studentThesisCandidacy.delete();
-            return true;
-        } catch (DomainException de) {
-            return false;
-        }
     }
 
     public String[] getThesisProposalDegrees(ThesisProposal proposal) {

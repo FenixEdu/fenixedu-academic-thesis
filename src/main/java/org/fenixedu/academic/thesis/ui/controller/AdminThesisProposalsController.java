@@ -87,18 +87,18 @@ public class AdminThesisProposalsController {
         return "proposals/admin-candidates-list";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "deleteCandidacy/{oid}")
-    public String deleteCandidacy(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy,
-            @RequestParam ThesisProposalsConfiguration configuration) {
-        service.delete(studentThesisCandidacy);
-
-        return "redirect:/admin-proposals/candidates?configuration=" + configuration.getExternalId();
-    }
-
     @RequestMapping(method = RequestMethod.GET, value = "acceptCandidacy/{oid}")
     public String attributeProposal(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy,
             @RequestParam ThesisProposalsConfiguration configuration) {
         service.accept(studentThesisCandidacy);
+
+        return "redirect:/admin-proposals/candidates?configuration=" + configuration.getExternalId();
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "revokeCandidacyAcceptance/{oid}")
+    public String revokeProposalAttribution(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy,
+            @RequestParam ThesisProposalsConfiguration configuration) {
+        service.revoke(studentThesisCandidacy);
 
         return "redirect:/admin-proposals/candidates?configuration=" + configuration.getExternalId();
     }

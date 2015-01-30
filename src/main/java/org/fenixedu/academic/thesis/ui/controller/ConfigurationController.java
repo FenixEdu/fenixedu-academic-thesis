@@ -231,10 +231,6 @@ public class ConfigurationController {
         Interval proposalPeriod = new Interval(proposalPeriodStartDT, proposalPeriodEndDT);
         Interval candidacyPeriod = new Interval(candidacyPeriodStartDT, candidacyPeriodEndDT);
 
-        if (proposalPeriod.overlaps(candidacyPeriod)) {
-            throw new OverlappingIntervalsException();
-        }
-
         for (ThesisProposalsConfiguration config : thesisProposalsConfiguration.getExecutionDegree()
                 .getThesisProposalsConfigurationSet()) {
             if (!config.equals(thesisProposalsConfiguration)
