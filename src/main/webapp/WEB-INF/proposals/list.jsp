@@ -35,10 +35,10 @@ ${portal.toolkit()}
 <div class="well">
 	<p><spring:message code="label.proposals.well"/></p>
 	<p><spring:message code="label.configuration"/></p>
-	<c:if test="${!empty configsList}">
+	<c:if test="${not empty configurations}">
 				<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form-horizontal" id="thesisConfigForm">
 				<select name="configuration" class="form-control">
-					<c:forEach items="${configsList}" var="config">
+					<c:forEach items="${configurations}" var="config">
 						<option <c:if test="${config.externalId eq configuration.externalId}">selected="selected"</c:if> value="${config.externalId}" label='${config.presentationName}'/>
 					</c:forEach>
 				</select>
@@ -46,35 +46,30 @@ ${portal.toolkit()}
 	</c:if>
 </div>
 
-<c:if test="${!empty deleteException}">
+<c:if test="${not empty deleteException}">
 	<p class="text-danger"><spring:message code="error.thesisProposal.delete"/></p>
 </c:if>
 
-<c:if test="${!empty error}">
+<c:if test="${not empty error}">
 	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 
-<c:if test="${!empty suggestedConfigs and !empty configuration}">
+<c:if test="${not empty configuration}">
 	<div class="alert alert-info">
-		<c:forEach items="${suggestedConfigs}" var="config">
-			<p>
-				<p><spring:message code="label.thesis.proposal.info" arguments="${configuration.presentationName},${configuration.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
-				<p><spring:message code="label.thesis.candidacy.info" arguments="${configuration.presentationName},${configuration.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
-			</p>
-		</c:forEach>
+		<p><spring:message code="label.thesis.proposal.info" arguments="${configuration.presentationName},${configuration.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
+		<p><spring:message code="label.thesis.candidacy.info" arguments="${configuration.presentationName},${configuration.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
 	</div>
-</c:if>
-
-	<span class="row">
-		<div class="col-sm-8">
-			<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/create" class="form-horizontal" id="thesisProposalCreateForm">
-				<button type="submit" class="btn btn-default"><spring:message code="button.create"/></button>
-			</form>
-			<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/transpose" class="form-horizontal" id="thesisProposalTransposeForm">
-				<button type="submit" class="btn btn-default"><spring:message code="button.transpose"/></button>
-			</form>
+	
+	<c:if test="${configuration.getProposalPeriod().containsNow()}">
+		<div class="btn-group">
+			<c:url var="createUrl" value="/proposals/create?configuration=${configuration.externalId}" />
+			<c:url var="transposeUrl" value="/proposals/transpose?configuration=${configuration.externalId}" />
+			<a class="btn btn-default" href="${createUrl}"><spring:message code="button.create"/></a>
+			<a class="btn btn-default" href="${transposeUrl}"><spring:message code="button.transpose"/></a>
 		</div>
-	</span>
+	</c:if>
+	
+</c:if>
 	
 <c:if test="${not empty thesisProposalsList}">
 	<div class="table-responsive">
@@ -109,7 +104,7 @@ ${portal.toolkit()}
 						<td>${thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
-								<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
+								<div>${participant.user.name} <small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
 							</c:forEach>
 						</td>
 						<td>
@@ -121,29 +116,21 @@ ${portal.toolkit()}
 							</c:if>
 							</td>
 						<td>
-							<form:form method="GET" action="${pageContext.request.contextPath}/proposals/edit/${thesisProposal.externalId}">
-								<input type="hidden" name="configuration" value="${configuration.externalId}"/>
-								<div class="btn-group btn-group-xs">
-									<button type="submit" class="btn btn-default" id="editButton">
-										<spring:message code='button.edit'/>
-									</button>
-
-									<c:set var="result" scope="session" value=''/>
-									<c:forEach items="${thesisProposal.executionDegreeSet}" var="executionDegree" varStatus="i">
-										<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
-										<c:if test="${i.index != thesisProposal.executionDegreeSet.size() - 1}">
-											<c:set var="result" scope="session" value="${result}, " />
-										</c:if>
-									</c:forEach>
-
-									<input type='button' class='detailsButton btn btn-default' data-observations="${thesisProposal.observations}" data-requirements="${thesisProposal.requirements}" data-goals="${thesisProposal.goals}" data-localization="${thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
-
-									<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
-										<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage"/></button>
-									</c:if>
-								</div>
-							</form:form>
-							<form method="GET" action="${pageContext.request.contextPath}/proposals/manage/${thesisProposal.externalId}" id='${thesisProposal.externalId}'></form>
+							<c:set var="degreesLabels" value="${fn:join(service.getThesisProposalDegrees(thesisProposal), ',')}"/>
+							<c:url var="editUrl" value="/proposals/edit/${thesisProposal.externalId}?configuration=${configuration.externalId}"/>
+							<p></p>
+							<div class="btn-group btn-group-xs">
+								<c:if test="${configuration.getProposalPeriod().containsNow()}">
+									<a href="${editUrl}" class="btn btn-default"><spring:message code="button.edit"/></a>
+								</c:if>
+								<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
+									<spring:message code="label.details"/>
+								</button>
+								<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
+									<c:url var="manageUrl" value="/proposals/manage/${thesisProposal.externalId}"/>
+									<a href="${manageUrl}" class="btn btn-default"><spring:message code="label.candidacies.manage"/></a>
+								</c:if>
+							</div>
 						</td>
 					</tr>
 				</c:forEach>
@@ -151,7 +138,9 @@ ${portal.toolkit()}
 		</table>
 	</div>
 </c:if>
-
+<c:if test="${empty thesisProposalsList}">
+	<spring:message code="label.student.proposals.empty"/>
+</c:if>
 <style>
 form{
 	display: inline

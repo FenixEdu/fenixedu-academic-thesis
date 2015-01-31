@@ -85,7 +85,7 @@ public class StudentCandidaciesController {
         try {
             service.createStudentThesisCandidacy(registration, thesisProposal);
         } catch (Exception exception) {
-            model.addAttribute("error", exception);
+            model.addAttribute("error", exception.getClass().getSimpleName());
             return listProposals(model);
         }
 

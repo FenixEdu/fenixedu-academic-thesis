@@ -85,15 +85,9 @@ public class ThesisProposalsController {
             return "proposals/list";
         }
 
-        if (Authenticate.getUser().getPerson().getTeacher() != null) {
-            model.addAttribute("suggestedConfigs", service.getNotPastExecutionDegrees(Authenticate.getUser(), configuration
-                    .getExecutionDegree().getExecutionYear()));
-        }
-
-        model.addAttribute("configsList", configs);
-
+        model.addAttribute("service", service);
+        model.addAttribute("configurations", configs);
         model.addAttribute("configuration", configuration);
-
         model.addAttribute("thesisProposalsList", service.getThesisProposals(Authenticate.getUser(), configuration));
 
         return "proposals/list";
