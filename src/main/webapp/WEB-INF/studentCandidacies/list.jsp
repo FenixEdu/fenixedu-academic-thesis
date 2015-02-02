@@ -41,7 +41,7 @@
 	<h1><spring:message code="title.studentThesisCandidacy.management"/></h1>
 </div>
 
-<c:if test="${!empty error}">
+<c:if test="${not empty error}">
 	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 

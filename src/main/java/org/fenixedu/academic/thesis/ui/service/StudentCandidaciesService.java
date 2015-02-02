@@ -160,7 +160,7 @@ public class StudentCandidaciesService {
 
                     if (openRegConfigs.isEmpty()) {
                         Optional<ThesisProposalsConfiguration> nextConfig =
-                                regConfigs.stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
+                                regConfigs.stream().max(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
                         if (nextConfig.isPresent()) {
                             suggestedConfigs.add(nextConfig.get());
                         }
