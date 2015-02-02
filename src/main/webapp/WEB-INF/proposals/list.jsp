@@ -59,17 +59,14 @@ ${portal.toolkit()}
 		<p><spring:message code="label.thesis.proposal.info" arguments="${configuration.presentationName},${configuration.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
 		<p><spring:message code="label.thesis.candidacy.info" arguments="${configuration.presentationName},${configuration.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
 	</div>
-
-	<c:if test="${configuration.getProposalPeriod().containsNow()}">
-		<div class="btn-group">
-			<c:url var="createUrl" value="/proposals/create?configuration=${configuration.externalId}" />
-			<c:url var="transposeUrl" value="/proposals/transpose?configuration=${configuration.externalId}" />
-			<a class="btn btn-default" href="${createUrl}"><spring:message code="button.create"/></a>
-			<a class="btn btn-default" href="${transposeUrl}"><spring:message code="button.transpose"/></a>
-		</div>
-	</c:if>
-
 </c:if>
+
+<div class="btn-group">
+	<c:url var="createUrl" value="/proposals/create?configuration=${configuration.externalId}" />
+	<c:url var="transposeUrl" value="/proposals/transpose?configuration=${configuration.externalId}" />
+	<a class="btn btn-default" href="${createUrl}"><spring:message code="button.create"/></a>
+	<a class="btn btn-default" href="${transposeUrl}"><spring:message code="button.transpose"/></a>
+</div>
 
 <c:if test="${not empty thesisProposalsList}">
 	<div class="table-responsive">

@@ -128,7 +128,7 @@ public class ThesisProposalsService {
                 user.getThesisProposalParticipantSet().stream()
                         .flatMap(participant -> participant.getThesisProposal().getThesisConfigurationSet().stream()).distinct();
 
-        return Stream.concat(configurationsForAuthorizations, configurationsForParticipants)
+        return Stream.concat(configurationsForAuthorizations, configurationsForParticipants).distinct()
                 .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
     }
 
