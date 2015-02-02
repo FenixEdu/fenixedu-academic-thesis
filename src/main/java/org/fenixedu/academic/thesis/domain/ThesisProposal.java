@@ -104,7 +104,7 @@ public class ThesisProposal extends ThesisProposal_Base {
         setLocalization(localization);
         getThesisProposalParticipantSet().addAll(participants);
         getThesisConfigurationSet().addAll(configurations);
-        setHidden(false);
+        setHidden(true);
     }
 
     public int getNumberOfStudentCandidacies() {
