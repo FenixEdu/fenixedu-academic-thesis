@@ -58,9 +58,9 @@ ${ portal.toolkit() }
 			<div class="col-sm-4">
 				<c:if test="${!empty executionYearsList}">
 				<select id="executionYearSelect" class="form-control">
-					<option value="NONE" label="<spring:message code='label.executionYear.select'/>"/>
+					<option value="NONE"> <spring:message code='label.executionYear.select'/> </option>
 					<c:forEach items="${executionYearsList}" var="executionYear">
-					<option value="${executionYear.year}" label="${executionYear.year}"/>
+					<option value="${executionYear.year}">${executionYear.year}</option>
 				</c:forEach>
 			</select>
 		</c:if>
@@ -210,9 +210,9 @@ $(".deleteConfiguration").on("click", function() {
 						<label class="col-sm-4 control-label"><spring:message code='label.executionDegree'/></label>
 						<div class="col-sm-8">
 							<select id="executionYearSelect2" class="form-control">
-								<option value="NONE" label="<spring:message code='label.executionYear.select'/>"/>
+								<option value="NONE" label="<spring:message code='label.executionYear.select'/>"> <spring:message code='label.executionYear.select'/> </option>
 								<c:forEach items="${executionYearsList}" var="executionYear">
-								<option value="${executionYear.externalId}" label="${executionYear.year}"/>
+								<option value="${executionYear.externalId}" label="${executionYear.year}">${executionYear.year}</option>
 							</c:forEach>
 						</select>
 					</div>
@@ -222,7 +222,7 @@ $(".deleteConfiguration").on("click", function() {
 					<label for="executionDegree"class="col-sm-4 control-label"></label>
 					<div class="col-sm-8">
 						<select disabled="disabled" name="executionDegree" class="form-control" id="executionDegreeSelect">
-							<option value="NONE" label="<spring:message code='label.executionDegree.select'/>" id="executionDegreeDefaultOption"/>
+							<option value="NONE" label="<spring:message code='label.executionDegree.select'/>" id="executionDegreeDefaultOption"> <spring:message code='label.executionDegree.select'/> </option>
 						</select>
 					</div>
 				</div>
@@ -270,7 +270,7 @@ $("#executionYearSelect2").change(function() {
 			$('#executionDegreeSelect').removeAttr("disabled");
 
 			response.forEach(function(elem) {
-				$("#executionDegreeSelect").append($("<option></option>").attr("value", elem.externalId).attr("label", elem.name));
+				$("#executionDegreeSelect").append($("<option>" + elem.name + "</option>").attr("value", elem.externalId).attr("label", elem.name));
 			});
 		});
 	}

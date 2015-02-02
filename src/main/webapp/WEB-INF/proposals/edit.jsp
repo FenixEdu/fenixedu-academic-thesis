@@ -79,13 +79,13 @@ ${portal.toolkit()}
 				<div class="form-group">
 					<div class="col-sm-10">
 						<select id="selectParticipantType" class="form-control">
-							<option value="" label="${selectParticipantType}"/>
+							<option value="">${selectParticipantType}<option/>
 							<c:forEach var="participantType" items="${participantTypeList}">
 							<c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
-							<option value="${participantType.externalId}" selected="selected" label="${participantType.name.content}"/>
+							<option value="${participantType.externalId}" selected="selected">${participantType.name.content}<option/>
 						</c:if>
 						<c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
-						<option value="${participantType.externalId}" label="${participantType.name.content}"/>
+						<option value="${participantType.externalId}">${participantType.name.content}<option/>
 					</c:if>
 				</c:forEach>
 			</select>
@@ -182,9 +182,9 @@ ${portal.toolkit()}
 			<div class="form-group">
 				<div class="col-sm-10">
 					<select id="selectParticipantType" class="form-control">
-						<option value="" label="${selectParticipantType}"/>
+						<option value="">${selectParticipantType}<option/>
 						<c:forEach var="participantType" items="${participantTypeList}">
-						<option value="${participantType.externalId}" label="${participantType.name.content}"/>
+						<option value="${participantType.externalId}">${participantType.name.content}"<option/>
 					</c:forEach>
 				</select>
 			</div>

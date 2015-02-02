@@ -55,6 +55,7 @@ public class StudentCandidaciesController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String listProposals(Model model) {
+        System.out.println("deleteException=>" + model.asMap().get("deleteException"));
 
         Student student = Authenticate.getUser().getPerson().getStudent();
 
