@@ -119,9 +119,16 @@ public class ThesisProposalsService {
             return new ArrayList<>();
         }
 
-        return teacher.getTeacherAuthorizationStream().flatMap(auth -> auth.getDepartment().getDegreesSet().stream())
-                .flatMap(degree -> degree.getExecutionDegrees().stream())
-                .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct()
+        Stream<ThesisProposalsConfiguration> configurationsForAuthorizations =
+                teacher.getTeacherAuthorizationStream().flatMap(auth -> auth.getDepartment().getDegreesSet().stream())
+                        .flatMap(degree -> degree.getExecutionDegrees().stream())
+                        .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct();
+
+        Stream<ThesisProposalsConfiguration> configurationsForParticipants =
+                user.getThesisProposalParticipantSet().stream()
+                        .flatMap(participant -> participant.getThesisProposal().getThesisConfigurationSet().stream()).distinct();
+
+        return Stream.concat(configurationsForAuthorizations, configurationsForParticipants)
                 .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
     }
 
