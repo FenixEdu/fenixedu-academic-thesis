@@ -211,21 +211,13 @@ ${portal.toolkit()}
 							<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" data-candidates="${candidatesLabels}"value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
 								<spring:message code="label.details"/>
 							</button>
-<%-- 							<form:form method="GET" action="${pageContext.request.contextPath}/admin-proposals/edit/${thesisProposal.externalId}"> --%>
-<!-- 								<div class="btn-group btn-group-xs"> -->
-<!-- 									<button type="submit" class="btn btn-default" id="editButton"> -->
-<%-- 										<spring:message code='button.edit'/> --%>
-<!-- 									</button> -->
-
-
-
-<%-- 									<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}"> --%>
-<%-- 										<button type="button" class="btn btn-default manageButton" data-thesis-proposal="${thesisProposal.externalId}"><spring:message code="label.candidacies.manage"/></button> --%>
-<%-- 									</c:if> --%>
-
-								</div>
-<%-- 							</form:form> --%>
-<%-- 							<form method="GET" action="${pageContext.request.contextPath}/proposals/manage/${thesisProposal.externalId}" id='${thesisProposal.externalId}'></form> --%>
+							<a href="${pageContext.request.contextPath}/admin-proposals/edit/${thesisProposal.externalId}" class="btn btn-default">
+								<spring:message code='button.edit'/>
+							</a>
+							<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
+								<a href="${pageContext.request.contextPath}/admin-proposals/manage/${thesisProposal.externalId}" class="btn btn-default"><spring:message code="label.candidacies.manage"/></a>
+							</c:if>
+							</div>
 						</td>
 					</tr>
 				</c:forEach>

@@ -29,16 +29,20 @@ import java.util.TreeSet;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
+import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
+import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationException;
 import org.fenixedu.academic.thesis.ui.service.ExportThesisProposalsService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
+import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +53,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import pt.ist.fenixframework.FenixFramework;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.thesisProposal.admin.management",
         accessGroup = "thesisSystemManagers | thesisCreators")
@@ -82,6 +92,68 @@ public class AdminThesisProposalsController {
         model.addAttribute("coordinatorProposals",
                 service.getCoordinatorProposals(configuration, isVisible, isAttributed, hasCandidacy));
         return "proposals/admin-list";
+    }
+
+    @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)
+    public ModelAndView editProposalForm(@PathVariable("oid") ThesisProposal thesisProposal,
+            @RequestParam(required = false) ThesisProposalsConfiguration configuration, Model model) {
+
+        boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
+        boolean isDegreeCoordinator =
+                thesisProposal.getExecutionDegreeSet().stream()
+                        .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));
+
+        if (configuration == null) {
+            configuration = thesisProposal.getSingleThesisProposalsConfiguration();
+        }
+
+        model.addAttribute("configuration", configuration);
+        model.addAttribute("action", "admin-proposals/edit");
+        model.addAttribute("adminEdit", true);
+        HashSet<ThesisProposalParticipantBean> thesisProposalParticipantsBean = new HashSet<ThesisProposalParticipantBean>();
+
+        for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
+            String participantType = participant.getThesisProposalParticipantType().getExternalId();
+            ThesisProposalParticipantBean bean = new ThesisProposalParticipantBean(participant.getUser(), participantType);
+            thesisProposalParticipantsBean.add(bean);
+        }
+
+        ThesisProposalBean thesisProposalBean =
+                new ThesisProposalBean(thesisProposal.getTitle(), thesisProposal.getObservations(),
+                        thesisProposal.getRequirements(), thesisProposal.getGoals(), thesisProposal.getLocalization(),
+                        thesisProposal.getThesisConfigurationSet(), thesisProposal.getStudentThesisCandidacySet(),
+                        thesisProposalParticipantsBean, thesisProposal.getHidden(), thesisProposal.getExternalId());
+
+        ModelAndView mav = new ModelAndView("proposals/edit", "command", thesisProposalBean);
+        Set<ThesisProposalsConfiguration> configurations = thesisProposal.getThesisConfigurationSet();
+        mav.addObject("configurations", configurations);
+        mav.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
+
+        return mav;
+
+    }
+
+    @RequestMapping(value = "/edit", method = RequestMethod.POST)
+    public ModelAndView editProposal(@ModelAttribute ThesisProposalBean thesisProposalBean,
+            @RequestParam String participantsJson, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
+            @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations, Model model,
+            RedirectAttributes redirectAttrs) {
+
+        thesisProposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
+
+        ThesisProposal thesisProposal = FenixFramework.getDomainObject(thesisProposalBean.getExternalId());
+
+        JsonParser parser = new JsonParser();
+        JsonArray jsonArray = (JsonArray) parser.parse(participantsJson);
+
+        try {
+            service.editThesisProposal(Authenticate.getUser(), thesisProposalBean, thesisProposal, jsonArray);
+            redirectAttrs.addAttribute("configuration", configuration != null ? configuration.getExternalId() : null);
+            return new ModelAndView("redirect:/admin-proposals");
+        } catch (ThesisProposalException exception) {
+            model.addAttribute("error", exception.getClass().getSimpleName());
+            return editProposalForm(thesisProposal, configuration, model);
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "candidates")
@@ -149,6 +221,24 @@ public class AdminThesisProposalsController {
         modelAndview.addObject("action", "admin-proposals/createProposal");
 
         return modelAndview;
+    }
+
+    @RequestMapping(value = "/accept/{studentThesisCandidacy}", method = RequestMethod.POST)
+    public String acceptStudentThesisCandidacy(
+            @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
+        service.accept(studentThesisCandidacy);
+        return "redirect:/admin-proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
+    }
+
+    @RequestMapping(value = "/manage/{oid}", method = RequestMethod.GET)
+    public ModelAndView manageCandidacies(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
+        ModelAndView view = new ModelAndView("thesisCandidacies/manage");
+        view.addObject("coordinatorManagement", true);
+        view.addObject("action", "admin-proposals/accept");
+        view.addObject("thesisProposal", thesisProposal);
+        view.addObject("candidaciesList", service.getStudentThesisCandidacy(thesisProposal));
+        view.addObject("bestAccepted", service.getBestAccepted(thesisProposal));
+        return view;
     }
 
     @RequestMapping(value = "/createProposal", method = RequestMethod.POST)

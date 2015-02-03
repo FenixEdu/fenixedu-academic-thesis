@@ -35,7 +35,7 @@ ${portal.toolkit()}
 	</h1>
 </div>
 
-<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/edit" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalBean">
+<form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalBean">
 	<input type="hidden" name="configuration" value="${configuration.externalId}"/>
 
 <c:if test="${!empty error}">
@@ -137,16 +137,22 @@ ${portal.toolkit()}
 	<form:input type="hidden" class="form-control" id="ExternalId" placeholder="ExternalId" path="externalId" required="required"/>
 </div>
 
-
 <div class="form-group">
 	<label class="col-sm-2 control-label">${executionDegrees}</label>
 	<div class="col-sm-10" id="configurationsSelect">
 		<c:forEach items="${configurations}" var="configuration">
 			<div class="checkbox">
 				<label>
-					<form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" onClick="checkboxListener(this)" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
+					<c:choose>
+						<c:when test="${not empty adminEdit}">
+							<form:hidden path="thesisProposalsConfigurations" value="${configuration.externalId}" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
+						</c:when>
+						<c:otherwise>
+							<form:checkbox path="thesisProposalsConfigurations" value="${configuration.externalId}" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
+						</c:otherwise>
+					</c:choose>
 				</label>
-				</div>
+			</div>
 	</c:forEach>
 </div>
 </div>

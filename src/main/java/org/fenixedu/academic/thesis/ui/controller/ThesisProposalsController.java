@@ -172,10 +172,11 @@ public class ThesisProposalsController {
         }
 
         model.addAttribute("configuration", configuration);
-
+        model.addAttribute("action", "proposals/edit");
         try {
-            if ((isManager || isDegreeCoordinator)
-                    || thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().contains(DateTime.now())) {
+            if (isDegreeCoordinator
+                    || (isManager || thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod()
+                            .contains(DateTime.now()))) {
                 if (!thesisProposal.getStudentThesisCandidacySet().isEmpty()) {
                     throw new CannotEditUsedThesisProposalsException(thesisProposal);
                 } else {
@@ -257,6 +258,7 @@ public class ThesisProposalsController {
     public ModelAndView manageCandidacies(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
         ModelAndView view = new ModelAndView("thesisCandidacies/manage");
         view.addObject("thesisProposal", thesisProposal);
+        view.addObject("action", "proposals/accept");
         view.addObject("candidaciesList", service.getStudentThesisCandidacy(thesisProposal));
         view.addObject("bestAccepted", service.getBestAccepted(thesisProposal));
         return view;

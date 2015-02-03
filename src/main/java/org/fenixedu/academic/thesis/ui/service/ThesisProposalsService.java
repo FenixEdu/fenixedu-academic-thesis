@@ -30,6 +30,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
+import org.fenixedu.academic.thesis.ui.exception.CannotEditUsedThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.IllegalParticipantTypeException;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
@@ -241,6 +242,10 @@ public class ThesisProposalsService {
         boolean isDegreeCoordinator =
                 thesisProposal.getExecutionDegreeSet().stream()
                         .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(currentUser));
+
+        if (!(isManager || isDegreeCoordinator || thesisProposal.getStudentThesisCandidacySet().isEmpty())) {
+            throw new CannotEditUsedThesisProposalsException(thesisProposal);
+        }
 
         ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
 

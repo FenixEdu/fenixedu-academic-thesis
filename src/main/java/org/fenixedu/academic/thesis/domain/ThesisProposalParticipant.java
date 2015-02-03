@@ -23,7 +23,6 @@ import java.util.Comparator;
 
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.i18n.BundleUtil;
 
 public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
 
@@ -56,8 +55,5 @@ public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
     @Override
     protected void checkForDeletionBlockers(Collection<String> blockers) {
         super.checkForDeletionBlockers(blockers);
-        if (!getThesisProposal().getStudentThesisCandidacySet().isEmpty()) {
-            blockers.add(BundleUtil.getString("resources.ThesisProposalsResources", "error.participants.cant.delete"));
-        }
     }
 }
