@@ -37,7 +37,7 @@ public class ExportThesisProposalsService {
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.number"));
         //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.state"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.title"));
-        ThesisProposal asd;
+
         service.getThesisProposalParticipantTypes().stream().forEach(type -> {
             headers.add(type.getName().getContent() + " - " + BundleUtil.getString(BUNDLE, "export.thesis.user.name"));
             headers.add(type.getName().getContent() + " - " + BundleUtil.getString(BUNDLE, "export.thesis.user.username"));
