@@ -55,7 +55,6 @@ public class StudentCandidaciesController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String listProposals(Model model) {
-        System.out.println("deleteException=>" + model.asMap().get("deleteException"));
 
         Student student = Authenticate.getUser().getPerson().getStudent();
 
@@ -85,7 +84,7 @@ public class StudentCandidaciesController {
 
         try {
             service.createStudentThesisCandidacy(registration, thesisProposal);
-        } catch (Exception exception) {
+        } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
             return listProposals(model);
         }

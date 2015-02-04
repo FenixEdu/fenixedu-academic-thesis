@@ -41,6 +41,10 @@
 	<h1><spring:message code="title.studentThesisCandidacy.management"/></h1>
 </div>
 
+<c:if test="${! empty error}">
+	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
+</c:if>
+
 <c:if test="${! empty deleteException}">
 	<p class="text-danger"><spring:message code="error.thesisProposal.OutOfCandidacyPeriodException"/></p>
 </c:if>
@@ -54,7 +58,6 @@
 	</c:forEach>
 </div>
 </c:if>
-
 
 <div role="tabpanel">
 	<!-- Nav tabs -->
@@ -86,6 +89,11 @@
 				</div>
 			</c:if>
 			<c:if test="${candidaciesSize > 0}">
+			<div class="alert alert-warning">
+				<p>
+					<spring:message code="label.thesis.candidacy.temporary.info"/>
+				</p>
+			</div>
 				<form:form role="form" method="POST" action="${pageContext.request.contextPath}/studentCandidacies/updatePreferences" class="form-horizontal">
 					<input type="hidden" name="json" id="json" />
 					<button type="submit" class="btn btn-default" id="savePreferencesButton" style="display:none;"><spring:message code="button.preferences.save"/></button>

@@ -72,8 +72,15 @@
 				<td>${studentThesisCandidacy.timestamp.toString('dd-MM-YYY HH:mm')}</td>
 				<td>
 					<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
-					<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/accept/${studentThesisCandidacy.externalId}" class="form-horizontal">
+					<form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}/${studentThesisCandidacy.externalId}" class="form-horizontal">
 
+				<c:choose>
+				<c:when test="${not empty coordinatorManagement}">
+					<button type="submit" class="btn btn-default acceptButton">
+						<spring:message code='button.candidacy.accept' />
+					</button>
+				</c:when>
+				<c:otherwise>
 					<c:if test="${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber}">
 					<button type="submit" class="btn btn-default acceptButton" disabled="true">
 						<spring:message code='button.candidacy.accept' />
@@ -85,7 +92,8 @@
 					<spring:message code='button.candidacy.accept' />
 				</button>
 			</c:if>
-
+			</c:otherwise>
+			</c:choose>
 		</form:form>
 	</c:if>
 

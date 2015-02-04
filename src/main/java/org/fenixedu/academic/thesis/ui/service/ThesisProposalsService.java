@@ -30,6 +30,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
+import org.fenixedu.academic.thesis.ui.exception.CannotEditUsedThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.IllegalParticipantTypeException;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
@@ -39,6 +40,8 @@ import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantExce
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
+import org.fenixedu.bennu.core.i18n.BundleUtil;
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
@@ -61,6 +64,7 @@ import com.google.gson.JsonParser;
 public class ThesisProposalsService {
 
     private static final Logger logger = LoggerFactory.getLogger(ThesisProposalsService.class);
+    static String BUNDLE = "resources.FenixEduThesisProposalsResources";
 
     @Autowired
     MessageSource messageSource;
@@ -240,6 +244,10 @@ public class ThesisProposalsService {
                 thesisProposal.getExecutionDegreeSet().stream()
                         .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(currentUser));
 
+        if (!(isManager || isDegreeCoordinator || thesisProposal.getStudentThesisCandidacySet().isEmpty())) {
+            throw new CannotEditUsedThesisProposalsException(thesisProposal);
+        }
+
         ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
 
         for (JsonElement elem : jsonArray) {
@@ -356,6 +364,14 @@ public class ThesisProposalsService {
         studentThesisCandidacy.setAcceptedByAdvisor(false);
     }
 
+    private Optional<String> getAuthenticateGetUserName() {
+        String name = null;
+        if (Authenticate.getUser() != null) {
+            name = Authenticate.getUser().getProfile().getDisplayName();
+        }
+        return Optional.ofNullable(name);
+    }
+
     private void sendStolenProposalMessage(StudentThesisCandidacy oldCandidacy, StudentThesisCandidacy newCandidacy) {
 
         ThesisProposalParticipant newParticipant =
@@ -379,7 +395,8 @@ public class ThesisProposalsService {
                         oldCandidacy.getRegistration().getStudent().getPerson().getUser().getProfile().getDisplayName(),
                         oldCandidacy.getThesisProposal().getTitle(), oldCandidacy.getPreferenceNumber(),
                         newCandidacy.getThesisProposal().getTitle(), newParticipant.getUser().getProfile().getDisplayName(),
-                        newCandidacy.getPreferenceNumber(), link }, I18N.getLocale());
+                        newCandidacy.getPreferenceNumber(), link, getAuthenticateGetUserName().orElse("System") },
+                        I18N.getLocale());
 
         new Message(Bennu.getInstance().getSystemSender(), null, null, subject, body, bccs);
     }
@@ -466,6 +483,17 @@ public class ThesisProposalsService {
     public String[] getThesisProposalDegrees(ThesisProposal proposal) {
         return proposal.getExecutionDegreeSet().stream().map(executionDegree -> executionDegree.getDegree().getSigla())
                 .collect(Collectors.toList()).toArray(new String[0]);
+    }
+
+    public String[] getThesisProposalCandidates(ThesisProposal proposal) {
+        return proposal
+                .getStudentThesisCandidacySet()
+                .stream()
+                .map(candidacy -> {
+                    User user = candidacy.getRegistration().getStudent().getPerson().getUser();
+                    return user.getProfile().getDisplayName() + " (" + user.getUsername() + ") - "
+                            + BundleUtil.getString(BUNDLE, "label.preference.number") + ": " + candidacy.getPreferenceNumber();
+                }).collect(Collectors.toList()).toArray(new String[0]);
     }
 
     public boolean isAccepted(ThesisProposal proposal) {

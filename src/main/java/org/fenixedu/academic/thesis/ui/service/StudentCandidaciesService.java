@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
+import org.fenixedu.academic.domain.StudentCurricularPlan;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.student.Student;
@@ -18,6 +19,8 @@ import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberStudentThesisCandidaciesException;
 import org.fenixedu.academic.thesis.ui.exception.OutOfCandidacyPeriodException;
+import org.fenixedu.academic.thesis.ui.exception.Unsuficient1stCycleCreditsException;
+import org.fenixedu.academic.thesis.ui.exception.Unsuficient2ndCycleCreditsException;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -63,30 +66,44 @@ public class StudentCandidaciesService {
 
     @Atomic(mode = TxMode.WRITE)
     public void createStudentThesisCandidacy(Registration registration, ThesisProposal thesisProposal)
-            throws MaxNumberStudentThesisCandidaciesException, OutOfCandidacyPeriodException {
+            throws MaxNumberStudentThesisCandidaciesException, OutOfCandidacyPeriodException,
+            Unsuficient1stCycleCreditsException, Unsuficient2ndCycleCreditsException {
 
         ThesisProposalsConfiguration thesisProposalsConfiguration = thesisProposal.getSingleThesisProposalsConfiguration();
 
+        StudentCurricularPlan studentCurricularPlan = registration.getActiveStudentCurricularPlan();
+
+        if (studentCurricularPlan.getFirstCycle() != null
+                && thesisProposalsConfiguration.getMinECTS1stCycle() > studentCurricularPlan.getFirstCycle()
+                        .getAprovedEctsCredits()) {
+            throw new Unsuficient1stCycleCreditsException();
+        }
+
+        if (studentCurricularPlan.getSecondCycle() == null
+                || thesisProposalsConfiguration.getMinECTS2ndCycle() > studentCurricularPlan.getSecondCycle()
+                        .getAprovedEctsCredits()) {
+            throw new Unsuficient2ndCycleCreditsException();
+        }
+
         if (!thesisProposalsConfiguration.getCandidacyPeriod().containsNow()) {
             throw new OutOfCandidacyPeriodException();
-        } else {
-
-            long candidaciesCount =
-                    registration
-                            .getStudentThesisCandidacySet()
-                            .stream()
-                            .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
-                                    .getCandidacyPeriod().containsNow()).count();
-
-            if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
-                    && candidaciesCount >= thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent()) {
-                throw new MaxNumberStudentThesisCandidaciesException(registration.getStudent());
-            } else {
-                StudentThesisCandidacy studentThesisCandidacy =
-                        new StudentThesisCandidacy(registration, (int) candidaciesCount + 1, thesisProposal);
-                registration.getStudentThesisCandidacySet().add(studentThesisCandidacy);
-            }
         }
+
+        long candidaciesCount =
+                registration
+                        .getStudentThesisCandidacySet()
+                        .stream()
+                        .filter(candidacy -> candidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
+                                .getCandidacyPeriod().containsNow()).count();
+
+        if (thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent() != -1
+                && candidaciesCount >= thesisProposalsConfiguration.getMaxThesisCandidaciesByStudent()) {
+            throw new MaxNumberStudentThesisCandidaciesException(registration.getStudent());
+        }
+
+        StudentThesisCandidacy studentThesisCandidacy =
+                new StudentThesisCandidacy(registration, (int) candidaciesCount + 1, thesisProposal);
+        registration.getStudentThesisCandidacySet().add(studentThesisCandidacy);
 
     }
 

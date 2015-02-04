@@ -72,7 +72,7 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
             };
 
     public ThesisProposalsConfiguration(Interval proposalPeriod, Interval candidacyPeriod, ExecutionDegree executionDegree,
-            int maxThesisCandidaciesByStudent, int maxThesisProposalsByUser) {
+            int maxThesisCandidaciesByStudent, int maxThesisProposalsByUser, int minECTS1stCycle, int minECTS2ndCycle) {
         super();
         setProposalPeriod(proposalPeriod);
         setCandidacyPeriod(candidacyPeriod);
@@ -80,6 +80,8 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
         setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
         setMaxThesisCandidaciesByStudent(maxThesisCandidaciesByStudent);
         setMaxThesisProposalsByUser(maxThesisProposalsByUser);
+        setMinECTS1stCycle(minECTS1stCycle);
+        setMinECTS2ndCycle(minECTS2ndCycle);
     }
 
     public ThesisProposalsConfiguration() {
@@ -108,7 +110,9 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
         return getMaxThesisCandidaciesByStudent() == configuration.getMaxThesisCandidaciesByStudent()
                 && getMaxThesisProposalsByUser() == configuration.getMaxThesisProposalsByUser()
                 && getProposalPeriod().isEqual(configuration.getProposalPeriod())
-                && getCandidacyPeriod().isEqual(configuration.getCandidacyPeriod());
+                && getCandidacyPeriod().isEqual(configuration.getCandidacyPeriod())
+                && getMinECTS1stCycle() == configuration.getMinECTS1stCycle()
+                && getMinECTS2ndCycle() == configuration.getMinECTS2ndCycle();
     }
 
     @Override

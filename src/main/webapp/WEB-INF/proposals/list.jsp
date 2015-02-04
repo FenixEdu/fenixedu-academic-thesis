@@ -125,7 +125,14 @@ ${portal.toolkit()}
 								</button>
 								<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
 									<c:url var="manageUrl" value="/proposals/manage/${thesisProposal.externalId}"/>
-									<a href="${manageUrl}" class="btn btn-default"><spring:message code="label.candidacies.manage"/></a>
+									<c:choose>
+										<c:when test="${service.isAccepted(thesisProposal)}">
+											<a href="${manageUrl}" class="btn btn-default"><spring:message code="label.candidacies.manage"/></a>
+										</c:when>
+										<c:otherwise>
+											<a href="${manageUrl}" class="btn btn-warning"><spring:message code="label.candidacies.manage"/></a>
+										</c:otherwise>
+									</c:choose>
 								</c:if>
 							</div>
 						</td>
