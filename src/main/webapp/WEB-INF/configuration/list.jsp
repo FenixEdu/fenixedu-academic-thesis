@@ -90,6 +90,8 @@ ${ portal.toolkit() }
 			<col></col>
 			<col></col>
 			<col></col>
+			<col></col>
+			<col></col>
 		</colgroup>
 		<thead>
 			<tr>
@@ -101,6 +103,8 @@ ${ portal.toolkit() }
 					<th><spring:message code='label.candidacyPeriod.end'/></th>
 					<th><spring:message code='label.maxThesisCandidaciesByStudent'/></th>
 					<th><spring:message code='label.maxThesisProposalsByUser'/></th>
+					<th><spring:message code='label.min.ects.first.cyle'/></th>
+					<th><spring:message code='label.min.ects.second.cyle'/></th>
 					<th></th>
 				</tr>
 			</thead>
@@ -128,7 +132,9 @@ ${ portal.toolkit() }
 						<spring:message code='label.configuration.unlimited'/>
 					</c:if>
 				</td>
-					<td class=""><form:form method="GET" action="${pageContext.request.contextPath}/configuration/edit/${configuration.externalId}">
+				<td>${configuration.minECTS1stCycle}</td>
+				<td>${configuration.minECTS2ndCycle}</td>
+				<td class=""><form:form method="GET" action="${pageContext.request.contextPath}/configuration/edit/${configuration.externalId}">
 						<button type="submit" class="btn btn-xs btn-default" id="editButton"><spring:message code="button.edit"/></button>
 					</form:form></td>
 				</tr>
@@ -240,6 +246,20 @@ $(".deleteConfiguration").on("click", function() {
 					<div class="col-sm-8">
 						<input type="number" min="-1" class="form-control" id="maxThesisProposalsByUser" name="maxThesisProposalsByUser" placeholder="<spring:message code='label.maxThesisProposalsByUser'/>" required="required" value="-1"/>
 						<div class="help-block"><spring:message code='label.maxThesisProposalsByUser.create.help-message'/></div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="minECTS1stCycle" class="col-sm-4 control-label"><spring:message code='label.min.ects.first.cyle'/></label>
+					<div class="col-sm-8">
+						<input type="number" min="0" class="form-control" id="minECTS1stCycle" name="minECTS1stCycle" required="required" value="0"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="minECTS2ndCycle" class="col-sm-4 control-label"><spring:message code='label.min.ects.second.cyle'/></label>
+					<div class="col-sm-8">
+						<input type="number" min="0" class="form-control" id="minECTS2ndCycle" name="minECTS2ndCycle" required="required" value="0"/>
 					</div>
 				</div>
 

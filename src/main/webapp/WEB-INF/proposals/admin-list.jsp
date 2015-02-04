@@ -203,11 +203,12 @@ ${portal.toolkit()}
 						</td>
 						<td>
 							<c:set var="degreesLabels" value="${fn:join(service.getThesisProposalDegrees(thesisProposal), ',')}"/>
+							<c:set var="candidatesLabels" value='${fn:join(service.getThesisProposalCandidates(thesisProposal), "</br>")}'/>
 							<c:url var="toggleVisibilityUrl" value="/admin-proposals/toggle/${thesisProposal.externalId}?configuration=${configuration.externalId}&isVisible=${isVisible}&isAttributed=${isAttributed}&hasCandidacy=${hasCandidacy}"/>
 							<p></p>
 							<div class="btn-group btn-group-xs">
 							<a href="${toggleVisibilityUrl}" class="btn btn-default"><spring:message code="label.toggle.visibility"/></a>
-							<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
+							<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" data-candidates="${candidatesLabels}"value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
 								<spring:message code="label.details"/>
 							</button>
 <%-- 							<form:form method="GET" action="${pageContext.request.contextPath}/admin-proposals/edit/${thesisProposal.externalId}"> --%>
@@ -283,6 +284,13 @@ form{
 					</div>
 				</div>
 
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.candidates'/></label>
+					<div class="col-sm-10">
+						<div class="information candidates"></div>
+					</div>
+				</div>
+
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code='button.close'/></button>
@@ -318,7 +326,7 @@ $(function(){
 	$(".detailsButton").on("click", function(evt){
 		var e = $(evt.target);
 
-		['observations','requirements','goals','localization','degrees'].map(function(x){
+		['observations','requirements','goals','localization','degrees', 'candidates'].map(function(x){
 			$("#view ." + x).html(e.data(x));
 		});
 

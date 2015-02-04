@@ -11,6 +11,8 @@ class ThesisProposalsConfiguration {
 	public Interval candidacyPeriod;
 	public int maxThesisCandidaciesByStudent;
 	public int maxThesisProposalsByUser;
+	public int minECTS1stCycle;
+	public int minECTS2ndCycle;
 }
 
 class ThesisProposal {

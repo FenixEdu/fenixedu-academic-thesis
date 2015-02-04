@@ -39,6 +39,8 @@ public class ConfigurationBean {
     private String externalId;
     private int maxThesisCandidaciesByStudent;
     private int maxThesisProposalsByUser;
+    private int minECTS1stCycle;
+    private int minECTS2ndCycle;
 
     public String getProposalPeriodStart() {
         return proposalPeriodStart;
@@ -104,9 +106,25 @@ public class ConfigurationBean {
         this.externalId = externalId;
     }
 
+    public int getMinECTS1stCycle() {
+        return minECTS1stCycle;
+    }
+
+    public void setMinECTS1stCycle(int minECTS1stCycle) {
+        this.minECTS1stCycle = minECTS1stCycle;
+    }
+
+    public int getMinECTS2ndCycle() {
+        return minECTS2ndCycle;
+    }
+
+    public void setMinECTS2ndCycle(int minECTS2ndCycle) {
+        this.minECTS2ndCycle = minECTS2ndCycle;
+    }
+
     public ConfigurationBean(String proposalPeriodStart, String proposalPeriodEnd, String candidacyPeriodStart,
             String candidacyPeriodEnd, ExecutionDegree executionDegree, int maxThesisCandidaciesByStudent,
-            int maxThesisProposalsByUser) {
+            int maxThesisProposalsByUser, int minECTS1stCycle, int minECTS2ndCycle) {
         this.proposalPeriodStart = proposalPeriodStart;
         this.proposalPeriodEnd = proposalPeriodEnd;
         this.candidacyPeriodStart = candidacyPeriodStart;
@@ -114,6 +132,8 @@ public class ConfigurationBean {
         this.executionDegree = executionDegree;
         this.maxThesisCandidaciesByStudent = maxThesisCandidaciesByStudent;
         this.maxThesisProposalsByUser = maxThesisProposalsByUser;
+        this.minECTS1stCycle = minECTS1stCycle;
+        this.minECTS2ndCycle = minECTS2ndCycle;
     }
 
     public ConfigurationBean() {
@@ -121,7 +141,7 @@ public class ConfigurationBean {
 
     public ConfigurationBean(DateTime proposalPeriodStart, DateTime proposalPeriodEnd, DateTime candidacyPeriodStart,
             DateTime candidacyPeriodEnd, ExecutionDegree executionDegree, String externalId, int maxThesisCandidaciesByStudent,
-            int maxThesisProposalsByUser) {
+            int maxThesisProposalsByUser, int minECTS1stCycle, int minECTS2ndCycle) {
 
         this.proposalPeriodStart = proposalPeriodStart.toString();
         this.proposalPeriodEnd = proposalPeriodEnd.toString();
@@ -132,6 +152,9 @@ public class ConfigurationBean {
         this.externalId = externalId;
         this.maxThesisCandidaciesByStudent = maxThesisCandidaciesByStudent;
         this.maxThesisProposalsByUser = maxThesisProposalsByUser;
+
+        this.minECTS1stCycle = minECTS1stCycle;
+        this.minECTS2ndCycle = minECTS2ndCycle;
     }
 
     public static class Builder {
@@ -142,8 +165,11 @@ public class ConfigurationBean {
         private final ExecutionDegree executionDegree;
         private final int maxThesisCandidaciesByStudent;
         private final int maxThesisProposalsByUser;
+        private final int minECTS1stCycle;
+        private final int minECTS2ndCycle;
 
         public Builder(ConfigurationBean thesisProposalsConfigurationBean) {
+
             this.proposalPeriodStart = thesisProposalsConfigurationBean.getProposalPeriodStart();
             this.proposalPeriodEnd = thesisProposalsConfigurationBean.getProposalPeriodEnd();
             this.candidacyPeriodStart = thesisProposalsConfigurationBean.getCandidacyPeriodStart();
@@ -151,6 +177,8 @@ public class ConfigurationBean {
             this.executionDegree = thesisProposalsConfigurationBean.getExecutionDegree();
             this.maxThesisCandidaciesByStudent = thesisProposalsConfigurationBean.getMaxThesisCandidaciesByStudent();
             this.maxThesisProposalsByUser = thesisProposalsConfigurationBean.getMaxThesisProposalsByUser();
+            this.minECTS1stCycle = thesisProposalsConfigurationBean.getMinECTS1stCycle();
+            this.minECTS2ndCycle = thesisProposalsConfigurationBean.getMinECTS2ndCycle();
         }
 
         @Atomic(mode = TxMode.WRITE)
@@ -176,7 +204,7 @@ public class ConfigurationBean {
             }
 
             return new ThesisProposalsConfiguration(proposalPeriod, candidacyPeriod, executionDegree,
-                    maxThesisCandidaciesByStudent, maxThesisProposalsByUser);
+                    maxThesisCandidaciesByStudent, maxThesisProposalsByUser, minECTS1stCycle, minECTS2ndCycle);
         }
     }
 

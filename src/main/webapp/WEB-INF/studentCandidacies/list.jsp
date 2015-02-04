@@ -41,6 +41,10 @@
 	<h1><spring:message code="title.studentThesisCandidacy.management"/></h1>
 </div>
 
+<c:if test="${! empty error}">
+	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
+</c:if>
+
 <c:if test="${! empty deleteException}">
 	<p class="text-danger"><spring:message code="error.thesisProposal.OutOfCandidacyPeriodException"/></p>
 </c:if>

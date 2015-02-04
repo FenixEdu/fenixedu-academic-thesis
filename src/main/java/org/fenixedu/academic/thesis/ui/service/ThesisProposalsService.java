@@ -39,6 +39,7 @@ import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantExce
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
+import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
@@ -61,6 +62,7 @@ import com.google.gson.JsonParser;
 public class ThesisProposalsService {
 
     private static final Logger logger = LoggerFactory.getLogger(ThesisProposalsService.class);
+    static String BUNDLE = "resources.FenixEduThesisProposalsResources";
 
     @Autowired
     MessageSource messageSource;
@@ -466,6 +468,17 @@ public class ThesisProposalsService {
     public String[] getThesisProposalDegrees(ThesisProposal proposal) {
         return proposal.getExecutionDegreeSet().stream().map(executionDegree -> executionDegree.getDegree().getSigla())
                 .collect(Collectors.toList()).toArray(new String[0]);
+    }
+
+    public String[] getThesisProposalCandidates(ThesisProposal proposal) {
+        return proposal
+                .getStudentThesisCandidacySet()
+                .stream()
+                .map(candidacy -> {
+                    User user = candidacy.getRegistration().getStudent().getPerson().getUser();
+                    return user.getProfile().getDisplayName() + " (" + user.getUsername() + ") - "
+                            + BundleUtil.getString(BUNDLE, "label.preference.number") + ": " + candidacy.getPreferenceNumber();
+                }).collect(Collectors.toList()).toArray(new String[0]);
     }
 
     public boolean isAccepted(ThesisProposal proposal) {
