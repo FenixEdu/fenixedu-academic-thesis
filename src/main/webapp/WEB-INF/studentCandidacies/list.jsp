@@ -58,11 +58,6 @@
 	</c:forEach>
 </div>
 </c:if>
-<div class="alert alert-warning">
-	<p>
-		<spring:message code="label.thesis.candidacy.temporary.info"/>
-	</p>
-</div>
 
 <div role="tabpanel">
 	<!-- Nav tabs -->
