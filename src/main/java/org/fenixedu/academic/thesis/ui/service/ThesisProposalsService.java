@@ -41,6 +41,7 @@ import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
@@ -363,6 +364,14 @@ public class ThesisProposalsService {
         studentThesisCandidacy.setAcceptedByAdvisor(false);
     }
 
+    private Optional<String> getAuthenticateGetUserName() {
+        String name = null;
+        if (Authenticate.getUser() != null) {
+            name = Authenticate.getUser().getProfile().getDisplayName();
+        }
+        return Optional.ofNullable(name);
+    }
+
     private void sendStolenProposalMessage(StudentThesisCandidacy oldCandidacy, StudentThesisCandidacy newCandidacy) {
 
         ThesisProposalParticipant newParticipant =
@@ -386,7 +395,8 @@ public class ThesisProposalsService {
                         oldCandidacy.getRegistration().getStudent().getPerson().getUser().getProfile().getDisplayName(),
                         oldCandidacy.getThesisProposal().getTitle(), oldCandidacy.getPreferenceNumber(),
                         newCandidacy.getThesisProposal().getTitle(), newParticipant.getUser().getProfile().getDisplayName(),
-                        newCandidacy.getPreferenceNumber(), link }, I18N.getLocale());
+                        newCandidacy.getPreferenceNumber(), link, getAuthenticateGetUserName().orElse("System") },
+                        I18N.getLocale());
 
         new Message(Bennu.getInstance().getSystemSender(), null, null, subject, body, bccs);
     }
