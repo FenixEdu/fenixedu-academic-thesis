@@ -481,6 +481,22 @@ public class ThesisProposalsService {
         return proposal.getStudentThesisCandidacySet().stream().anyMatch(StudentThesisCandidacy::getAcceptedByAdvisor);
     }
 
+    public boolean canTeacherAcceptedCandidacy(final ThesisProposal proposal) {
+        return proposal
+                .getStudentThesisCandidacySet()
+                .stream()
+                .anyMatch(candidacy -> {
+                    //best accepted for that student
+                        Optional<StudentThesisCandidacy> hit =
+                                candidacy.getRegistration().getStudentThesisCandidacySet().stream()
+                                        .filter(StudentThesisCandidacy::getAcceptedByAdvisor)
+                                        .min(StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
+
+                        return !hit.isPresent()
+                                || (hit.isPresent() && hit.get().getPreferenceNumber() > candidacy.getPreferenceNumber());
+                    });
+    }
+
     @Atomic(mode = TxMode.WRITE)
     public boolean toggleVisibility(ThesisProposal proposal) {
         final boolean state = !proposal.getHidden();

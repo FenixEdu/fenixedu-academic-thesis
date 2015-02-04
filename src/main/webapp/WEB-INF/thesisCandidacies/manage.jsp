@@ -85,7 +85,7 @@
 					<button type="submit" class="btn btn-default acceptButton" disabled="true">
 						<spring:message code='button.candidacy.accept' />
 					</button>
-					<p>You can't accept this student since it has already been accepted in a more prefereble proposal</p>
+					<p>You can't accept this student since it has already been accepted in a more preferable proposal</p>
 				</c:if>
 				<c:if test="${!(bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber)}">
 				<button type="submit" class="btn btn-default acceptButton">
