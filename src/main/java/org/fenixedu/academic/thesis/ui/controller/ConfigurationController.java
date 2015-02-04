@@ -188,7 +188,8 @@ public class ConfigurationController {
                 new ConfigurationBean(configuration.getProposalPeriod().getStart(), configuration.getProposalPeriod().getEnd(),
                         configuration.getCandidacyPeriod().getStart(), configuration.getCandidacyPeriod().getEnd(),
                         configuration.getExecutionDegree(), configuration.getExternalId(),
-                        configuration.getMaxThesisCandidaciesByStudent(), configuration.getMaxThesisProposalsByUser());
+                        configuration.getMaxThesisCandidaciesByStudent(), configuration.getMaxThesisProposalsByUser(),
+                        configuration.getMinECTS1stCycle(), configuration.getMinECTS2ndCycle());
 
         ModelAndView mav = new ModelAndView("configuration/edit", "command", configurationBean);
 
@@ -247,6 +248,9 @@ public class ConfigurationController {
 
         thesisProposalsConfiguration.setMaxThesisCandidaciesByStudent(configurationBean.getMaxThesisCandidaciesByStudent());
         thesisProposalsConfiguration.setMaxThesisProposalsByUser(configurationBean.getMaxThesisProposalsByUser());
+
+        thesisProposalsConfiguration.setMinECTS1stCycle(configurationBean.getMinECTS1stCycle());
+        thesisProposalsConfiguration.setMinECTS2ndCycle(configurationBean.getMinECTS2ndCycle());
     }
 
     @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE, value = "/execution-year/{executionYear}/execution-degrees",
