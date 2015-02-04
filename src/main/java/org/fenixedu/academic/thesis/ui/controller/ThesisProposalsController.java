@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
@@ -65,30 +66,30 @@ public class ThesisProposalsController {
     @Autowired
     ThesisProposalsService service;
 
-    private String listProposals(Model model, ThesisProposalsConfiguration configuration) {
-        return listProposals(model, configuration, null, null, null);
+    private String listProposals(Model model, ExecutionYear executionYear) {
+        return listProposals(model, executionYear, null, null, null);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public String listProposals(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
-            @RequestParam(required = false) Boolean isVisible, @RequestParam(required = false) Boolean isAttributed,
-            @RequestParam(required = false) Boolean hasCandidacy) {
+    public String listProposals(Model model, @RequestParam(required = false) ExecutionYear executionYear, @RequestParam(
+            required = false) Boolean isVisible, @RequestParam(required = false) Boolean isAttributed, @RequestParam(
+            required = false) Boolean hasCandidacy) {
 
-        List<ThesisProposalsConfiguration> configs = service.getThesisProposalsConfigurations(Authenticate.getUser());
+        List<ExecutionYear> executionYears = service.getThesisProposalsConfigurationsExecutionYears(Authenticate.getUser());
 
-        if (configuration == null && !configs.isEmpty()) {
-            configuration = configs.iterator().next();
+        if (executionYear == null && !executionYears.isEmpty()) {
+            executionYear = executionYears.iterator().next();
         }
 
-        if (configuration == null) {
+        if (executionYear == null) {
             model.addAttribute("error", "cant.manage.list.proposals");
             return "proposals/list";
         }
 
         model.addAttribute("service", service);
-        model.addAttribute("configurations", configs);
-        model.addAttribute("configuration", configuration);
-        model.addAttribute("thesisProposalsList", service.getThesisProposals(Authenticate.getUser(), configuration));
+        model.addAttribute("executionYears", executionYears);
+        model.addAttribute("executionYear", executionYear);
+        model.addAttribute("proposals", service.getThesisProposals(Authenticate.getUser(), executionYear));
 
         return "proposals/list";
     }
@@ -213,7 +214,7 @@ public class ThesisProposalsController {
             }
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
-            return new ModelAndView(listProposals(model, configuration));
+            return new ModelAndView(listProposals(model, configuration.getExecutionDegree().getExecutionYear()));
         }
     }
 

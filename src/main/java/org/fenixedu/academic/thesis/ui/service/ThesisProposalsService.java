@@ -107,6 +107,17 @@ public class ThesisProposalsService {
         return proposalsStream.collect(Collectors.toList());
     }
 
+    public List<ThesisProposal> getThesisProposals(User user, ExecutionYear year) {
+        return getThesisProposalsConfigurations(user)
+                .stream()
+                .filter(p -> p.getExecutionDegree().getExecutionYear().equals(year))
+                .flatMap(configuration -> configuration.getThesisProposalSet().stream())
+                .distinct()
+                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream()
+                        .anyMatch(participant -> participant.getUser().equals(user)))
+                .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES).collect(Collectors.toList());
+    }
+
     public List<ThesisProposal> getThesisProposals(User user, ThesisProposalsConfiguration configuration) {
         return ThesisProposal.readProposalsByUserAndConfiguration(user, configuration).stream()
                 .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES).collect(Collectors.toList());
@@ -141,36 +152,6 @@ public class ThesisProposalsService {
                 .filter(executionDegree -> CoordinatorGroup.get(executionDegree.getDegree()).isMember(coordinator))
                 .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct()
                 .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
-    }
-
-    public Set<ThesisProposalsConfiguration> getNotPastExecutionDegrees(User user, ExecutionYear year) {
-        Set<ExecutionDegree> notPastExecDegrees =
-                user.getPerson().getTeacher().getProfessorships().stream()
-                        .flatMap(professorship -> professorship.getExecutionCourse().getExecutionDegrees().stream())
-                        .map(execDegree -> execDegree.getDegree()).flatMap(degree -> degree.getExecutionDegrees().stream())
-                        .filter(executionDegree -> executionDegree.getExecutionYear().isAfterOrEquals(year))
-                        .collect(Collectors.toSet());
-
-        HashMap<Degree, Set<ThesisProposalsConfiguration>> map = new HashMap<Degree, Set<ThesisProposalsConfiguration>>();
-
-        notPastExecDegrees.stream().flatMap(execDegree -> execDegree.getThesisProposalsConfigurationSet().stream())
-                .filter(config -> config.getProposalPeriod().getEnd().isAfterNow()).forEach(config -> {
-                    Degree degree = config.getExecutionDegree().getDegree();
-                    if (!map.containsKey(degree)) {
-                        map.put(degree, new HashSet<ThesisProposalsConfiguration>());
-                    }
-                    map.get(degree).add(config);
-                });
-
-        Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<ThesisProposalsConfiguration>();
-        for (Degree degree : map.keySet()) {
-            Optional<ThesisProposalsConfiguration> config =
-                    map.get(degree).stream().min(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
-            if (config.isPresent()) {
-                suggestedConfigs.add(config.get());
-            }
-        }
-        return suggestedConfigs;
     }
 
     @Atomic(mode = TxMode.WRITE)
@@ -505,5 +486,11 @@ public class ThesisProposalsService {
         final boolean state = !proposal.getHidden();
         proposal.setHidden(state);
         return state;
+    }
+
+    public List<ExecutionYear> getThesisProposalsConfigurationsExecutionYears(User user) {
+        return getThesisProposalsConfigurations(user).stream().map(ThesisProposalsConfiguration::getExecutionDegree)
+                .map(ExecutionDegree::getExecutionYear).distinct().sorted(ExecutionYear.COMPARATOR_BY_YEAR.reversed())
+                .collect(Collectors.toList());
     }
 }

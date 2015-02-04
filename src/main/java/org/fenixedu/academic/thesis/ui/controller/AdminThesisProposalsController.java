@@ -35,6 +35,7 @@ import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
+import org.fenixedu.academic.thesis.ui.bean.AdminProposalsSummaryBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
@@ -84,6 +85,7 @@ public class AdminThesisProposalsController {
         }
 
         model.addAttribute("configuration", configuration);
+        model.addAttribute("summary", configuration == null ? null : new AdminProposalsSummaryBean(service, configuration));
         model.addAttribute("configurations", configurations);
         model.addAttribute("isVisible", isVisible);
         model.addAttribute("isAttributed", isAttributed);

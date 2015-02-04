@@ -35,11 +35,11 @@ ${portal.toolkit()}
 <div class="well">
 	<p><spring:message code="label.proposals.well"/></p>
 	<p><spring:message code="label.configuration"/></p>
-	<c:if test="${not empty configurations}">
+	<c:if test="${not empty executionYears}">
 				<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form-horizontal" id="thesisConfigForm">
-				<select name="configuration" class="form-control">
-					<c:forEach items="${configurations}" var="config">
-						<option <c:if test="${config.externalId eq configuration.externalId}">selected="selected"</c:if> value="${config.externalId}" label='${config.presentationName}'> ${config.presentationName} </option>
+				<select name="executionYear" class="form-control">
+					<c:forEach items="${executionYears}" var="year">
+						<option <c:if test="${year.externalId eq executionYear.externalId}">selected="selected"</c:if> value="${year.externalId}" label='${year.qualifiedName}'> ${year.qualifiedName} </option>
 					</c:forEach>
 				</select>
 			</form>
@@ -68,83 +68,67 @@ ${portal.toolkit()}
 	<a class="btn btn-default" href="${transposeUrl}"><spring:message code="button.transpose"/></a>
 </div>
 
-<c:if test="${not empty thesisProposalsList}">
-	<div class="table-responsive">
-		<table class="table">
-			<thead>
-				<tr>
-					<th>
-						<spring:message code='label.thesis.id'/>
-					</th>
-					<th>
-						<spring:message code='label.year'/>
-					</th>
-					<th>
-						<spring:message code='label.title'/>
-					</th>
-					<th>
-						<spring:message code='label.participants'/>
-					</th>
-					<th>
-						<spring:message code='label.proposal.status'/>
-					</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				<c:forEach items="${thesisProposalsList}" var="thesisProposal">
-					<tr>
-						<td>${thesisProposal.identifier}</td>
-						<td>
-							${thesisProposal.getSingleThesisProposalsConfiguration().executionDegree.executionYear.year}
-						</td>
-						<td>${thesisProposal.title}</td>
-						<td>
-							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
-								<div>${participant.user.name} <small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
-							</c:forEach>
-						</td>
-						<td>
-							<c:if test="${thesisProposal.hidden}">
-								<spring:message code='label.proposal.status.hidden'/>
-							</c:if>
-							<c:if test="${!thesisProposal.hidden}">
-								<spring:message code='label.proposal.status.visible'/>
-							</c:if>
-							</td>
-						<td>
-							<c:set var="degreesLabels" value="${fn:join(service.getThesisProposalDegrees(thesisProposal), ',')}"/>
-							<c:url var="editUrl" value="/proposals/edit/${thesisProposal.externalId}?configuration=${configuration.externalId}"/>
-							<p></p>
-							<div class="btn-group btn-group-xs">
-								<c:if test="${configuration.getProposalPeriod().containsNow()}">
-									<a href="${editUrl}" class="btn btn-default"><spring:message code="button.edit"/></a>
-								</c:if>
-								<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
-									<spring:message code="label.details"/>
-								</button>
-								<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
-									<c:url var="manageUrl" value="/proposals/manage/${thesisProposal.externalId}"/>
-									<c:choose>
-										<c:when test="${service.isAccepted(thesisProposal)}">
-											<a href="${manageUrl}" class="btn btn-default"><spring:message code="label.candidacies.manage"/></a>
-										</c:when>
-										<c:otherwise>
-											<a href="${manageUrl}" class="btn btn-warning"><spring:message code="label.candidacies.manage"/></a>
-										</c:otherwise>
-									</c:choose>
-								</c:if>
-							</div>
-						</td>
-					</tr>
-				</c:forEach>
-			</tbody>
-		</table>
-	</div>
-</c:if>
-<c:if test="${empty thesisProposalsList}">
-	<spring:message code="label.student.proposals.empty"/>
-</c:if>
+<table class="table">
+	<thead>
+		<tr>
+			<th>
+				<spring:message code='label.thesis.id'/>
+			</th>
+			<th>
+				<spring:message code='label.title'/>
+			</th>
+			<th>
+				<spring:message code='label.executionDegree' />
+			</th>
+			<th>
+				<spring:message code='label.participants'/>
+			</th>
+			<th>
+				<spring:message code='label.proposal.status'/>
+			</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<c:forEach items="${proposals}" var="thesisProposal">
+			<c:set var="degreesLabels" value="${fn:join(service.getThesisProposalDegrees(thesisProposal), ',')}"/>
+			<tr>
+				<td>${thesisProposal.identifier}</td>
+				<td>${thesisProposal.title}</td>
+				<td>${degreesLabels}</td>
+				<td>
+					<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
+						<div>${participant.user.name} <small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
+					</c:forEach>
+				</td>
+				<td>
+					<c:if test="${thesisProposal.hidden}">
+						<spring:message code='label.proposal.status.hidden'/>
+					</c:if>
+					<c:if test="${!thesisProposal.hidden}">
+						<spring:message code='label.proposal.status.visible'/>
+					</c:if>
+				</td>
+				<td>
+					<c:url var="editUrl" value="/proposals/edit/${thesisProposal.externalId}?configuration=${configuration.externalId}"/>
+					<p></p>
+					<div class="btn-group btn-group-xs">
+						<c:if test="${configuration.getProposalPeriod().containsNow()}">
+							<a href="${editUrl}" class="btn btn-default"><spring:message code="button.edit"/></a>
+						</c:if>
+						<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
+							<spring:message code="label.details"/>
+						</button>
+						<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
+							<c:url var="manageUrl" value="/proposals/manage/${thesisProposal.externalId}"/>
+							<a href="${manageUrl}" class="btn btn-default <c:if test="${service.isAccepted(thesisProposal)">btn-warning</c:if>"><spring:message code="label.candidacies.manage"/></a>
+						</c:if>
+					</div>
+				</td>
+			</tr>
+		</c:forEach>
+	</tbody>
+</table>
 <style>
 form{
 	display: inline
@@ -227,7 +211,7 @@ jQuery(document).ready(function(){
 
 	});
 
-	$("select[name=configuration]").change(function() {
+	$("select[name=executionYear]").change(function() {
 		$("#thesisConfigForm").submit();
 	});
 });

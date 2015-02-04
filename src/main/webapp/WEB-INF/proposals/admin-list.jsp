@@ -78,11 +78,65 @@ ${portal.toolkit()}
 </div>
 
 
-<p>
-	<a href="${viewCandidatesUrl}"><spring:message code="label.view.candidates"/></a>
-	<br />
-	<a href="${exportToExcelUrl}"><spring:message code="label.proposals.export.to.excel"/></a>
-</p>
+<c:if test="${not empty summary}">
+	<c:url var="totalOfProposalsUrl" value="/admin-proposals?configuration=${configuration.externalId}"/>
+	<c:url var="visibleProposalsNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&isVisible=true"/>
+	<c:url var="hiddenProposalsNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&isVisible=false"/>
+	<c:url var="proposalsWithCandadaciesNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&hasCandidacy=true"/>
+	<c:url var="proposalsWithoutCandidaciesNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&hasCandidacy=false"/>
+	<c:url var="proposalsWithAcceptedCandidaciesNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&isAttributed=true"/>
+	
+	<div class="row">
+		<div class="col-md-6">
+			<div class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title"><spring:message code="label.summary"/></h3>
+				  </div>
+				  <div class="panel-body">
+				    <table class="table table-condensed">
+						<thead>
+							<th></th>
+							<th></th>
+						</thead>
+						<tbody>
+							<tr>
+								<td><a href="${totalOfProposalsUrl}"><spring:message code="label.summary.totalOfProposals"/></a></td>
+								<td><a href="${totalOfProposalsUrl}">${summary.totalOfProposals}</a></td>
+							</tr>
+							<tr>
+								<td><a href="${visibleProposalsNumberUrl}"><spring:message code="label.summary.visibleProposalsNumber"/></a></td>
+								<td><a href="${visibleProposalsNumberUrl}">${summary.visibleProposalsNumber}</a></td>
+							</tr>
+				    		<tr>
+				    			<td><a href="${hiddenProposalsNumberUrl}"><spring:message code="label.summary.hiddenProposalsNumber"/></a></td>
+				    			<td><a href="${hiddenProposalsNumberUrl}">${summary.hiddenProposalsNumber}</a></td>
+				    		</tr>
+				    		<tr>
+				    			<td><a href="${proposalsWithCandadaciesNumberUrl}"><spring:message code="label.summary.proposalsWithCandadaciesNumber"/></a></td>
+				    			<td><a href="${proposalsWithCandadaciesNumberUrl}">${summary.proposalsWithCandadaciesNumber}</a></td>
+				    		</tr>
+				    		<tr>
+				    			<td><a href="${proposalsWithoutCandidaciesNumberUrl}"><spring:message code="label.summary.proposalsWithoutCandidaciesNumber"/></a></td>
+				    			<td><a href="${proposalsWithoutCandidaciesNumberUrl}">${summary.proposalsWithoutCandidaciesNumber}</a></td>
+				    		</tr>
+				    		<tr>
+				    			<td><a href="${proposalsWithAcceptedCandidaciesNumberUrl}"><spring:message code="label.summary.proposalsWithAcceptedCandidaciesNumber"/></a></td>
+				    			<td><a href="${proposalsWithAcceptedCandidaciesNumberUrl}">${summary.proposalsWithAcceptedCandidaciesNumber}</a></td>
+				    		</tr>
+						</tbody>
+					</table>
+				  </div>
+			</div>
+		</div>
+	</div>
+	
+</c:if>
+
+
+<span class="btn-group">
+	<a href="${viewCandidatesUrl}" class="btn btn-default"><spring:message code="label.view.candidates"/></a>
+	<a href="${exportToExcelUrl}" class="btn btn-default"><spring:message code="label.proposals.export.to.excel"/></a>
+</span>
 
 <div class="panel panel-default">
   <div class="panel-heading"><spring:message code="label.filter" /></div>
