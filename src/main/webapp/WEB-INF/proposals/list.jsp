@@ -34,15 +34,42 @@ ${portal.toolkit()}
 
 <div class="well">
 	<p><spring:message code="label.proposals.well"/></p>
-	<p><spring:message code="label.configuration"/></p>
 	<c:if test="${not empty executionYears}">
-				<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form-horizontal" id="thesisConfigForm">
-				<select name="executionYear" class="form-control">
+		<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form" id="thesisConfigForm">
+			<div class="form-group">
+				<label for="executionYear"><spring:message code="label.configuration"/></label>
+				<select name="executionYear" id="executionYear" class="form-control">
 					<c:forEach items="${executionYears}" var="year">
 						<option <c:if test="${year.externalId eq executionYear.externalId}">selected="selected"</c:if> value="${year.externalId}" label='${year.qualifiedName}'> ${year.qualifiedName} </option>
 					</c:forEach>
 				</select>
-			</form>
+			</div>
+		</form>
+	</c:if>
+	<p><spring:message code="label.periods"/></p>
+	<c:if test="${not empty configurations}">
+		<div class="row">
+			<div class="col-lg-5 ">
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th><spring:message code="label.executionDegrees"/></th>
+							<th><spring:message code="label.proposalPeriod"/></th>
+							<th><spring:message code="label.candidacyPeriod"/></th>
+						</tr>
+					</thead>
+					<tbody>
+						<c:forEach var="configuration" items="${configurations}">
+							<tr>
+								<td>${configuration.presentationName}</td>
+								<td>${configuration.proposalPeriod.start.toString('dd-MM-YYY')} <spring:message code="label.to"/> ${configuration.proposalPeriod.end.toString('dd-MM-YYY')}</td>
+								<td>${configuration.candidacyPeriod.start.toString('dd-MM-YYY')} <spring:message code="label.to"/> ${configuration.candidacyPeriod.end.toString('dd-MM-YYY')}</td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</c:if>
 </div>
 
@@ -54,19 +81,12 @@ ${portal.toolkit()}
 	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 
-<c:if test="${not empty configuration}">
-	<div class="alert alert-info">
-		<p><spring:message code="label.thesis.proposal.info" arguments="${configuration.presentationName},${configuration.proposalPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.proposalPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
-		<p><spring:message code="label.thesis.candidacy.info" arguments="${configuration.presentationName},${configuration.candidacyPeriod.start.toString('dd-MM-YYY HH:mm')},${configuration.candidacyPeriod.end.toString('dd-MM-YYY HH:mm')}"/></p>
-	</div>
-</c:if>
+<c:url var="createUrl" value="/proposals/create" />
+<c:url var="transposeUrl" value="/proposals/transpose" />
+<a class="btn btn-default" href="${createUrl}"><spring:message code="button.create"/></a>
+<a class="btn btn-default" href="${transposeUrl}"><spring:message code="button.transpose"/></a>
 
-<div class="btn-group">
-	<c:url var="createUrl" value="/proposals/create" />
-	<c:url var="transposeUrl" value="/proposals/transpose" />
-	<a class="btn btn-default" href="${createUrl}"><spring:message code="button.create"/></a>
-	<a class="btn btn-default" href="${transposeUrl}"><spring:message code="button.transpose"/></a>
-</div>
+<hr />
 
 <table class="table">
 	<thead>
@@ -113,7 +133,7 @@ ${portal.toolkit()}
 						<spring:message code='label.proposal.status.visible'/>
 					</c:if>
 				</td>
-				<td>
+				<td width="15%">
 					<c:url var="editUrl" value="/proposals/edit/${thesisProposal.externalId}"/>
 					<p></p>
 					<div class="btn-group btn-group-xs">

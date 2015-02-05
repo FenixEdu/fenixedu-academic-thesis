@@ -28,12 +28,8 @@
 
 ${portal.toolkit()}
 
-<div class="page-header">
-	<h1><spring:message code="title.thesisProposal.management"/></h1>
-</div>
 
 <script type="text/javascript">
-
 	$(document).ready(function() {
 		$("input[name=isVisible][value=${isVisible}]").prop('checked', 'true');
 		$("input[name=isAttributed][value=${isAttributed}]").prop('checked', 'true');
@@ -48,6 +44,15 @@ ${portal.toolkit()}
 	});
 </script>
 
+
+<div class="page-header">
+	<h1><spring:message code="title.thesisProposal.management"/></h1>
+	<p class="help-block">
+		<spring:message code="label.proposals.admin.well"/>
+	</p>
+</div>
+
+
 <c:if test="${empty configuration}">
 	<div class="alert alert-info" role="alert"><spring:message code="label.no.configurations.available"/></div>
 </c:if>
@@ -56,11 +61,7 @@ ${portal.toolkit()}
 <c:url var="viewCandidatesUrl" value="/admin-proposals/candidates?configuration=${configuration.externalId}"/>
 <c:url var="exportToExcelUrl" value="/admin-proposals/export?configuration=${configuration.externalId}"/>
 
-<div class="well">
-	<p>
-		<spring:message code="label.proposals.admin.well"/>
-	</p>
-</div>
+
 <form class="form" id="chooseConfiguration" method="GET">
 	<div class="form-group">
 		<label for="configuration"><spring:message code="label.configuration"/></label>
@@ -128,11 +129,12 @@ ${portal.toolkit()}
 </c:if>
 
 
-<span class="btn-group">
-	<a href="${viewCandidatesUrl}" class="btn btn-default"><spring:message code="label.view.candidates"/></a>
-	<a href="${exportToExcelUrl}" class="btn btn-default"><spring:message code="label.proposals.export.to.excel"/></a>
-</span>
+<c:url var="createProposalUrl" value="/admin-proposals/createProposal?configuration=${configuration.externalId}"/>
 
+<a href="${viewCandidatesUrl}" class="btn btn-default"><spring:message code="label.view.candidates"/></a>
+<a href="${exportToExcelUrl}" class="btn btn-default"><spring:message code="label.proposals.export.to.excel"/></a>
+<a href="${createProposalUrl}" class='btn btn-default'><spring:message code='title.thesisProposal.create'/></a>
+<hr />
 <div class="panel panel-default">
   <div class="panel-heading"><spring:message code="label.filter" /></div>
   <div class="panel-body">
@@ -186,10 +188,8 @@ ${portal.toolkit()}
   </div>
 </div>
 
-<br />
 
-<c:url var="createProposalUrl" value="/admin-proposals/createProposal?configuration=${configuration.externalId}"/>
-<a href="${createProposalUrl}" class='btn btn-default'><spring:message code='title.thesisProposal.create'/></a>
+<hr />
 
 <c:if test="${empty coordinatorProposals}">
 	<p><spring:message code="label.proposals.search.result.empty"/></p>

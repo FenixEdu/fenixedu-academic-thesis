@@ -21,6 +21,7 @@ package org.fenixedu.academic.thesis.ui.controller;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
@@ -86,10 +87,17 @@ public class ThesisProposalsController {
             return "proposals/list";
         }
 
+        final ExecutionYear year = executionYear;
+
         model.addAttribute("service", service);
         model.addAttribute("executionYears", executionYears);
-        model.addAttribute("executionYear", executionYear);
         model.addAttribute("proposals", service.getThesisProposals(Authenticate.getUser(), executionYear));
+        model.addAttribute(
+                "configurations",
+                service.getThesisProposalsConfigurations(Authenticate.getUser()).stream()
+                        .filter(configuration -> year.equals(configuration.getExecutionDegree().getExecutionYear()))
+                        .collect(Collectors.toList()));
+        model.addAttribute("executionYear", executionYear);
 
         return "proposals/list";
     }
