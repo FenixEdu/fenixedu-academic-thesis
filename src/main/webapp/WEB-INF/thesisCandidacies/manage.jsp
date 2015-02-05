@@ -64,6 +64,9 @@
 			<td>
 				<a href="${fr:checksumLink(pageContext.request, '/teacher/viewStudentCurriculum.do?method=prepare&registrationOID='.concat(studentThesisCandidacy.registration.externalId))}">
 					${studentThesisCandidacy.registration.student.name}</a>
+					<c:if test="${studentThesisCandidacy.acceptedByAdvisor}">
+						<span class="badge"><spring:message code='label.proposal.attributed'/></span>
+					</c:if>
 					<c:if test="${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber}">
 						<p><spring:message code='label.candidate.already.accepted' arguments="${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.identifier};${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber};${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.getSortedParticipants().get(0).user.name}" argumentSeparator=";"/></p>
 					</c:if>
@@ -73,7 +76,6 @@
 				<td>
 					<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
 					<form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}/${studentThesisCandidacy.externalId}" class="form-horizontal">
-
 				<c:choose>
 				<c:when test="${not empty coordinatorManagement}">
 					<button type="submit" class="btn btn-default acceptButton">
@@ -85,7 +87,7 @@
 					<button type="submit" class="btn btn-default acceptButton" disabled="true">
 						<spring:message code='button.candidacy.accept' />
 					</button>
-					<p>You can't accept this student since it has already been accepted in a more preferable proposal</p>
+					<p><spring:message code='label.candidacy.unacceptable'/></p>
 				</c:if>
 				<c:if test="${!(bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber)}">
 				<button type="submit" class="btn btn-default acceptButton">
@@ -96,7 +98,6 @@
 			</c:choose>
 		</form:form>
 	</c:if>
-
 	<c:if test="${studentThesisCandidacy.acceptedByAdvisor}">
 	<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/reject/${studentThesisCandidacy.externalId}" class="form-horizontal">
 	<button type="submit" class="btn btn-default removeButton">

@@ -492,8 +492,12 @@ public class ThesisProposalsService {
                                         .filter(StudentThesisCandidacy::getAcceptedByAdvisor)
                                         .min(StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
 
-                        return !hit.isPresent()
-                                || (hit.isPresent() && hit.get().getPreferenceNumber() > candidacy.getPreferenceNumber());
+                        if (!hit.isPresent()
+                                || (hit.isPresent() && hit.get().getPreferenceNumber() > candidacy.getPreferenceNumber())) {
+                            return true;
+                        } else {
+                            return false;
+                        }
                     });
     }
 

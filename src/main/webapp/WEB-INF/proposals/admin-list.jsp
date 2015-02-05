@@ -82,10 +82,9 @@ ${portal.toolkit()}
 	<c:url var="totalOfProposalsUrl" value="/admin-proposals?configuration=${configuration.externalId}"/>
 	<c:url var="visibleProposalsNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&isVisible=true"/>
 	<c:url var="hiddenProposalsNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&isVisible=false"/>
-	<c:url var="proposalsWithCandadaciesNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&hasCandidacy=true"/>
-	<c:url var="proposalsWithoutCandidaciesNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&hasCandidacy=false"/>
 	<c:url var="proposalsWithAcceptedCandidaciesNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&isAttributed=true"/>
-	
+	<c:url var="proposalsNotAcceptedWithCandidaciesNumberUrl" value="/admin-proposals?configuration=${configuration.externalId}&isAttributed=false&hasCandidacy=true"/>
+
 	<div class="row">
 		<div class="col-md-6">
 			<div class="panel panel-default">
@@ -100,36 +99,32 @@ ${portal.toolkit()}
 						</thead>
 						<tbody>
 							<tr>
-								<td><a href="${totalOfProposalsUrl}"><spring:message code="label.summary.totalOfProposals"/></a></td>
+								<td><spring:message code="label.summary.totalOfProposals"/></td>
 								<td><a href="${totalOfProposalsUrl}">${summary.totalOfProposals}</a></td>
 							</tr>
 							<tr>
-								<td><a href="${visibleProposalsNumberUrl}"><spring:message code="label.summary.visibleProposalsNumber"/></a></td>
+								<td><spring:message code="label.summary.visibleProposalsNumber"/></td>
 								<td><a href="${visibleProposalsNumberUrl}">${summary.visibleProposalsNumber}</a></td>
 							</tr>
 				    		<tr>
-				    			<td><a href="${hiddenProposalsNumberUrl}"><spring:message code="label.summary.hiddenProposalsNumber"/></a></td>
+				    			<td><spring:message code="label.summary.hiddenProposalsNumber"/></td>
 				    			<td><a href="${hiddenProposalsNumberUrl}">${summary.hiddenProposalsNumber}</a></td>
 				    		</tr>
-				    		<tr>
-				    			<td><a href="${proposalsWithCandadaciesNumberUrl}"><spring:message code="label.summary.proposalsWithCandadaciesNumber"/></a></td>
-				    			<td><a href="${proposalsWithCandadaciesNumberUrl}">${summary.proposalsWithCandadaciesNumber}</a></td>
-				    		</tr>
-				    		<tr>
-				    			<td><a href="${proposalsWithoutCandidaciesNumberUrl}"><spring:message code="label.summary.proposalsWithoutCandidaciesNumber"/></a></td>
-				    			<td><a href="${proposalsWithoutCandidaciesNumberUrl}">${summary.proposalsWithoutCandidaciesNumber}</a></td>
-				    		</tr>
-				    		<tr>
-				    			<td><a href="${proposalsWithAcceptedCandidaciesNumberUrl}"><spring:message code="label.summary.proposalsWithAcceptedCandidaciesNumber"/></a></td>
-				    			<td><a href="${proposalsWithAcceptedCandidaciesNumberUrl}">${summary.proposalsWithAcceptedCandidaciesNumber}</a></td>
-				    		</tr>
+								<tr>
+									<td><spring:message code="label.summary.proposalsWithAcceptedCandidaciesNumber"/></td>
+									<td><a href="${proposalsWithAcceptedCandidaciesNumberUrl}">${summary.proposalsWithAcceptedCandidaciesNumber}</a></td>
+								</tr>
+								<tr>
+									<td><spring:message code="label.summary.proposalsNotAcceptedWithCandidaciesNumberUrl"/></td>
+									<td><a href="${proposalsNotAcceptedWithCandidaciesNumberUrl}">${summary.proposalsNotAcceptedWithCandidaciesNumber}</a></td>
+								</tr>
 						</tbody>
 					</table>
 				  </div>
 			</div>
 		</div>
 	</div>
-	
+
 </c:if>
 
 

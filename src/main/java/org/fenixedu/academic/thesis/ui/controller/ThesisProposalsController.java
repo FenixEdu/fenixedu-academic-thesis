@@ -277,6 +277,7 @@ public class ThesisProposalsController {
         ModelAndView view = new ModelAndView("proposals/create", "command", proposalBean);
         view.addObject("configurations", service.getCurrentThesisProposalsConfigurations());
         view.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
+        view.addObject("action", "proposals/create");
         return view;
     }
 

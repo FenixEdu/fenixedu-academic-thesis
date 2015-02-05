@@ -40,4 +40,8 @@ public class AdminProposalsSummaryBean {
         return service.getCoordinatorProposals(configuration, null, true, null).size();
     }
 
+    public int getproposalsNotAcceptedWithCandidaciesNumber() {
+        return service.getCoordinatorProposals(configuration, null, false, true).size();
+    }
+
 }

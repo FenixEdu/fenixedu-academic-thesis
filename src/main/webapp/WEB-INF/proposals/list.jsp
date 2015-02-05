@@ -62,8 +62,8 @@ ${portal.toolkit()}
 </c:if>
 
 <div class="btn-group">
-	<c:url var="createUrl" value="/proposals/create?configuration=${configuration.externalId}" />
-	<c:url var="transposeUrl" value="/proposals/transpose?configuration=${configuration.externalId}" />
+	<c:url var="createUrl" value="/proposals/create" />
+	<c:url var="transposeUrl" value="/proposals/transpose" />
 	<a class="btn btn-default" href="${createUrl}"><spring:message code="button.create"/></a>
 	<a class="btn btn-default" href="${transposeUrl}"><spring:message code="button.transpose"/></a>
 </div>
@@ -84,6 +84,9 @@ ${portal.toolkit()}
 				<spring:message code='label.participants'/>
 			</th>
 			<th>
+				<spring:message code='label.number.of.candidacies'/>
+			</th>
+			<th>
 				<spring:message code='label.proposal.status'/>
 			</th>
 			<th></th>
@@ -101,6 +104,7 @@ ${portal.toolkit()}
 						<div>${participant.user.name} <small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
 					</c:forEach>
 				</td>
+				<td>${thesisProposal.getStudentThesisCandidacySet().size()}
 				<td>
 					<c:if test="${thesisProposal.hidden}">
 						<spring:message code='label.proposal.status.hidden'/>
@@ -110,10 +114,10 @@ ${portal.toolkit()}
 					</c:if>
 				</td>
 				<td>
-					<c:url var="editUrl" value="/proposals/edit/${thesisProposal.externalId}?configuration=${configuration.externalId}"/>
+					<c:url var="editUrl" value="/proposals/edit/${thesisProposal.externalId}"/>
 					<p></p>
 					<div class="btn-group btn-group-xs">
-						<c:if test="${configuration.getProposalPeriod().containsNow()}">
+						<c:if test="${thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().containsNow()}">
 							<a href="${editUrl}" class="btn btn-default"><spring:message code="button.edit"/></a>
 						</c:if>
 						<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">

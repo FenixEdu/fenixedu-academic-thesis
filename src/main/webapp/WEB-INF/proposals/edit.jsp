@@ -157,14 +157,6 @@ ${portal.toolkit()}
 </div>
 </div>
 
-<div class="form-group">
-	<form:label for="thesisProposalHidden" path="hidden" class="col-sm-2 control-label">${hidden}</form:label>
-	<div class="col-sm-10">
-		<form:checkbox id="thesisProposalHidden" path="hidden" placeholder="${hidden}"/>
-	</div>
-</div>
-
-
 <div class="col-sm-offset-3 col-sm-8">
 	<button type="submit" class="btn btn-default" id="submitButton">${saveButton}</button>
 	<button type="button" class="btn btn-danger" id="deleteButton"><spring:message code='button.delete'/></button>
