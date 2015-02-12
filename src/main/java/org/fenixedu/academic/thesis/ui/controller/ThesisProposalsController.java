@@ -143,6 +143,7 @@ public class ThesisProposalsController {
             service.createThesisProposal(proposalBean, participantsJson);
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
+            model.addAttribute("action", "proposals/create");
             return error(proposalBean, model);
         }
 
@@ -197,7 +198,8 @@ public class ThesisProposalsController {
                         String participantType = participant.getThesisProposalParticipantType().getExternalId();
 
                         ThesisProposalParticipantBean bean =
-                                new ThesisProposalParticipantBean(participant.getUser(), participantType);
+                                new ThesisProposalParticipantBean(participant.getUser(), participantType,
+                                        participant.getParticipationPercentage());
 
                         thesisProposalParticipantsBean.add(bean);
                     }

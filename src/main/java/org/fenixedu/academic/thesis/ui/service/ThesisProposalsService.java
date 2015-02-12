@@ -32,9 +32,11 @@ import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.academic.thesis.ui.exception.CannotEditUsedThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.IllegalParticipantTypeException;
+import org.fenixedu.academic.thesis.ui.exception.InvalidPercentageException;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
+import org.fenixedu.academic.thesis.ui.exception.TotalParticipantPercentageException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantException;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -58,6 +60,7 @@ import pt.ist.fenixframework.FenixFramework;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 @Service
@@ -164,8 +167,15 @@ public class ThesisProposalsService {
         Set<ThesisProposalParticipantBean> participants = new HashSet<ThesisProposalParticipantBean>();
 
         for (JsonElement elem : jsonArray) {
-            String userId = elem.getAsJsonObject().get("userId").getAsString();
-            String userType = elem.getAsJsonObject().get("userType").getAsString();
+            JsonObject jsonObj = elem.getAsJsonObject();
+
+            String userId = jsonObj.get("userId").getAsString();
+            String userType = jsonObj.get("userType").getAsString();
+            int percentage = jsonObj.get("percentage").getAsInt();
+
+            if (percentage > 100 || percentage < 0) {
+                throw new InvalidPercentageException(percentage);
+            }
 
             if (userType.isEmpty()) {
                 throw new IllegalParticipantTypeException(User.findByUsername(userId));
@@ -175,7 +185,7 @@ public class ThesisProposalsService {
                 throw new UnexistentThesisParticipantException();
             }
 
-            participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType));
+            participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType, percentage));
         }
 
         if (participants.isEmpty()) {
@@ -232,15 +242,22 @@ public class ThesisProposalsService {
         ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
 
         for (JsonElement elem : jsonArray) {
-            String userId = elem.getAsJsonObject().get("userId").getAsString();
-            String userType = elem.getAsJsonObject().get("userType").getAsString();
+            JsonObject jsonObj = elem.getAsJsonObject();
+
+            String userId = jsonObj.get("userId").getAsString();
+            String userType = jsonObj.get("userType").getAsString();
+            int percentage = jsonObj.get("percentage").getAsInt();
+
+            if (percentage > 100 || percentage < 0) {
+                throw new InvalidPercentageException(percentage);
+            }
 
             if (userType.isEmpty()) {
                 throw new IllegalParticipantTypeException(User.findByUsername(userId));
             }
 
             ThesisProposalParticipantBean participantBean =
-                    new ThesisProposalParticipantBean(User.findByUsername(userId), userType);
+                    new ThesisProposalParticipantBean(User.findByUsername(userId), userType, percentage);
 
             participantsBean.add(participantBean);
         }
@@ -248,7 +265,6 @@ public class ThesisProposalsService {
         if (participantsBean.isEmpty()) {
             throw new UnexistentThesisParticipantException();
         }
-
         for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
             participant.delete();
         }
@@ -257,13 +273,20 @@ public class ThesisProposalsService {
 
         ArrayList<ThesisProposalParticipant> participants = new ArrayList<ThesisProposalParticipant>();
 
+        int totalPercentage =
+                participantsBean.stream().map(ThesisProposalParticipantBean::getPercentage).reduce(0, (a, b) -> a + b);
+        if (totalPercentage != 100) {
+            throw new TotalParticipantPercentageException();
+        }
+
         for (ThesisProposalParticipantBean participantBean : participantsBean) {
             User user = FenixFramework.getDomainObject(participantBean.getUserExternalId());
 
             ThesisProposalParticipantType participantType =
                     FenixFramework.getDomainObject(participantBean.getParticipantTypeExternalId());
 
-            ThesisProposalParticipant participant = new ThesisProposalParticipant(user, participantType);
+            ThesisProposalParticipant participant =
+                    new ThesisProposalParticipant(user, participantType, participantBean.getPercentage());
 
             for (ThesisProposalsConfiguration configuration : thesisProposal.getThesisConfigurationSet()) {
                 int proposalsCount =

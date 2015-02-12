@@ -121,7 +121,7 @@ ${portal.toolkit()}
 				<td>${degreesLabels}</td>
 				<td>
 					<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
-						<div>${participant.user.name} <small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
+						<div>${participant.user.name} (${participant.participationPercentage}%) <small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
 					</c:forEach>
 				</td>
 				<td>${thesisProposal.getStudentThesisCandidacySet().size()}

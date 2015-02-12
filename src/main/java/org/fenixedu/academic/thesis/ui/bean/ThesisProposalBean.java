@@ -29,7 +29,8 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
-import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
+import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
+import org.fenixedu.academic.thesis.ui.exception.TotalParticipantPercentageException;
 import org.fenixedu.bennu.core.domain.User;
 
 import pt.ist.fenixframework.Atomic;
@@ -165,7 +166,9 @@ public class ThesisProposalBean {
 
         for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
             String participantType = participant.getThesisProposalParticipantType().getExternalId();
-            ThesisProposalParticipantBean bean = new ThesisProposalParticipantBean(participant.getUser(), participantType);
+            ThesisProposalParticipantBean bean =
+                    new ThesisProposalParticipantBean(participant.getUser(), participantType,
+                            participant.getParticipationPercentage());
             thesisProposalParticipantsBean.add(bean);
         }
         setThesisProposalParticipantsBean(thesisProposalParticipantsBean);
@@ -192,7 +195,7 @@ public class ThesisProposalBean {
         }
 
         @Atomic(mode = TxMode.WRITE)
-        public ThesisProposal build() throws MaxNumberThesisProposalsException, OutOfProposalPeriodException {
+        public ThesisProposal build() throws ThesisProposalException {
             Set<ThesisProposalParticipant> participants = new HashSet<ThesisProposalParticipant>();
 
             for (ThesisProposalParticipantBean participantBean : thesisProposalParticipantsBean) {
@@ -201,12 +204,19 @@ public class ThesisProposalBean {
                         FenixFramework.getDomainObject(participantBean.getParticipantTypeExternalId());
 
                 User username = FenixFramework.getDomainObject(participantBean.getUserExternalId());
-                ThesisProposalParticipant participant = new ThesisProposalParticipant(username, participantType);
+
+                int percentage = participantBean.getPercentage();
+
+                ThesisProposalParticipant participant = new ThesisProposalParticipant(username, participantType, percentage);
 
                 participants.add(participant);
             }
 
-            ThesisProposalsConfiguration baseConfig = configurations.iterator().next();
+            int totalPercentage =
+                    participants.stream().map(ThesisProposalParticipant::getParticipationPercentage).reduce(0, (a, b) -> a + b);
+            if (totalPercentage != 100) {
+                throw new TotalParticipantPercentageException();
+            }
 
             for (ThesisProposalParticipant participant : participants) {
                 for (ThesisProposalsConfiguration configuration : configurations) {

@@ -140,7 +140,7 @@
 							<td>${candidacy.thesisProposal.title}</td>
 							<td>
 								<c:forEach items="${candidacy.thesisProposal.getSortedParticipants()}" var="participant">
-									<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
+									<div>${participant.user.name} (${participant.participationPercentage}%)<small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
 								</div>
 							</c:forEach>
 						</td>
@@ -271,7 +271,7 @@ $(function(){
 					<td>${proposal.title}</td>
 					<td>
 						<c:forEach items="${proposal.getSortedParticipants()}" var="participant">
-						<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
+						<div>${participant.user.name} (${participant.participationPercentage}%)<small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
 						</div>
 					</c:forEach>
 				</td>

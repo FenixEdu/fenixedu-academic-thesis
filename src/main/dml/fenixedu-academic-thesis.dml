@@ -32,6 +32,7 @@ class StudentThesisCandidacy {
  }
 
 class ThesisProposalParticipant {
+    public int participationPercentage;
 }
 
 class ThesisProposalParticipantType {

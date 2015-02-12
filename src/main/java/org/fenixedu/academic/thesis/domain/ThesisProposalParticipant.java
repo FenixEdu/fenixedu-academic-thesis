@@ -33,10 +33,15 @@ public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
         }
     };
 
-    public ThesisProposalParticipant(User user, ThesisProposalParticipantType participantType) {
+    public ThesisProposalParticipant(User user, ThesisProposalParticipantType participantType, int percentage) {
         super();
         setThesisProposalParticipantType(participantType);
         setUser(user);
+        if (percentage >= 0 && percentage <= 100) {
+            setParticipationPercentage(percentage);
+        } else {
+            throw new DomainException("error.domain.percentage.out.of.bounds");
+        }
     }
 
     public void delete() {

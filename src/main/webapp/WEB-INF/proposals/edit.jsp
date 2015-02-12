@@ -55,6 +55,8 @@ ${portal.toolkit()}
 <spring:message code='label.thesisProposal.participant.add' var='addParticipant'/>
 <spring:message code='label.thesisProposal.participant.remove' var='removeParticipant'/>
 <spring:message code='button.save' var='saveButton'/>
+<spring:message code='label.participant.percentage' var='percentage'/>
+
 
 <div class="form-group">
 	<form:label for="thesisProposalTitle" path="title" class="col-sm-2 control-label">${title}</form:label>
@@ -71,30 +73,30 @@ ${portal.toolkit()}
 		<c:forEach var="participantBean" items="${command.thesisProposalParticipantsBean}">
 		<div class="col-sm-offset-2 col-sm-10">
 			<div class="tableRow">
-				<div class="form-group">
-					<div class="col-sm-10">
-						<input type="text" class="form-control" id="UserId"  bennu-user-autocomplete placeholder="${participantBean.user.username}" value="${participantBean.user.username}" required="required"/>
-					</div>
+				<div class="form-group col-md-2">
+						<input type="text" class="form-control" id="UserId" bennu-user-autocomplete  value="${participantBean.user.username}" required="required"/>
 				</div>
-				<div class="form-group">
-					<div class="col-sm-10">
+				<div class="form-group col-md-2">
 						<select id="selectParticipantType" class="form-control">
-							<option value="">${selectParticipantType}<option/>
+							<option value="">${selectParticipantType}</option>
 							<c:forEach var="participantType" items="${participantTypeList}">
 							<c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
-							<option value="${participantType.externalId}" selected="selected">${participantType.name.content}<option/>
+							<option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
 						</c:if>
 						<c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
-						<option value="${participantType.externalId}">${participantType.name.content}<option/>
+						<option value="${participantType.externalId}">${participantType.name.content}</option>
 					</c:if>
 				</c:forEach>
 			</select>
-		</div>
 	</div>
-	<div class="form-group">
-		<div class="col-sm-12">
+	<div class="form-group col-md-2">
+			<div class="input-group">
+				<input type="number" min="0" max="100" class="form-control" id="percentage" title="${percentage}" data-toggle="tooltip" data-placement="right" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
+				<div class="input-group-addon">%</div>
+			</div>
+	</div>
+	<div class="form-group col-md-4">
 			<a href="#" class="removeParticipant">${removeParticipant}</a>
-		</div>
 	</div>
 </div>
 </div>
@@ -172,26 +174,26 @@ ${portal.toolkit()}
 <script type="text/html" id="participantRowTemplate">
 	<div class="col-sm-offset-2 col-sm-10">
 		<div class="tableRow">
-			<div class="form-group">
-				<div class="col-sm-10">
+				<div class="form-group col-sm-2">
 					<input type="text" class="form-control" id="UserId" bennu-user-autocomplete placeholder="${userId}"  required="required"/>
 				</div>
-			</div>
-			<div class="form-group">
-				<div class="col-sm-10">
+			<div class="form-group col-md-2">
 					<select id="selectParticipantType" class="form-control">
-						<option value="">${selectParticipantType}<option/>
+						<option value="">${selectParticipantType}</option>
 						<c:forEach var="participantType" items="${participantTypeList}">
-						<option value="${participantType.externalId}">${participantType.name.content}"<option/>
+						<option value="${participantType.externalId}">${participantType.name.content}</option>
 					</c:forEach>
 				</select>
-			</div>
 		</div>
-		<div class="form-group">
-			<div class="col-sm-12">
+		<div class="form-group col-md-2">
+			<div class="input-group">
+			<input type="number" min="0" max="100" class="form-control" id="percentage" title="" data-toggle="tooltip" data-placement="right" placeholder="Participation percentage" required="required"  data-original-title="Participation percentage">
+			<div class="input-group-addon">%</div>
+		</div>
+	</div>
+	<div class="form-group col-md-4">
 				<a href="#" class="removeParticipant">${removeParticipant}</a>
 			</div>
-		</div>
 	</div>
 </div>
 </script>
@@ -204,6 +206,9 @@ var onRemoveParticipant = function(e) {
 $("#addParticipant").on("click", function(e) {
 	var addedRow = $("#tableBody").append($("#participantRowTemplate").html());
 	$(".removeParticipant", addedRow).on("click", onRemoveParticipant);
+	$(function () {
+		$("[data-toggle=tooltip]").tooltip();
+	});
 });
 
 $(".removeParticipant").on("click", onRemoveParticipant);
@@ -220,10 +225,12 @@ $("#submitButton").on("click", function(e) {
 		participant = participants.eq(index)
 		user = participant.find("#UserId").val()
 		participantType = participant.find("#selectParticipantType").val()
+		percentage = participant.find("#percentage").val()
 
 		participantsJSON.participants.push({
 			"userId" : user,
-			"userType" : participantType
+			"userType" : participantType,
+			"percentage" : percentage
 		});
 	}
 
@@ -241,4 +248,7 @@ function checkboxListener(e) {
 
 $("#deleteButton").on("click", function(){ $("#deleteForm").submit(); })
 
+$(function () {
+	$("[data-toggle=tooltip]").tooltip();
+});
 </script>
