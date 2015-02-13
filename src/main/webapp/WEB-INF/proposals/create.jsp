@@ -42,6 +42,12 @@ ${portal.toolkit()}
 
 <form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalCreateForm">
 
+<div class="alert alert-warning">
+  <p>
+    Colocar nome e email dos orientadores externos no campo de Observações.
+  </p>
+</div>
+
 <spring:message code='label.title' var='title'/>
 <spring:message code='label.observations' var='observations'/>
 <spring:message code='label.requirements' var='requirements'/>

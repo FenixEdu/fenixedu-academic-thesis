@@ -131,23 +131,23 @@ public class ThesisProposalsService {
         Objects.nonNull(user);
         Objects.nonNull(user.getPerson());
 
-        final Teacher teacher = user.getPerson().getTeacher();
-
-        if (teacher == null) {
-            return new ArrayList<>();
-        }
-
-        Stream<ThesisProposalsConfiguration> configurationsForAuthorizations =
-                teacher.getTeacherAuthorizationStream().flatMap(auth -> auth.getDepartment().getDegreesSet().stream())
-                        .flatMap(degree -> degree.getExecutionDegrees().stream())
-                        .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct();
-
         Stream<ThesisProposalsConfiguration> configurationsForParticipants =
                 user.getThesisProposalParticipantSet().stream()
                         .flatMap(participant -> participant.getThesisProposal().getThesisConfigurationSet().stream()).distinct();
 
-        return Stream.concat(configurationsForAuthorizations, configurationsForParticipants).distinct()
-                .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
+        final Teacher teacher = user.getPerson().getTeacher();
+        if (teacher == null) {
+            return configurationsForParticipants.sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC)
+                    .collect(Collectors.toList());
+        } else {
+            Stream<ThesisProposalsConfiguration> configurationsForAuthorizations =
+                    teacher.getTeacherAuthorizationStream().flatMap(auth -> auth.getDepartment().getDegreesSet().stream())
+                            .flatMap(degree -> degree.getExecutionDegrees().stream())
+                            .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct();
+
+            return Stream.concat(configurationsForAuthorizations, configurationsForParticipants).distinct()
+                    .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
+        }
     }
 
     public List<ThesisProposalsConfiguration> getThesisProposalsConfigurationsForCoordinator(User coordinator) {

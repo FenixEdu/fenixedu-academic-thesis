@@ -99,7 +99,7 @@
 		</form:form>
 	</c:if>
 	<c:if test="${studentThesisCandidacy.acceptedByAdvisor}">
-	<form:form role="form" method="POST" action="${pageContext.request.contextPath}/proposals/reject/${studentThesisCandidacy.externalId}" class="form-horizontal">
+	<form:form role="form" method="POST" action="${pageContext.request.contextPath}/${baseAction}/reject/${studentThesisCandidacy.externalId}" class="form-horizontal">
 	<button type="submit" class="btn btn-default removeButton">
 		<spring:message code='button.candidacy.reject' />
 	</button>

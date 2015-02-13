@@ -67,6 +67,10 @@ public class ThesisProposalsController {
     @Autowired
     ThesisProposalsService service;
 
+    protected String getBaseView() {
+        return "proposals";
+    }
+
     private String listProposals(Model model, ExecutionYear executionYear) {
         return listProposals(model, executionYear, null, null, null);
     }
@@ -82,21 +86,18 @@ public class ThesisProposalsController {
             executionYear = executionYears.iterator().next();
         }
 
-        if (executionYear == null) {
-            model.addAttribute("error", "cant.manage.list.proposals");
-            return "proposals/list";
-        }
-
-        final ExecutionYear year = executionYear;
-
+        model.addAttribute("baseAction", getBaseView());
         model.addAttribute("service", service);
         model.addAttribute("executionYears", executionYears);
         model.addAttribute("proposals", service.getThesisProposals(Authenticate.getUser(), executionYear));
-        model.addAttribute(
-                "configurations",
-                service.getThesisProposalsConfigurations(Authenticate.getUser()).stream()
-                        .filter(configuration -> year.equals(configuration.getExecutionDegree().getExecutionYear()))
-                        .collect(Collectors.toList()));
+        if (executionYear != null) {
+            final ExecutionYear year = executionYear;
+            model.addAttribute(
+                    "configurations",
+                    service.getThesisProposalsConfigurations(Authenticate.getUser()).stream()
+                            .filter(configuration -> year.equals(configuration.getExecutionDegree().getExecutionYear()))
+                            .collect(Collectors.toList()));
+        }
         model.addAttribute("executionYear", executionYear);
 
         return "proposals/list";
@@ -112,7 +113,7 @@ public class ThesisProposalsController {
 
         modelAndview.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
 
-        modelAndview.addObject("action", "proposals/create");
+        modelAndview.addObject("action", getBaseView() + "/create");
 
         return modelAndview;
     }
@@ -143,7 +144,7 @@ public class ThesisProposalsController {
             service.createThesisProposal(proposalBean, participantsJson);
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
-            model.addAttribute("action", "proposals/create");
+            model.addAttribute("action", getBaseView() + "/create");
             return error(proposalBean, model);
         }
 
@@ -165,7 +166,7 @@ public class ThesisProposalsController {
             return new ModelAndView(listProposals(model, null));
         }
 
-        return new ModelAndView("redirect:/proposals");
+        return new ModelAndView("redirect:/" + getBaseView());
     }
 
     @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)
@@ -182,7 +183,8 @@ public class ThesisProposalsController {
         }
 
         model.addAttribute("configuration", configuration);
-        model.addAttribute("action", "proposals/edit");
+        model.addAttribute("baseAction", getBaseView());
+        model.addAttribute("action", getBaseView() + "/edit");
         try {
             if (isDegreeCoordinator
                     || (isManager || thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod()
@@ -244,7 +246,7 @@ public class ThesisProposalsController {
         try {
             service.editThesisProposal(Authenticate.getUser(), thesisProposalBean, thesisProposal, jsonArray);
             redirectAttrs.addAttribute("configuration", configuration != null ? configuration.getExternalId() : null);
-            return new ModelAndView("redirect:/proposals");
+            return new ModelAndView("redirect:/" + getBaseView());
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
             return editProposalForm(thesisProposal, configuration, model);
@@ -255,21 +257,22 @@ public class ThesisProposalsController {
     public String acceptStudentThesisCandidacy(
             @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
         service.accept(studentThesisCandidacy);
-        return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
+        return "redirect:/" + getBaseView() + "/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 
     @RequestMapping(value = "/reject/{studentThesisCandidacy}", method = RequestMethod.POST)
     public String rejectStudentThesisCandidacy(
             @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
         service.reject(studentThesisCandidacy);
-        return "redirect:/proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
+        return "redirect:/" + getBaseView() + "/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 
     @RequestMapping(value = "/manage/{oid}", method = RequestMethod.GET)
     public ModelAndView manageCandidacies(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
         ModelAndView view = new ModelAndView("thesisCandidacies/manage");
         view.addObject("thesisProposal", thesisProposal);
-        view.addObject("action", "proposals/accept");
+        view.addObject("baseAction", getBaseView());
+        view.addObject("action", getBaseView() + "/accept");
         view.addObject("candidaciesList", service.getStudentThesisCandidacy(thesisProposal));
         view.addObject("bestAccepted", service.getBestAccepted(thesisProposal));
         return view;
@@ -277,6 +280,7 @@ public class ThesisProposalsController {
 
     @RequestMapping(value = "/transpose", method = RequestMethod.GET)
     public String listOldProposals(Model model) {
+        model.addAttribute("baseAction", getBaseView());
         model.addAttribute("recentProposals", service.getRecentProposals(Authenticate.getUser()));
         return "proposals/old";
     }
@@ -287,7 +291,7 @@ public class ThesisProposalsController {
         ModelAndView view = new ModelAndView("proposals/create", "command", proposalBean);
         view.addObject("configurations", service.getCurrentThesisProposalsConfigurations());
         view.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
-        view.addObject("action", "proposals/create");
+        view.addObject("action", getBaseView() + "/create");
         return view;
     }
 

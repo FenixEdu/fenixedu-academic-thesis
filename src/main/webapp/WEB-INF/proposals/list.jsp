@@ -35,7 +35,7 @@ ${portal.toolkit()}
 <div class="well">
 	<p><spring:message code="label.proposals.well"/></p>
 	<c:if test="${not empty executionYears}">
-		<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals" class="form" id="thesisConfigForm">
+		<form role="form" method="GET" action="${pageContext.request.contextPath}/${baseAction}" class="form" id="thesisConfigForm">
 			<div class="form-group">
 				<label for="executionYear"><spring:message code="label.configuration"/></label>
 				<select name="executionYear" id="executionYear" class="form-control">
@@ -46,8 +46,8 @@ ${portal.toolkit()}
 			</div>
 		</form>
 	</c:if>
-	<p><spring:message code="label.periods"/></p>
 	<c:if test="${not empty configurations}">
+		<p><spring:message code="label.periods"/></p>
 		<div class="row">
 			<div class="col-lg-5 ">
 				<table class="table table-condensed">
@@ -81,8 +81,8 @@ ${portal.toolkit()}
 	<p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 
-<c:url var="createUrl" value="/proposals/create" />
-<c:url var="transposeUrl" value="/proposals/transpose" />
+<c:url var="createUrl" value="/${baseAction}/create" />
+<c:url var="transposeUrl" value="/${baseAction}/transpose" />
 <a class="btn btn-default" href="${createUrl}"><spring:message code="button.create"/></a>
 <a class="btn btn-default" href="${transposeUrl}"><spring:message code="button.transpose"/></a>
 
@@ -134,7 +134,7 @@ ${portal.toolkit()}
 					</c:if>
 				</td>
 				<td width="15%">
-					<c:url var="editUrl" value="/proposals/edit/${thesisProposal.externalId}"/>
+					<c:url var="editUrl" value="/${baseAction}/edit/${thesisProposal.externalId}"/>
 					<p></p>
 					<div class="btn-group btn-group-xs">
 						<c:if test="${thesisProposal.getSingleThesisProposalsConfiguration().getProposalPeriod().containsNow()}">
@@ -144,7 +144,7 @@ ${portal.toolkit()}
 							<spring:message code="label.details"/>
 						</button>
 						<c:if test="${thesisProposal.studentThesisCandidacy.size() > 0}">
-							<c:url var="manageUrl" value="/proposals/manage/${thesisProposal.externalId}"/>
+							<c:url var="manageUrl" value="/${baseAction}/manage/${thesisProposal.externalId}"/>
 							<a href="${manageUrl}" class="btn btn-default <c:if test="${service.canTeacherAcceptedCandidacy(thesisProposal)}">btn-warning</c:if>"><spring:message code="label.candidacies.manage"/></a>
 						</c:if>
 					</div>

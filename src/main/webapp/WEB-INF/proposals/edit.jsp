@@ -42,6 +42,12 @@ ${portal.toolkit()}
 <p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 
+<div class="alert alert-warning">
+  <p>
+    Colocar nome e email dos orientadores externos no campo de Observações.
+  </p>
+</div>
+
 <spring:message code='label.title' var='title'/>
 <spring:message code='label.observations' var='observations'/>
 <spring:message code='label.hidden' var='hidden'/>
@@ -171,7 +177,7 @@ ${portal.toolkit()}
 </div>
 </form:form>
 
-<form method="POST" action="${pageContext.request.contextPath}/proposals/delete/${command.externalId}" id="deleteForm">
+<form method="POST" action="${pageContext.request.contextPath}/${baseAction}/delete/${command.externalId}" id="deleteForm">
 </form>
 
 

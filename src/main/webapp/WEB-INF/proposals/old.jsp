@@ -76,7 +76,7 @@ ${portal.toolkit()}
 						</c:forEach>
 					</td>
 					<td>
-						<form role="form" method="GET" action="${pageContext.request.contextPath}/proposals/transpose/${thesisProposal.externalId}" class="form-horizontal" id="thesisProposalTransposeForm">
+						<form role="form" method="GET" action="${pageContext.request.contextPath}/${baseAction}/transpose/${thesisProposal.externalId}" class="form-horizontal" id="thesisProposalTransposeForm">
 							<button type="submit" class="btn btn-default"><spring:message code="button.transpose"/></button>
 						</form>
 					</td>

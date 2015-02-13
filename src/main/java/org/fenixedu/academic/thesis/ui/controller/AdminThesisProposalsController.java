@@ -238,6 +238,7 @@ public class AdminThesisProposalsController {
     public ModelAndView manageCandidacies(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
         ModelAndView view = new ModelAndView("thesisCandidacies/manage");
         view.addObject("coordinatorManagement", true);
+        view.addObject("baseAction", "admin-proposals");
         view.addObject("action", "admin-proposals/accept");
         view.addObject("thesisProposal", thesisProposal);
         view.addObject("candidaciesList", service.getStudentThesisCandidacy(thesisProposal));
