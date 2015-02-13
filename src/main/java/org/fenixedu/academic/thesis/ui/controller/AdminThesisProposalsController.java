@@ -116,7 +116,9 @@ public class AdminThesisProposalsController {
 
         for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
             String participantType = participant.getThesisProposalParticipantType().getExternalId();
-            ThesisProposalParticipantBean bean = new ThesisProposalParticipantBean(participant.getUser(), participantType);
+            ThesisProposalParticipantBean bean =
+                    new ThesisProposalParticipantBean(participant.getUser(), participantType,
+                            participant.getParticipationPercentage());
             thesisProposalParticipantsBean.add(bean);
         }
 

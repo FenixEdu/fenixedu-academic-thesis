@@ -24,6 +24,15 @@ public class ThesisProposalParticipantBean {
 
     private User user;
     private String participantTypeExternalId;
+    private int percentage;
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(int percentage) {
+        this.percentage = percentage;
+    }
 
     public String getUserExternalId() {
         return user.getExternalId();
@@ -41,8 +50,9 @@ public class ThesisProposalParticipantBean {
         this.participantTypeExternalId = participantType;
     }
 
-    public ThesisProposalParticipantBean(User user, String participantType) {
+    public ThesisProposalParticipantBean(User user, String participantType, int percentage) {
         setUser(user);
+        setPercentage(percentage);
         this.participantTypeExternalId = participantType;
     }
 
