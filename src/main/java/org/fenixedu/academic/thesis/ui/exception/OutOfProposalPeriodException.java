@@ -18,7 +18,6 @@
  */
 package org.fenixedu.academic.thesis.ui.exception;
 
-
 public class OutOfProposalPeriodException extends ThesisProposalException {
     private static final long serialVersionUID = 7294240729086538046L;
 }

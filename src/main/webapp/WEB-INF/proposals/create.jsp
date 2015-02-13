@@ -1,6 +1,6 @@
 <%--
 
-    Copyright Ã‚Â© 2014 Instituto Superior TÃƒÂ©cnico
+    Copyright © 2014 Instituto Superior Técnico
 
     This file is part of FenixEdu Academic Thesis.
 
