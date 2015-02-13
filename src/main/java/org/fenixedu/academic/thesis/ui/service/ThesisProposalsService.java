@@ -290,7 +290,6 @@ public class ThesisProposalsService {
         thesisProposal.setObservations(thesisProposalBean.getObservations());
         thesisProposal.setRequirements(thesisProposalBean.getRequirements());
         thesisProposal.setGoals(thesisProposalBean.getGoals());
-        thesisProposal.setHidden(thesisProposalBean.getHidden());
         thesisProposal.getThesisConfigurationSet().clear();
         thesisProposal.getThesisConfigurationSet().addAll(thesisProposalBean.getThesisProposalsConfigurations());
 
