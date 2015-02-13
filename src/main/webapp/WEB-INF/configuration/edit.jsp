@@ -114,7 +114,7 @@ ${ portal.toolkit() }
 <div class="form-group">
   <form:label for="minECTS2ndCycle" path="minECTS2ndCycle" class="col-sm-4 control-label"><spring:message code='label.min.ects.second.cyle'/></form:label>
   <div class="col-sm-8">
-    <form:input type="number" min="0" class="form-control" id="minECTS2ndCycle" path="minECTS2ndCycle" name="minECTS2ndCycle" required="required" value="${command.minECTS1stCycle}"/>
+    <form:input type="number" min="0" class="form-control" id="minECTS2ndCycle" path="minECTS2ndCycle" name="minECTS2ndCycle" required="required" value="${command.minECTS2ndCycle}"/>
   </div>
 </div>
 
