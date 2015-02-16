@@ -251,7 +251,7 @@ $("#submitButton").on("click", function(e) {
 });
 
 function checkboxListener(e) {
-	if($("#configurationsSelect").find(":checked").size() > 0) {
+	if($("#configurationsSelect").find(":checked").size() > 0 || ${adminEdit}) {
 		$("#submitButton").attr("disabled", false);
 	}
 	else {

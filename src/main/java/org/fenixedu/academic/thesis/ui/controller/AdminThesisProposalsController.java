@@ -29,7 +29,6 @@ import java.util.TreeSet;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletResponse;
 
-import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
@@ -43,7 +42,6 @@ import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfiguration
 import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationException;
 import org.fenixedu.academic.thesis.ui.service.ExportThesisProposalsService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,11 +97,6 @@ public class AdminThesisProposalsController {
     @RequestMapping(value = "/edit/{oid}", method = RequestMethod.GET)
     public ModelAndView editProposalForm(@PathVariable("oid") ThesisProposal thesisProposal,
             @RequestParam(required = false) ThesisProposalsConfiguration configuration, Model model) {
-
-        boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
-        boolean isDegreeCoordinator =
-                thesisProposal.getExecutionDegreeSet().stream()
-                        .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));
 
         if (configuration == null) {
             configuration = thesisProposal.getSingleThesisProposalsConfiguration();
