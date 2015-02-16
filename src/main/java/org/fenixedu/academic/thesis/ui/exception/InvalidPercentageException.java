@@ -26,6 +26,9 @@ public class InvalidPercentageException extends ThesisProposalException {
         this.setPercentage(percentage);
     }
 
+    public InvalidPercentageException() {
+    }
+
     public int getPercentage() {
         return percentage;
     }

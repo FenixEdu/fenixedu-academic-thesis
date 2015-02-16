@@ -189,21 +189,26 @@ public class ThesisProposalsService {
 
             String userId = jsonObj.get("userId").getAsString();
             String userType = jsonObj.get("userType").getAsString();
-            int percentage = jsonObj.get("percentage").getAsInt();
 
-            if (percentage > 100 || percentage < 0) {
-                throw new InvalidPercentageException(percentage);
+            try {
+                int percentage = jsonObj.get("percentage").getAsInt();
+
+                if (percentage > 100 || percentage < 0) {
+                    throw new InvalidPercentageException(percentage);
+                }
+
+                if (userType.isEmpty()) {
+                    throw new IllegalParticipantTypeException(User.findByUsername(userId));
+                }
+
+                if (userId == null || userId.isEmpty()) {
+                    throw new UnexistentThesisParticipantException();
+                }
+
+                participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType, percentage));
+            } catch (NumberFormatException e) {
+                throw new InvalidPercentageException();
             }
-
-            if (userType.isEmpty()) {
-                throw new IllegalParticipantTypeException(User.findByUsername(userId));
-            }
-
-            if (userId == null || userId.isEmpty()) {
-                throw new UnexistentThesisParticipantException();
-            }
-
-            participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType, percentage));
         }
 
         if (participants.isEmpty()) {
