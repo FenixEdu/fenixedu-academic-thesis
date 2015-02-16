@@ -64,12 +64,8 @@ public class ThesisProposal extends ThesisProposal_Base {
         @Override
         public int compare(ThesisProposal arg0, ThesisProposal arg1) {
 
-            if (arg0.getSingleThesisProposalsConfiguration().getProposalPeriod()
-                    .isBefore(arg1.getSingleThesisProposalsConfiguration().getProposalPeriod())) {
-                return -1;
-            } else {
-                return 1;
-            }
+            return ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC.reversed().compare(
+                    arg0.getSingleThesisProposalsConfiguration(), arg1.getSingleThesisProposalsConfiguration());
         }
     };
 

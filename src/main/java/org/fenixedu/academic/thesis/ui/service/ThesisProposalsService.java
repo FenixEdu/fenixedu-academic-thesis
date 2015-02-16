@@ -1,21 +1,3 @@
-/**
- * Copyright © 2014 Instituto Superior Técnico
- *
- * This file is part of FenixEdu Academic Thesis.
- *
- * FenixEdu Academic Thesis is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * FenixEdu Academic Thesis is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with FenixEdu Academic Thesis.  If not, see <http://www.gnu.org/licenses/>.
- */
 package org.fenixedu.academic.thesis.ui.service;
 
 import java.util.ArrayList;
@@ -149,23 +131,23 @@ public class ThesisProposalsService {
         Objects.nonNull(user);
         Objects.nonNull(user.getPerson());
 
+        final Teacher teacher = user.getPerson().getTeacher();
+
+        if (teacher == null) {
+            return new ArrayList<>();
+        }
+
+        Stream<ThesisProposalsConfiguration> configurationsForAuthorizations =
+                teacher.getTeacherAuthorizationStream().flatMap(auth -> auth.getDepartment().getDegreesSet().stream())
+                        .flatMap(degree -> degree.getExecutionDegrees().stream())
+                        .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct();
+
         Stream<ThesisProposalsConfiguration> configurationsForParticipants =
                 user.getThesisProposalParticipantSet().stream()
                         .flatMap(participant -> participant.getThesisProposal().getThesisConfigurationSet().stream()).distinct();
 
-        final Teacher teacher = user.getPerson().getTeacher();
-        if (teacher == null) {
-            return configurationsForParticipants.sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC)
-                    .collect(Collectors.toList());
-        } else {
-            Stream<ThesisProposalsConfiguration> configurationsForAuthorizations =
-                    teacher.getTeacherAuthorizationStream().flatMap(auth -> auth.getDepartment().getDegreesSet().stream())
-                            .flatMap(degree -> degree.getExecutionDegrees().stream())
-                            .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct();
-
-            return Stream.concat(configurationsForAuthorizations, configurationsForParticipants).distinct()
-                    .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
-        }
+        return Stream.concat(configurationsForAuthorizations, configurationsForParticipants).distinct()
+                .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
     }
 
     public List<ThesisProposalsConfiguration> getThesisProposalsConfigurationsForCoordinator(User coordinator) {
@@ -460,7 +442,7 @@ public class ThesisProposalsService {
 
     }
 
-    public Set<ThesisProposal> getRecentProposals(User user) {
+    public List<ThesisProposal> getRecentProposals(User user) {
         Set<ThesisProposal> proposals =
                 user.getThesisProposalParticipantSet().stream().map(participant -> participant.getThesisProposal())
                         .collect(Collectors.toSet());
@@ -478,7 +460,10 @@ public class ThesisProposalsService {
         for (String key : proposalTitleMap.keySet()) {
             recentProposals.add(proposalTitleMap.get(key).stream().max(ThesisProposal.COMPARATOR_BY_PROPOSAL_PERIOD).get());
         }
-        return recentProposals;
+
+        return recentProposals.stream()
+                .filter(proposal -> proposal.getSingleThesisProposalsConfiguration().getProposalPeriod().isBeforeNow())
+                .sorted(ThesisProposal.COMPARATOR_BY_PROPOSAL_PERIOD).collect(Collectors.toList());
     }
 
     public Map<Registration, TreeSet<StudentThesisCandidacy>> getCoordinatorCandidacies(ThesisProposalsConfiguration configuration) {
