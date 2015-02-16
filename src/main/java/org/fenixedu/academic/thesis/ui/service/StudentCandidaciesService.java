@@ -173,6 +173,7 @@ public class StudentCandidaciesService {
                                     .stream()
                                     .filter(config -> config.getCandidacyPeriod().containsNow())
                                     .flatMap(config -> config.getThesisProposalSet().stream())
+                                    .filter(proposal -> !proposal.getHidden())
                                     .filter(proposal -> !(proposal.getStudentThesisCandidacySet().stream()
                                             .map(candidacy -> candidacy.getRegistration().getStudent()).anyMatch(st -> st
                                             .equals(student)))).collect(Collectors.toSet());
