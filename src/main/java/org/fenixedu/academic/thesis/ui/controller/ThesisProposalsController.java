@@ -36,6 +36,7 @@ import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationException;
+import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantException;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -216,8 +217,8 @@ public class ThesisProposalsController {
                     ModelAndView mav = new ModelAndView("proposals/edit", "command", thesisProposalBean);
 
                     mav.addObject("configurations", service.getCurrentThesisProposalsConfigurations());
-
                     mav.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
+                    mav.addObject("adminEdit", false);
 
                     return mav;
                 }
@@ -226,6 +227,7 @@ public class ThesisProposalsController {
             }
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
+            model.addAttribute("adminEdit", false);
             return new ModelAndView(listProposals(model, configuration.getExecutionDegree().getExecutionYear()));
         }
     }
@@ -241,14 +243,20 @@ public class ThesisProposalsController {
         ThesisProposal thesisProposal = FenixFramework.getDomainObject(thesisProposalBean.getExternalId());
 
         JsonParser parser = new JsonParser();
-        JsonArray jsonArray = (JsonArray) parser.parse(participantsJson);
 
         try {
+            if (participantsJson == null || participantsJson.length() == 0) {
+                throw new UnexistentThesisParticipantException();
+            }
+
+            JsonArray jsonArray = (JsonArray) parser.parse(participantsJson);
+
             service.editThesisProposal(Authenticate.getUser(), thesisProposalBean, thesisProposal, jsonArray);
             redirectAttrs.addAttribute("configuration", configuration != null ? configuration.getExternalId() : null);
             return new ModelAndView("redirect:/" + getBaseView());
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
+            model.addAttribute("adminEdit", false);
             return editProposalForm(thesisProposal, configuration, model);
         }
     }

@@ -33,6 +33,7 @@ import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.academic.thesis.ui.exception.CannotEditUsedThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.IllegalParticipantTypeException;
 import org.fenixedu.academic.thesis.ui.exception.InvalidPercentageException;
+import org.fenixedu.academic.thesis.ui.exception.InvalidUserException;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
@@ -257,12 +258,17 @@ public class ThesisProposalsService {
                 throw new InvalidPercentageException(percentage);
             }
 
-            if (userType.isEmpty()) {
-                throw new IllegalParticipantTypeException(User.findByUsername(userId));
+            User user = User.findByUsername(userId);
+
+            if (user == null) {
+                throw new InvalidUserException();
             }
 
-            ThesisProposalParticipantBean participantBean =
-                    new ThesisProposalParticipantBean(User.findByUsername(userId), userType, percentage);
+            if (userType.isEmpty()) {
+                throw new IllegalParticipantTypeException(user);
+            }
+
+            ThesisProposalParticipantBean participantBean = new ThesisProposalParticipantBean(user, userType, percentage);
 
             participantsBean.add(participantBean);
         }
