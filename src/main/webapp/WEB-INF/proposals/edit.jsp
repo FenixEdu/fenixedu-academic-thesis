@@ -156,7 +156,7 @@ ${portal.toolkit()}
 			<div class="checkbox">
 				<label>
 					<c:choose>
-						<c:when test="${not empty adminEdit}">
+						<c:when test="${not empty adminEdit && adminEdit}">
 							<form:hidden path="thesisProposalsConfigurations" value="${configuration.externalId}" name="thesisProposalsConfigurations"/>${configuration.executionDegree.presentationName}
 						</c:when>
 						<c:otherwise>
