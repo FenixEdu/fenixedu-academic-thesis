@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.StudentCurricularPlan;
-import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.student.Student;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
@@ -37,6 +36,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberStudentThesisCandidaciesException;
 import org.fenixedu.academic.thesis.ui.exception.OutOfCandidacyPeriodException;
+import org.fenixedu.academic.thesis.ui.exception.ThesisProposalsDomainException;
 import org.fenixedu.academic.thesis.ui.exception.Unsuficient1stCycleCreditsException;
 import org.fenixedu.academic.thesis.ui.exception.Unsuficient2ndCycleCreditsException;
 import org.springframework.stereotype.Service;
@@ -74,8 +74,8 @@ public class StudentCandidaciesService {
     public boolean delete(StudentThesisCandidacy studentThesisCandidacy, Model model) {
         try {
             studentThesisCandidacy.delete();
-        } catch (DomainException domainException) {
-            model.addAttribute("deleteException", true);
+        } catch (ThesisProposalsDomainException domainException) {
+            model.addAttribute("domainException", domainException.getLocalizedMessage());
             return false;
         }
 
@@ -127,10 +127,7 @@ public class StudentCandidaciesService {
 
     public Set<ThesisProposalsConfiguration> getConfigurationsForRegistration(Registration reg) {
         return reg.getAllCurriculumGroups().stream().map(group -> group.getDegreeCurricularPlanOfDegreeModule())
-                .filter(Objects::nonNull).map(dcp -> dcp.getDegree())
-                .flatMap(degree -> degree.getExecutionDegrees().stream())
-//                .filter((ExecutionDegree execDegree) -> execDegree.getExecutionYear().isAfterOrEquals(
-//                        ExecutionYear.readCurrentExecutionYear()))
+                .filter(Objects::nonNull).map(dcp -> dcp.getDegree()).flatMap(degree -> degree.getExecutionDegrees().stream())
                 .flatMap((ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet().stream())
                 .collect(Collectors.toSet());
     }

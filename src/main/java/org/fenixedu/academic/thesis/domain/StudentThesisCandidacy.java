@@ -21,8 +21,8 @@ package org.fenixedu.academic.thesis.domain;
 import java.util.Collection;
 import java.util.Comparator;
 
-import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
+import org.fenixedu.academic.thesis.ui.exception.ThesisProposalsDomainException;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.joda.time.DateTime;
 
@@ -57,7 +57,7 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 
     public void delete() {
 
-        DomainException.throwWhenDeleteBlocked(getDeletionBlockers());
+        ThesisProposalsDomainException.throwWhenDeleteBlocked(getDeletionBlockers());
 
         this.setThesisProposal(null);
         this.setThesisProposalsSystem(null);
@@ -70,9 +70,13 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
     protected void checkForDeletionBlockers(Collection<String> blockers) {
         super.checkForDeletionBlockers(blockers);
 
-        if (getAcceptedByAdvisor()
-                || !getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod().contains(DateTime.now())) {
-            blockers.add(BundleUtil.getString("resources.FenixEduThesisProposalsResources", "error.candidacies.cant.delete"));
+        if (getAcceptedByAdvisor()) {
+            blockers.add(BundleUtil.getString("resources.FenixEduThesisProposalsResources",
+                    "domain.exception.accepted.by.advisor"));
+        }
+        if (!getThesisProposal().getSingleThesisProposalsConfiguration().getCandidacyPeriod().contains(DateTime.now())) {
+            blockers.add(BundleUtil.getString("resources.FenixEduThesisProposalsResources",
+                    "domain.exception.out.of.candidacy.period"));
         }
     }
 

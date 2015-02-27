@@ -49,6 +49,10 @@
 	<p class="text-danger"><spring:message code="error.thesisProposal.OutOfCandidacyPeriodException"/></p>
 </c:if>
 
+<c:if test="${! empty domainException}">
+	<p class="text-danger">${domainException}</p>
+</c:if>
+
 <c:if test="${!empty suggestedConfigs}">
 <div class="alert alert-info">
 		<c:forEach items="${suggestedConfigs}" var="config">
