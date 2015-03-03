@@ -287,7 +287,7 @@ public class ThesisProposalsService {
 
         int totalPercentage =
                 participantsBean.stream().map(ThesisProposalParticipantBean::getPercentage).reduce(0, (a, b) -> a + b);
-        if (totalPercentage != 100) {
+        if (totalPercentage > 100) {
             throw new TotalParticipantPercentageException();
         }
 
