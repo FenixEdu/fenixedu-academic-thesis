@@ -164,22 +164,6 @@ public class AdminThesisProposalsController {
         return "proposals/admin-candidates-list";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "acceptCandidacy/{oid}")
-    public String attributeProposal(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy,
-            @RequestParam ThesisProposalsConfiguration configuration) {
-        service.accept(studentThesisCandidacy);
-
-        return "redirect:/admin-proposals/candidates?configuration=" + configuration.getExternalId();
-    }
-
-    @RequestMapping(method = RequestMethod.GET, value = "revokeCandidacyAcceptance/{oid}")
-    public String revokeProposalAttribution(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy,
-            @RequestParam ThesisProposalsConfiguration configuration) {
-        service.revoke(studentThesisCandidacy);
-
-        return "redirect:/admin-proposals/candidates?configuration=" + configuration.getExternalId();
-    }
-
     @RequestMapping(value = "/export", method = RequestMethod.GET)
     public void exportCSV(@RequestParam ThesisProposalsConfiguration configuration, HttpServletResponse response)
             throws IOException, UnavailableException {
@@ -224,6 +208,13 @@ public class AdminThesisProposalsController {
     public String acceptStudentThesisCandidacy(
             @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
         service.accept(studentThesisCandidacy);
+        return "redirect:/admin-proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
+    }
+
+    @RequestMapping(value = "/reject/{studentThesisCandidacy}", method = RequestMethod.POST)
+    public String rejectStudentThesisCandidacy(
+            @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
+        service.reject(studentThesisCandidacy);
         return "redirect:/admin-proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 
