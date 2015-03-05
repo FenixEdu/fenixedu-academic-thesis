@@ -97,7 +97,7 @@ ${portal.toolkit()}
 					</div>
 					<div class="col-sm-2">
 						<div class="input-group">
-							<input type="number" min="0" max="100" class="form-control" id="percentage" title="${percentage}" data-toggle="tooltip" data-placement="right" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
+							<input type="number" min="0" max="100" class="form-control" id="percentage" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
 							<div class="input-group-addon">%</div>
 						</div>
 					</div>
@@ -201,7 +201,7 @@ ${portal.toolkit()}
 </div>
 <div class="col-sm-2">
 	<div class="input-group">
-		<input type="number" min="0" max="100" class="form-control" id="percentage" title="${percentage}" data-toggle="tooltip" data-placement="right" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
+		<input type="number" min="0" max="100" class="form-control" id="percentage" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
 		<div class="input-group-addon">%</div>
 	</div>
 </div>
@@ -219,9 +219,6 @@ var onRemoveParticipant = function(e) {
 $("#addParticipant").on("click", function(e) {
 	var addedRow = $("#tableBody").append($("#participantRowTemplate").html());
 	$(".removeParticipant", addedRow).on("click", onRemoveParticipant);
-	$(function () {
-		$("[data-toggle=tooltip]").tooltip();
-	});
 });
 
 $(".removeParticipant").on("click", onRemoveParticipant);
@@ -262,7 +259,6 @@ function checkboxListener(e) {
 $("#deleteButton").on("click", function(){ $("#deleteForm").submit(); })
 
 $(document).ready(function() {
-	$("[data-toggle=tooltip]").tooltip();
 	checkboxListener(null);
 	<c:if test="${empty command.thesisProposalParticipantsBean}">
 	$("#addParticipant").click();
