@@ -229,11 +229,14 @@ ${portal.toolkit()}
 				<c:forEach items="${coordinatorProposals}" var="thesisProposal">
 					<tr>
 						<td>${thesisProposal.identifier}</td>
-<%-- 						<td>${thesisProposal.getSingleThesisProposalsConfiguration().executionDegree.executionYear.year}</td> --%>
 						<td>${thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
-								<div>${participant.user.name} (${participant.participationPercentage}%)<small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
+								<div>${participant.user.name} (${participant.participationPercentage}%)
+									<c:if test="${! empty participantLabelService}">
+										<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
+									</c:if>
+								</div>
 							</c:forEach>
 						</td>
 						<td>
