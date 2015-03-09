@@ -36,6 +36,7 @@ import org.fenixedu.academic.thesis.ui.exception.InvalidPercentageException;
 import org.fenixedu.academic.thesis.ui.exception.InvalidUserException;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.OutOfProposalPeriodException;
+import org.fenixedu.academic.thesis.ui.exception.ParticipantNotIncludedException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.TotalParticipantPercentageException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
@@ -197,6 +198,13 @@ public class ThesisProposalsService {
 
         if (participants.isEmpty()) {
             throw new UnexistentThesisParticipantException();
+        }
+
+        User thesisCreator = Authenticate.getUser();
+        if (!proposalBean.getExecutionDegreeSet().stream()
+                .anyMatch(e -> CoordinatorGroup.get(e.getDegree()).isMember(thesisCreator))
+                && !participants.stream().map(bean -> bean.getUser()).anyMatch(u -> u.equals(thesisCreator))) {
+            throw new ParticipantNotIncludedException();
         }
 
         proposalBean.setThesisProposalParticipantsBean(participants);
