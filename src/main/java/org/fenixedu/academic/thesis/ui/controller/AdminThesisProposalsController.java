@@ -103,6 +103,7 @@ public class AdminThesisProposalsController {
         }
 
         model.addAttribute("configuration", configuration);
+        model.addAttribute("baseAction", "admin-proposals");
         model.addAttribute("action", "admin-proposals/edit");
         model.addAttribute("adminEdit", true);
         HashSet<ThesisProposalParticipantBean> thesisProposalParticipantsBean = new HashSet<ThesisProposalParticipantBean>();
@@ -257,6 +258,17 @@ public class AdminThesisProposalsController {
             model.addAttribute("command", proposalBean);
             model.addAttribute("action", "admin-proposals/createProposal");
             return new ModelAndView("proposals/create", model.asMap());
+        }
+
+        return new ModelAndView("redirect:/admin-proposals");
+    }
+
+    @RequestMapping(value = "/delete/{oid}", method = RequestMethod.POST)
+    public ModelAndView deleteThesisProposals(@PathVariable("oid") ThesisProposal thesisProposal, Model model) {
+
+        if (!service.delete(thesisProposal)) {
+            model.addAttribute("deleteException", true);
+            return new ModelAndView(listProposals(model, null, false, false, false));
         }
 
         return new ModelAndView("redirect:/admin-proposals");
