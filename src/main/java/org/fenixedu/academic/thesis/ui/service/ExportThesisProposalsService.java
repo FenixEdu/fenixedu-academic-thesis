@@ -50,16 +50,22 @@ public class ExportThesisProposalsService {
     ThesisProposalsService service;
     static String BUNDLE = "resources.FenixEduThesisProposalsResources";
 
-    private List<Object> getHeaders() {
+    private List<Object> getHeaders(List<ThesisProposal> thesisProposals) {
         final List<Object> headers = new ArrayList<Object>();
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.number"));
         //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.state"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.title"));
 
-        service.getThesisProposalParticipantTypes().stream().forEach(type -> {
+        Set<ThesisProposalParticipantType> types =
+                thesisProposals.stream().flatMap(proposal -> proposal.getThesisProposalParticipantSet().stream())
+                        .map(participant -> participant.getThesisProposalParticipantType()).distinct()
+                        .sorted(ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT).collect(Collectors.toSet());
+
+        types.forEach(type -> {
             headers.add(type.getName().getContent() + " - " + BundleUtil.getString(BUNDLE, "export.thesis.user.name"));
             headers.add(type.getName().getContent() + " - " + BundleUtil.getString(BUNDLE, "export.thesis.user.username"));
         });
+
         //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisor.percent"));
         //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.coadvisor.percent"));
         //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.external.tutor.name"));
@@ -99,7 +105,7 @@ public class ExportThesisProposalsService {
         ExecutionDegree executionDegree = configuration.getExecutionDegree();
         List<ThesisProposal> thesisProposals = configuration.getThesisProposalSet().stream().collect(Collectors.toList());
         List<String> metaKeys = new ArrayList<String>();
-        final List<Object> headers = getHeaders();
+        final List<Object> headers = getHeaders(thesisProposals);
         final Spreadsheet spreadsheet =
                 new Spreadsheet("proposals_" + executionDegree.getAcademicInterval().getStart().getYear() + "_"
                         + executionDegree.getAcademicInterval().getEnd().getYear(), headers);
@@ -168,7 +174,7 @@ public class ExportThesisProposalsService {
         row.setCell(proposal.getTitle());
         String name;
         String userName;
-        List<ThesisProposalParticipantType> tppt = service.getThesisProposalParticipantTypes();
+        List<ThesisProposalParticipantType> tppt = service.getAllThesisProposalParticipantTypes();
         tppt.stream().forEach(
                 type -> {
                     List<ThesisProposalParticipant> thesisParticipant =
