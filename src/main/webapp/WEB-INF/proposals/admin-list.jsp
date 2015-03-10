@@ -204,9 +204,6 @@ ${portal.toolkit()}
 					<th>
 						<spring:message code='label.thesis.id'/>
 					</th>
-<!-- 					<th> -->
-<%-- 						<spring:message code='label.year'/> --%>
-<!-- 					</th> -->
 					<th>
 						<spring:message code='label.title'/>
 					</th>
@@ -229,14 +226,13 @@ ${portal.toolkit()}
 				<c:forEach items="${coordinatorProposals}" var="thesisProposal">
 					<tr>
 						<td>${thesisProposal.identifier}</td>
-<%-- 						<td>${thesisProposal.getSingleThesisProposalsConfiguration().executionDegree.executionYear.year}</td> --%>
 						<td>${thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
 								<div>${participant.user.name} (${participant.participationPercentage}%)<small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
 							</c:forEach>
 						</td>
-						<td>
+						<td class='proposalHidden' data-true="<spring:message code='label.proposal.status.hidden'/>" data-false="<spring:message code='label.proposal.status.visible'/>">
 							<c:if test="${thesisProposal.hidden}">
 								<spring:message code='label.proposal.status.hidden'/>
 							</c:if>
@@ -254,9 +250,16 @@ ${portal.toolkit()}
 							<c:set var="degreesLabels" value="${fn:join(service.getThesisProposalDegrees(thesisProposal), ',')}"/>
 							<c:set var="candidatesLabels" value='${fn:join(service.getThesisProposalCandidates(thesisProposal), "</br>")}'/>
 							<c:url var="toggleVisibilityUrl" value="/admin-proposals/toggle/${thesisProposal.externalId}?configuration=${configuration.externalId}&isVisible=${isVisible}&isAttributed=${isAttributed}&hasCandidacy=${hasCandidacy}"/>
-							<p></p>
+
 							<div class="btn-group btn-group-xs">
-							<a href="${toggleVisibilityUrl}" class="btn btn-default"><spring:message code="label.toggle.visibility"/></a>
+							<button data-action="${toggleVisibilityUrl}" class="btn btn-default btn-visibility" data-show="<spring:message code='label.toggle.show'/>" data-hide="<spring:message code='label.toggle.hide'/>">
+								<c:if test="${thesisProposal.hidden}">
+									<spring:message code="label.toggle.show"/>
+								</c:if>
+								<c:if test="${!thesisProposal.hidden}">
+									<spring:message code="label.toggle.hide"/>
+								</c:if>
+							</button>
 							<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" data-candidates="${candidatesLabels}"value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
 								<spring:message code="label.details"/>
 							</button>
@@ -374,4 +377,20 @@ $(function(){
 		$('#view').modal('show');
 	});
 })
+
+$(".btn-visibility").on("click", function(e) {
+
+	var action = $(e.target).data('action');
+	 $.get(action, function(response) {
+		var td = $(e.target).parents('tr').children('td.proposalHidden');
+		if(response) {
+			$(td).html($(td).data("true"));
+			$(e.target).html($(e.target).data("show"));
+		}
+		else {
+			$(td).html($(td).data("false"));
+			$(e.target).html($(e.target).data("hide"));
+		}
+	 });
+});
 </script>

@@ -45,6 +45,9 @@ import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -178,13 +181,14 @@ public class AdminThesisProposalsController {
         }
     }
 
-    @RequestMapping(value = "/toggle/{proposal}", method = RequestMethod.GET)
-    public String toggleVisibility(@PathVariable ThesisProposal proposal, Model model,
-            @RequestParam(required = false) ThesisProposalsConfiguration configuration,
-            @RequestParam(required = false) Boolean isVisible, @RequestParam(required = false) Boolean isAttributed,
-            @RequestParam(required = false) Boolean hasCandidacy) {
+    @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE, value = "/toggle/{proposal}", method = RequestMethod.GET)
+    public ResponseEntity<String> toggleVisibility(@PathVariable ThesisProposal proposal, Model model, @RequestParam(
+            required = false) ThesisProposalsConfiguration configuration, @RequestParam(required = false) Boolean isVisible,
+            @RequestParam(required = false) Boolean isAttributed, @RequestParam(required = false) Boolean hasCandidacy) {
+
         service.toggleVisibility(proposal);
-        return listProposals(model, configuration, isVisible, isAttributed, hasCandidacy);
+
+        return new ResponseEntity<String>(new Boolean(proposal.getHidden()).toString(), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/createProposal")
