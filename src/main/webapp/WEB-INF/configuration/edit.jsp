@@ -125,7 +125,7 @@ ${ portal.toolkit() }
 
 <div class="form-group">
   <div class="col-sm-offset-4 col-sm-8">
-    <button type="submit" class="btn btn-default" id="submitButton"><spring:message code='button.edit'/></button>
+    <button type="submit" class="btn btn-default" id="submitButton"><spring:message code='button.save'/></button>
     <button type="button" class="btn btn-danger" id="deleteButton"><spring:message code="button.delete"/></button>
   </form>
 </div>
