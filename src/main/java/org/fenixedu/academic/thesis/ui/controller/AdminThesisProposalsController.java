@@ -41,6 +41,7 @@ import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationException;
 import org.fenixedu.academic.thesis.ui.service.ExportThesisProposalsService;
+import org.fenixedu.academic.thesis.ui.service.ParticipantLabelService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -73,6 +74,9 @@ public class AdminThesisProposalsController {
     @Autowired
     ExportThesisProposalsService exportService;
 
+    @Autowired(required = false)
+    ParticipantLabelService participantLabelService;
+
     @RequestMapping(method = RequestMethod.GET)
     public String listProposals(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
             @RequestParam(required = false) Boolean isVisible, @RequestParam(required = false) Boolean isAttributed,
@@ -83,6 +87,10 @@ public class AdminThesisProposalsController {
 
         if (configuration == null && !configurations.isEmpty()) {
             configuration = configurations.iterator().next();
+        }
+
+        if (participantLabelService != null) {
+            model.addAttribute("participantLabelService", participantLabelService);
         }
 
         model.addAttribute("configuration", configuration);

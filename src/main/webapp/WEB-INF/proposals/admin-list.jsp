@@ -229,7 +229,11 @@ ${portal.toolkit()}
 						<td>${thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
-								<div>${participant.user.name} (${participant.participationPercentage}%)<small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
+								<div>${participant.user.name} (${participant.participationPercentage}%)
+									<c:if test="${! empty participantLabelService}">
+										<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
+									</c:if>
+								</div>
 							</c:forEach>
 						</td>
 						<td class='proposalHidden' data-true="<spring:message code='label.proposal.status.hidden'/>" data-false="<spring:message code='label.proposal.status.visible'/>">

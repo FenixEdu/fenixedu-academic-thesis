@@ -31,6 +31,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberStudentThesisCandidaciesException;
 import org.fenixedu.academic.thesis.ui.exception.OutOfCandidacyPeriodException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
+import org.fenixedu.academic.thesis.ui.service.ParticipantLabelService;
 import org.fenixedu.academic.thesis.ui.service.StudentCandidaciesService;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -53,6 +54,9 @@ public class StudentCandidaciesController {
     @Autowired
     StudentCandidaciesService service;
 
+    @Autowired(required = false)
+    ParticipantLabelService participantLabelService;
+
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String listProposals(Model model) {
 
@@ -67,6 +71,10 @@ public class StudentCandidaciesController {
 
         int proposalsSize = proposalsByReg.values().stream().map(Set::size).reduce(0, (a, b) -> a + b);
         int candidaciesSize = candidaciesByConfig.values().stream().map(List::size).reduce(0, (a, b) -> a + b);
+
+        if (participantLabelService != null) {
+            model.addAttribute("participantLabelService", participantLabelService);
+        }
 
         model.addAttribute("suggestedConfigs", suggestedConfigs);
         model.addAttribute("proposalsSize", proposalsSize);

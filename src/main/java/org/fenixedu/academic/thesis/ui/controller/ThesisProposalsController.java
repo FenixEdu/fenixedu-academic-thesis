@@ -37,6 +37,7 @@ import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantException;
+import org.fenixedu.academic.thesis.ui.service.ParticipantLabelService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -68,6 +69,9 @@ public class ThesisProposalsController {
     @Autowired
     ThesisProposalsService service;
 
+    @Autowired(required = false)
+    ParticipantLabelService participantLabelService;
+
     protected String getBaseView() {
         return "proposals";
     }
@@ -85,6 +89,10 @@ public class ThesisProposalsController {
 
         if (executionYear == null && !executionYears.isEmpty()) {
             executionYear = executionYears.iterator().next();
+        }
+
+        if (participantLabelService != null) {
+            model.addAttribute("participantLabelService", participantLabelService);
         }
 
         model.addAttribute("baseAction", getBaseView());

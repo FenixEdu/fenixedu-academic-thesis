@@ -144,8 +144,11 @@
 							<td>${candidacy.thesisProposal.title}</td>
 							<td>
 								<c:forEach items="${candidacy.thesisProposal.getSortedParticipants()}" var="participant">
-									<div>${participant.user.name} (${participant.participationPercentage}%)<small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
-								</div>
+									<div>${participant.user.name} (${participant.participationPercentage}%)
+										<c:if test="${! empty participantLabelService}">
+											<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
+										</c:if>
+									</div>
 							</c:forEach>
 						</td>
 						<td>
@@ -275,8 +278,11 @@ $(function(){
 					<td>${proposal.title}</td>
 					<td>
 						<c:forEach items="${proposal.getSortedParticipants()}" var="participant">
-						<div>${participant.user.name} (${participant.participationPercentage}%)<small>-</small> <b>${participant.thesisProposalParticipantType.name.content}</b>
-						</div>
+							<div>${participant.user.name} (${participant.participationPercentage}%)
+								<c:if test="${! empty participantLabelService}">
+									<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
+								</c:if>
+							</div>
 					</c:forEach>
 				</td>
 				<td>
