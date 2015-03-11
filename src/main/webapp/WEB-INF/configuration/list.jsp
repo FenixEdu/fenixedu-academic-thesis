@@ -378,6 +378,7 @@ $("#executionDegreeSelect").change(function(){
 		<thead>
 			<tr>
 				<th><spring:message code='label.participantType.name'/></th>
+				<th><spring:message code='label.participantType.inactive'/></th>
 				<th></th>
 			</tr>
 		</thead>
@@ -386,13 +387,32 @@ $("#executionDegreeSelect").change(function(){
 			<div class="sortable">
 				<tr data-participantType-id="${participantType.externalId}" class="sortableRow">
 					<td>${participantType.name.content}</td>
-					<td>
-						<%--			<c:if test="${participantType.thesisProposalParticipantSet.size() == 0}">  --%>
-						<a class="btn btn-xs btn-default" href="${pageContext.request.contextPath}/configuration/editParticipantType/${participantType.externalId}"><spring:message code='button.edit'/></a>
-						<%--		</c:if>
-					<c:if test="${participantType.thesisProposalParticipantSet.size() > 0}">
-					<button class="btn disabled btn-disabled btn-xs btn-default" data-toggle="tooltip" data-placement="right" title="<spring:message code="error.thesisProposal.participantType.edit.used"/>"><spring:message code='button.edit'/></button>
-				</c:if>  --%>
+					<c:if test="${participantType.inactive}">
+						<td>
+							<spring:message code='label.participantType.inactive.true'/>
+						</td>
+						<td>
+								<a class="btn btn-xs btn-default" href="${pageContext.request.contextPath}/configuration/activateParticipantType/${participantType.externalId}">
+									<spring:message code='label.participantType.inactive.activate'/>
+								</a>
+								<a class="btn btn-xs btn-default" href="${pageContext.request.contextPath}/configuration/editParticipantType/${participantType.externalId}">
+									<spring:message code='button.edit'/>
+								</a>
+						</td>
+					</c:if>
+					<c:if test="${!participantType.inactive}">
+						<td>
+							<spring:message code='label.participantType.inactive.false'/>
+						</td>
+						<td>
+							<a class="btn btn-xs btn-default" href="${pageContext.request.contextPath}/configuration/inactivateParticipantType/${participantType.externalId}">
+								<spring:message code='label.participantType.inactive.inactivate'/>
+							</a>
+							<a class="btn btn-xs btn-default" href="${pageContext.request.contextPath}/configuration/editParticipantType/${participantType.externalId}">
+								<spring:message code='button.edit'/>
+							</a>
+						</td>
+					</c:if>
 			</tr>
 		</div>
 	</c:forEach>

@@ -429,9 +429,14 @@ public class ThesisProposalsService {
         studentThesisCandidacy.setAcceptedByAdvisor(false);
     }
 
-    public List<ThesisProposalParticipantType> getThesisProposalParticipantTypes() {
+    public List<ThesisProposalParticipantType> getAllThesisProposalParticipantTypes() {
         return ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet().stream()
-                .sorted(ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT).distinct().collect(Collectors.toList());
+                .sorted(ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT).collect(Collectors.toList());
+    }
+
+    public List<ThesisProposalParticipantType> getThesisProposalParticipantTypes() {
+        return ThesisProposalsSystem.getInstance().getThesisProposalParticipantTypeSet().stream().filter(t -> !t.getInactive())
+                .sorted(ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT).collect(Collectors.toList());
     }
 
     public List<ThesisProposalsConfiguration> getCurrentThesisProposalsConfigurations() {

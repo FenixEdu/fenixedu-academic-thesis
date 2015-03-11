@@ -380,4 +380,27 @@ public class ConfigurationController {
         });
     }
 
+    @RequestMapping(value = "inactivateParticipantType/{participantType}", method = RequestMethod.GET)
+    public String inactivateParticipantType(@PathVariable("participantType") ThesisProposalParticipantType participantType,
+            Model model) {
+
+        setParticipantTypeInactiveness(participantType, true);
+
+        return "redirect:/configuration";
+    }
+
+    @RequestMapping(value = "activateParticipantType/{participantType}", method = RequestMethod.GET)
+    public String activateParticipantType(@PathVariable("participantType") ThesisProposalParticipantType participantType,
+            Model model) {
+
+        setParticipantTypeInactiveness(participantType, false);
+
+        return "redirect:/configuration";
+    }
+
+    @Atomic(mode = TxMode.WRITE)
+    private void setParticipantTypeInactiveness(ThesisProposalParticipantType participantType, boolean inactiveness) {
+        participantType.setInactive(inactiveness);
+    }
+
 }

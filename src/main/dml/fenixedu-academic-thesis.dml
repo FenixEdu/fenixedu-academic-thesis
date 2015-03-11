@@ -38,6 +38,7 @@ class ThesisProposalParticipant {
 class ThesisProposalParticipantType {
     public LocalizedString name;
     public int weight;
+    public boolean inactive;
 }
 
 // access groups relationships definition

@@ -78,19 +78,24 @@ ${portal.toolkit()}
 			     <div class="col-sm-4">
 			       <input type="text" class="form-control" id="UserId" bennu-user-autocomplete  value="${participantBean.user.username}" required="required"/>
 			     </div>
-			     <div class="col-sm-3">
-			       <select id="selectParticipantType" class="form-control">
-			         <option value="">${selectParticipantType}</option>
-			         <c:forEach var="participantType" items="${participantTypeList}">
-			           <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
-			             <option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
-			           </c:if>
-			           <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
-			             <option value="${participantType.externalId}">${participantType.name.content}</option>
-			           </c:if>
-			         </c:forEach>
-			       </select>
-			     </div>
+           <c:if test="${participantTypeList.size() == 1}">
+             <input type='hidden' id='selectParticipantType' value="${participantTypeList.iterator().next().externalId}"/>
+           </c:if>
+           <c:if test="${participantTypeList.size() != 1}">
+             <div class="col-sm-3">
+               <select id="selectParticipantType" class="form-control">
+                 <option value="">${selectParticipantType}</option>
+                 <c:forEach var="participantType" items="${participantTypeList}">
+                   <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
+                     <option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
+                   </c:if>
+                   <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
+                     <option value="${participantType.externalId}">${participantType.name.content}</option>
+                   </c:if>
+                 </c:forEach>
+               </select>
+             </div>
+           </c:if>
 			     <div class="col-sm-2">
 			       <div class="input-group">
 			         <input type="number" min="0" max="100" class="form-control" id="percentage" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
@@ -170,19 +175,24 @@ ${portal.toolkit()}
 	     <div class="col-sm-4">
 	       <input type="text" class="form-control" id="UserId" bennu-user-autocomplete  value="${participantBean.user.username}" required="required"/>
 	     </div>
-	     <div class="col-sm-3">
-	       <select id="selectParticipantType" class="form-control">
-	         <option value="">${selectParticipantType}</option>
-	         <c:forEach var="participantType" items="${participantTypeList}">
-	           <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
-	             <option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
-	           </c:if>
-	           <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
-	             <option value="${participantType.externalId}">${participantType.name.content}</option>
-	           </c:if>
-	         </c:forEach>
-	       </select>
-	     </div>
+         <c:if test="${participantTypeList.size() == 1}">
+         <input type='hidden' id='selectParticipantType' value="${participantTypeList.iterator().next().externalId}"/>
+         </c:if>
+         <c:if test="${participantTypeList.size() != 1}">
+           <div class="col-sm-3">
+             <select id="selectParticipantType" class="form-control">
+               <option value="">${selectParticipantType}</option>
+                <c:forEach var="participantType" items="${participantTypeList}">
+                  <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
+                    <option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
+                  </c:if>
+                  <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
+                    <option value="${participantType.externalId}">${participantType.name.content}</option>
+                  </c:if>
+                </c:forEach>
+              </select>
+            </div>
+         </c:if>
 	     <div class="col-sm-2">
 	       <div class="input-group">
 	         <input type="number" min="0" max="100" class="form-control" id="percentage" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
