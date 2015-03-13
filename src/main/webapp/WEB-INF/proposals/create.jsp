@@ -42,12 +42,6 @@ ${portal.toolkit()}
 
 <form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalCreateForm">
 
-<div class="alert alert-warning">
-  <p>
-    Colocar nome e email dos orientadores externos no campo de Observações.
-  </p>
-</div>
-
 <spring:message code='label.title' var='title'/>
 <spring:message code='label.observations' var='observations'/>
 <spring:message code='label.requirements' var='requirements'/>
@@ -61,6 +55,10 @@ ${portal.toolkit()}
 <spring:message code='label.thesisProposal.participant.add' var='addParticipant'/>
 <spring:message code='label.thesisProposal.participant.remove' var='removeParticipant'/>
 <spring:message code='button.create' var='createButton'/>
+<spring:message code='label.participant.name' var='name'/>
+<spring:message code='label.participant.email' var='email'/>
+<spring:message code='label.participant.external' var='external'/>
+<spring:message code='label.participant.external.add' var='addExternal'/>
 
 <div class="form-group row">
  	<form:label for="thesisProposalTitle" path="title" class="col-sm-2 control-label">${title}</form:label>
@@ -74,6 +72,7 @@ ${portal.toolkit()}
    	<div class="col-sm-10">
 	   	<div id="tableBody">
 	   	   <c:forEach var="participantBean" items="${command.thesisProposalParticipantsBean}">
+         <c:if test="${!participantBean.isExternal()}">
 			   <div class="tableRow row form-group">
 			     <div class="col-sm-4">
 			       <input type="text" class="form-control" id="UserId" bennu-user-autocomplete  value="${participantBean.user.username}" required="required"/>
@@ -102,22 +101,75 @@ ${portal.toolkit()}
 			         <div class="input-group-addon">%</div>
 			       </div>
 			     </div>
-			     <div class="col-sm-3">
+			     <div class="col-sm-2">
 			       <a href="#" class="btn btn-default removeParticipant"><span class="glyphicon glyphicon-remove"></span> ${removeParticipant}</a>
 			     </div>
 			   </div>
+         </c:if>
 			</c:forEach>
 		</div>
-
 		<div class="row">
 			<div class="col-sm-12">
 				<a class="btn btn-link" id="addParticipant">${addParticipant}</a>
 			</div>
 		</div>
-
 	</div>
 </div>
 
+<div class="form-group row">
+  <label class="col-sm-2 control-label">${external}</label>
+  <div class="col-sm-10">
+    <div id="tableExternalBody">
+    <div class="row">
+        <div class="col-sm-12">
+          <c:forEach var="participantBean" items="${command.thesisProposalParticipantsBean}">
+            <c:if test="${participantBean.isExternal()}">
+              <div class="tableExternalRow row form-group">
+                <div class="input-group">
+                  <div class="col-sm-2">
+                    <input type="text" class="form-control" id="name" placeholder="${name}" value="${participantBean.name}"/>
+                  </div>
+                  <div class="col-sm-2">
+                    <input type="text" class="form-control" id="email" placeholder="${email}" value="${participantBean.email}"/>
+                  </div>
+                  <c:if test="${participantTypeList.size() == 1}">
+                    <input type='hidden' id='selectParticipantType' value="${participantTypeList.iterator().next().externalId}"/>
+                  </c:if>
+                  <c:if test="${participantTypeList.size() != 1}">
+                    <div class="col-sm-2">
+                      <select id="selectParticipantType" class="form-control">
+                        <option value="">${selectParticipantType}</option>
+                        <c:forEach var="participantType" items="${participantTypeList}">
+                          <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
+                            <option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
+                          </c:if>
+                          <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
+                            <option value="${participantType.externalId}">${participantType.name.content}</option>
+                          </c:if>
+                        </c:forEach>
+                      </select>
+                    </div>
+                  </c:if>
+                  <div class="col-sm-2">
+                    <div class="input-group">
+                      <input type="number" min="0" max="100" class="form-control" id="percentage" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
+                      <div class="input-group-addon">%</div>
+                    </div>
+                  </div>
+                  <div class="col-sm-2">
+                    <a href="#" class="btn btn-default removeExternal"><span class="glyphicon glyphicon-remove"></span> ${removeParticipant}</a>
+                  </div>
+                </div>
+              </div>
+            </c:if>
+          </c:forEach>
+        </div>
+      </div>
+    </div>
+        <a class="btn btn-link" id="addExternal">${addExternal}</a>
+    </div>
+  </div>
+</div>
 
 <div class="form-group row">
   <form:label for="thesisProposalGoals" path="goals" class="col-sm-2 control-label">${goals}</form:label>
@@ -141,6 +193,7 @@ ${portal.toolkit()}
 </div>
 
 <input type="hidden" name="participantsJson" id="participantsJson"/>
+<input type="hidden" name="externalsJson" id="externalsJson"/>
 
 <div class="form-group row">
   <form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label>
@@ -172,37 +225,77 @@ ${portal.toolkit()}
 
 <script type="text/html" id="participantRowTemplate">
   <div class="tableRow row form-group">
-	     <div class="col-sm-4">
-	       <input type="text" class="form-control" id="UserId" bennu-user-autocomplete  value="${participantBean.user.username}" required="required"/>
-	     </div>
-         <c:if test="${participantTypeList.size() == 1}">
-         <input type='hidden' id='selectParticipantType' value="${participantTypeList.iterator().next().externalId}"/>
-         </c:if>
-         <c:if test="${participantTypeList.size() != 1}">
-           <div class="col-sm-3">
-             <select id="selectParticipantType" class="form-control">
-               <option value="">${selectParticipantType}</option>
-                <c:forEach var="participantType" items="${participantTypeList}">
-                  <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
-                    <option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
-                  </c:if>
-                  <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
-                    <option value="${participantType.externalId}">${participantType.name.content}</option>
-                  </c:if>
-                </c:forEach>
-              </select>
-            </div>
-         </c:if>
-	     <div class="col-sm-2">
-	       <div class="input-group">
-	         <input type="number" min="0" max="100" class="form-control" id="percentage" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
-	         <div class="input-group-addon">%</div>
-	       </div>
-	     </div>
-	     <div class="col-sm-3">
-	       <a href="#" class="btn btn-default removeParticipant"><span class="glyphicon glyphicon-remove"></span> ${removeParticipant}</a>
-	     </div>
-	</div>
+    <div class="col-sm-4">
+      <input type="text" class="form-control" id="UserId" bennu-user-autocomplete  value="${participantBean.user.username}" required="required"/>
+    </div>
+    <c:if test="${participantTypeList.size() == 1}">
+    <input type='hidden' id='selectParticipantType' value="${participantTypeList.iterator().next().externalId}"/>
+  </c:if>
+  <c:if test="${participantTypeList.size() != 1}">
+  <div class="col-sm-3">
+    <select id="selectParticipantType" class="form-control">
+      <option value="">${selectParticipantType}</option>
+      <c:forEach var="participantType" items="${participantTypeList}">
+      <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
+      <option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
+    </c:if>
+    <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
+    <option value="${participantType.externalId}">${participantType.name.content}</option>
+  </c:if>
+</c:forEach>
+</select>
+</div>
+</c:if>
+<div class="col-sm-2">
+  <div class="input-group">
+    <input type="number" min="0" max="100" class="form-control" id="percentage" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
+    <div class="input-group-addon">%</div>
+  </div>
+</div>
+<div class="col-sm-2">
+  <a href="#" class="btn btn-default removeParticipant"><span class="glyphicon glyphicon-remove"></span> ${removeParticipant}</a>
+</div>
+</div>
+</script>
+
+<script type="text/html" id="externalRowTemplate">
+  <div class="tableExternalRow row form-group">
+    <div class="input-group">
+      <div class="col-sm-2">
+        <input type="text" class="form-control" id="name" placeholder="${name}"/>
+      </div>
+      <div class="col-sm-2">
+        <input type="text" class="form-control" id="email" placeholder="${email}"/>
+      </div>
+      <c:if test="${participantTypeList.size() == 1}">
+      <input type='hidden' id='selectParticipantType' value="${participantTypeList.iterator().next().externalId}"/>
+    </c:if>
+    <c:if test="${participantTypeList.size() != 1}">
+    <div class="col-sm-2">
+      <select id="selectParticipantType" class="form-control">
+        <option value="">${selectParticipantType}</option>
+        <c:forEach var="participantType" items="${participantTypeList}">
+        <c:if test="${participantBean.participantTypeExternalId == participantType.externalId}">
+        <option value="${participantType.externalId}" selected="selected">${participantType.name.content}</option>
+      </c:if>
+      <c:if test="${participantBean.participantTypeExternalId != participantType.externalId}">
+      <option value="${participantType.externalId}">${participantType.name.content}</option>
+    </c:if>
+  </c:forEach>
+</select>
+</div>
+</c:if>
+<div class="col-sm-2">
+  <div class="input-group">
+    <input type="number" min="0" max="100" class="form-control" id="percentage" placeholder="${percentage}" required="required" value="${participantBean.percentage}"/>
+    <div class="input-group-addon">%</div>
+  </div>
+</div>
+<div class="col-sm-2">
+  <a href="#" class="btn btn-default removeExternal"><span class="glyphicon glyphicon-remove"></span> ${removeParticipant}</a>
+</div>
+</div>
+</div>
 </script>
 
 <script type="text/javascript">
@@ -217,6 +310,17 @@ ${portal.toolkit()}
 
   $(".removeParticipant").on("click", onRemoveParticipant);
 
+  var onRemoveExternal = function(e) {
+    $(this).closest(".tableExternalRow").remove();
+  };
+
+  $("#addExternal").on("click", function(e) {
+    var addedRow = $("#tableExternalBody").append($("#externalRowTemplate").html());
+    $(".removeExternal", addedRow).on("click", onRemoveExternal);
+  });
+
+  $(".removeExternal").on("click", onRemoveExternal);
+
   $("#submitButton").on("click", function(e) {
     var participantsJSON = {
       participants: []
@@ -224,9 +328,11 @@ ${portal.toolkit()}
     var participants = $("#tableBody").find(".tableRow");
     for (index=0; index < participants.length; index++) {
       participant = participants.eq(index)
+
       user = participant.find("#UserId").val()
       participantType = participant.find("#selectParticipantType").val()
       percentage = participant.find("#percentage").val()
+
       participantsJSON.participants.push({
         "userId" : user,
         "userType" : participantType,
@@ -234,6 +340,27 @@ ${portal.toolkit()}
       });
     }
     $("#participantsJson").val(JSON.stringify(participantsJSON.participants));
+
+    var externalsJSON = {
+      externals: []
+    };
+    var externals = $("#tableExternalBody").find(".tableExternalRow");
+    for (index=0; index < externals.length; index++) {
+      external = externals.eq(index)
+
+      name = external.find("#name").val()
+      email = external.find("#email").val()
+      participantType = external.find("#selectParticipantType").val()
+      percentage = external.find("#percentage").val()
+
+      externalsJSON.externals.push({
+        "name" : name,
+        "email" : email,
+        "userType" : participantType,
+        "percentage" : percentage
+      });
+    }
+    $("#externalsJson").val(JSON.stringify(externalsJSON.externals));
   });
 
   function checkboxListener(e) {

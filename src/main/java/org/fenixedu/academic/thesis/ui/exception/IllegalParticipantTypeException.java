@@ -29,6 +29,9 @@ public class IllegalParticipantTypeException extends ThesisProposalException {
         this.user = user;
     }
 
+    public IllegalParticipantTypeException() {
+    }
+
     public User getUser() {
         return user;
     }

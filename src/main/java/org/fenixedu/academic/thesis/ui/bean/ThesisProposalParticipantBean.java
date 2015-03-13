@@ -18,6 +18,7 @@
  */
 package org.fenixedu.academic.thesis.ui.bean;
 
+import org.fenixedu.academic.thesis.domain.ExternalUser;
 import org.fenixedu.bennu.core.domain.User;
 
 public class ThesisProposalParticipantBean {
@@ -25,6 +26,8 @@ public class ThesisProposalParticipantBean {
     private User user;
     private String participantTypeExternalId;
     private int percentage;
+    private String name;
+    private String email;
 
     public int getPercentage() {
         return percentage;
@@ -35,7 +38,7 @@ public class ThesisProposalParticipantBean {
     }
 
     public String getUserExternalId() {
-        return user.getExternalId();
+        return user != null ? user.getExternalId() : null;
     }
 
     public void setUser(User user) {
@@ -50,8 +53,35 @@ public class ThesisProposalParticipantBean {
         this.participantTypeExternalId = participantType;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
     public ThesisProposalParticipantBean(User user, String participantType, int percentage) {
         setUser(user);
+        setPercentage(percentage);
+        this.participantTypeExternalId = participantType;
+    }
+
+    public ThesisProposalParticipantBean(String name, String email, String participantType, int percentage) {
+        setName(name);
+        setEmail(email);
         setPercentage(percentage);
         this.participantTypeExternalId = participantType;
     }
@@ -59,8 +89,20 @@ public class ThesisProposalParticipantBean {
     public ThesisProposalParticipantBean() {
     }
 
-    public User getUser() {
-        return user;
+    public ThesisProposalParticipantBean(User user, ExternalUser externalUser, String participantType, int participationPercentage) {
+        setUser(user);
+        setPercentage(participationPercentage);
+        this.participantTypeExternalId = participantType;
+
+        if (externalUser != null) {
+            setName(externalUser.getName());
+            setEmail(externalUser.getEmail());
+        }
+
+    }
+
+    public boolean isExternal() {
+        return getName() != null || getEmail() != null;
     }
 
 }

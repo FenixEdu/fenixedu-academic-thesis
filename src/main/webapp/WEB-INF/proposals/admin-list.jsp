@@ -229,7 +229,7 @@ ${portal.toolkit()}
 						<td>${thesisProposal.title}</td>
 						<td>
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
-								<div>${participant.user.name} (${participant.participationPercentage}%)
+								<div>${participant.name} (${participant.participationPercentage}%)
 									<c:if test="${! empty participantLabelService}">
 										<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
 									</c:if>

@@ -41,6 +41,11 @@ class ThesisProposalParticipantType {
     public boolean inactive;
 }
 
+class ExternalUser {
+    public String name;
+    public String email;
+}
+
 // access groups relationships definition
 
 relation ThesisCreatorsGroup {
@@ -141,11 +146,21 @@ relation ThesisProposalConfiguration {
 
 relation ThesisProposalParticipantUser {
     public .org.fenixedu.bennu.core.domain.User playsRole user {
-	multiplicity 1..1;
+    multiplicity 0..1;
     }
 
     public ThesisProposalParticipant playsRole thesisProposalParticipant {
-	multiplicity 0..*;
+    multiplicity 0..*;
+    }
+}
+
+relation ThesisProposalParticipantExternalUser {
+    public ExternalUser playsRole externalUser {
+    multiplicity 0..1;
+    }
+
+    public ThesisProposalParticipant playsRole thesisProposalParticipant {
+    multiplicity 1..1;
     }
 }
 
