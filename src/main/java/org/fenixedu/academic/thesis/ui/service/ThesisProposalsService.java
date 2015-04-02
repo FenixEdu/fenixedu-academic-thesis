@@ -40,6 +40,8 @@ import org.fenixedu.academic.thesis.ui.exception.ParticipantNotIncludedException
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.TotalParticipantPercentageException;
 import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfigurationsException;
+import org.fenixedu.academic.thesis.ui.exception.UnexistentExternalEmailException;
+import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisExternalParticipantException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantException;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
@@ -119,7 +121,7 @@ public class ThesisProposalsService {
                 .flatMap(configuration -> configuration.getThesisProposalSet().stream())
                 .distinct()
                 .filter(proposal -> proposal.getThesisProposalParticipantSet().stream()
-                        .anyMatch(participant -> participant.getUser().equals(user)))
+                        .anyMatch(participant -> participant.getUser() != null && participant.getUser().equals(user)))
                 .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES).collect(Collectors.toList());
     }
 
@@ -161,15 +163,14 @@ public class ThesisProposalsService {
     }
 
     @Atomic(mode = TxMode.WRITE)
-    public ThesisProposal createThesisProposal(ThesisProposalBean proposalBean, String participantsJson)
+    public ThesisProposal createThesisProposal(ThesisProposalBean proposalBean, String participantsJson, String externalsJson)
             throws ThesisProposalException {
 
         JsonParser parser = new JsonParser();
-        JsonArray jsonArray = parser.parse(participantsJson).getAsJsonArray();
 
         Set<ThesisProposalParticipantBean> participants = new HashSet<ThesisProposalParticipantBean>();
 
-        for (JsonElement elem : jsonArray) {
+        for (JsonElement elem : parser.parse(participantsJson).getAsJsonArray()) {
             JsonObject jsonObj = elem.getAsJsonObject();
 
             String userId = jsonObj.get("userId").getAsString();
@@ -196,6 +197,38 @@ public class ThesisProposalsService {
             }
         }
 
+        for (JsonElement elem : parser.parse(externalsJson).getAsJsonArray()) {
+            JsonObject jsonObj = elem.getAsJsonObject();
+
+            String name = jsonObj.get("name").getAsString();
+            String email = jsonObj.get("email").getAsString();
+            String userType = jsonObj.get("userType").getAsString();
+
+            try {
+                int percentage = jsonObj.get("percentage").getAsInt();
+
+                if (percentage > 100 || percentage < 0) {
+                    throw new InvalidPercentageException(percentage);
+                }
+
+                if (userType.isEmpty()) {
+                    throw new IllegalParticipantTypeException();
+                }
+
+                if (name == null || name.isEmpty()) {
+                    throw new UnexistentThesisExternalParticipantException();
+                }
+
+                if (email == null || email.isEmpty()) {
+                    throw new UnexistentExternalEmailException();
+                }
+
+                participants.add(new ThesisProposalParticipantBean(name, email, userType, percentage));
+            } catch (NumberFormatException e) {
+                throw new InvalidPercentageException();
+            }
+        }
+
         if (participants.isEmpty()) {
             throw new UnexistentThesisParticipantException();
         }
@@ -203,7 +236,7 @@ public class ThesisProposalsService {
         User thesisCreator = Authenticate.getUser();
         if (!proposalBean.getExecutionDegreeSet().stream()
                 .anyMatch(e -> CoordinatorGroup.get(e.getDegree()).isMember(thesisCreator))
-                && !participants.stream().map(bean -> bean.getUser()).anyMatch(u -> u.equals(thesisCreator))) {
+                && !participants.stream().map(bean -> bean.getUser()).anyMatch(u -> u != null && u.equals(thesisCreator))) {
             throw new ParticipantNotIncludedException();
         }
 
@@ -243,7 +276,7 @@ public class ThesisProposalsService {
 
     @Atomic(mode = TxMode.WRITE)
     public void editThesisProposal(User currentUser, ThesisProposalBean thesisProposalBean, ThesisProposal thesisProposal,
-            JsonArray jsonArray) throws ThesisProposalException {
+            JsonArray participantsArray, JsonArray externalsArray) throws ThesisProposalException {
 
         boolean isManager = DynamicGroup.get("managers").isMember(currentUser);
         boolean isDegreeCoordinator =
@@ -256,7 +289,7 @@ public class ThesisProposalsService {
 
         ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
 
-        for (JsonElement elem : jsonArray) {
+        for (JsonElement elem : participantsArray) {
             JsonObject jsonObj = elem.getAsJsonObject();
 
             String userId = jsonObj.get("userId").getAsString();
@@ -282,6 +315,38 @@ public class ThesisProposalsService {
             participantsBean.add(participantBean);
         }
 
+        for (JsonElement elem : externalsArray) {
+            JsonObject jsonObj = elem.getAsJsonObject();
+
+            String name = jsonObj.get("name").getAsString();
+            String email = jsonObj.get("email").getAsString();
+            String userType = jsonObj.get("userType").getAsString();
+
+            try {
+                int percentage = jsonObj.get("percentage").getAsInt();
+
+                if (percentage > 100 || percentage < 0) {
+                    throw new InvalidPercentageException(percentage);
+                }
+
+                if (userType.isEmpty()) {
+                    throw new IllegalParticipantTypeException();
+                }
+
+                if (name == null || name.isEmpty()) {
+                    throw new UnexistentThesisExternalParticipantException();
+                }
+
+                if (email == null || email.isEmpty()) {
+                    throw new UnexistentExternalEmailException();
+                }
+
+                participantsBean.add(new ThesisProposalParticipantBean(name, email, userType, percentage));
+            } catch (NumberFormatException e) {
+                throw new InvalidPercentageException();
+            }
+        }
+
         if (participantsBean.isEmpty()) {
             throw new UnexistentThesisParticipantException();
         }
@@ -300,13 +365,15 @@ public class ThesisProposalsService {
         }
 
         for (ThesisProposalParticipantBean participantBean : participantsBean) {
-            User user = FenixFramework.getDomainObject(participantBean.getUserExternalId());
 
             ThesisProposalParticipantType participantType =
                     FenixFramework.getDomainObject(participantBean.getParticipantTypeExternalId());
 
             ThesisProposalParticipant participant =
-                    new ThesisProposalParticipant(user, participantType, participantBean.getPercentage());
+                    participantBean.getUserExternalId() != null ? new ThesisProposalParticipant(
+                            FenixFramework.getDomainObject(participantBean.getUserExternalId()), participantType,
+                            participantBean.getPercentage()) : new ThesisProposalParticipant(participantBean.getName(),
+                            participantBean.getEmail(), participantType, participantBean.getPercentage());
 
             for (ThesisProposalsConfiguration configuration : thesisProposal.getThesisConfigurationSet()) {
                 int proposalsCount =

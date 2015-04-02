@@ -129,8 +129,8 @@ public class ThesisProposalsController {
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ModelAndView createThesisProposals(@ModelAttribute ThesisProposalBean proposalBean,
-            @RequestParam String participantsJson, @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations,
-            Model model) {
+            @RequestParam String participantsJson, @RequestParam String externalsJson,
+            @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations, Model model) {
 
         try {
             if (thesisProposalsConfigurations == null || thesisProposalsConfigurations.isEmpty()) {
@@ -150,7 +150,7 @@ public class ThesisProposalsController {
             }
 
             proposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
-            service.createThesisProposal(proposalBean, participantsJson);
+            service.createThesisProposal(proposalBean, participantsJson, externalsJson);
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
             model.addAttribute("action", getBaseView() + "/create");
@@ -209,8 +209,8 @@ public class ThesisProposalsController {
                         String participantType = participant.getThesisProposalParticipantType().getExternalId();
 
                         ThesisProposalParticipantBean bean =
-                                new ThesisProposalParticipantBean(participant.getUser(), participantType,
-                                        participant.getParticipationPercentage());
+                                new ThesisProposalParticipantBean(participant.getUser(), participant.getExternalUser(),
+                                        participantType, participant.getParticipationPercentage());
 
                         thesisProposalParticipantsBean.add(bean);
                     }
@@ -242,7 +242,8 @@ public class ThesisProposalsController {
 
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
     public ModelAndView editProposal(@ModelAttribute ThesisProposalBean thesisProposalBean,
-            @RequestParam String participantsJson, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
+            @RequestParam String participantsJson, @RequestParam String externalsJson,
+            @RequestParam(required = false) ThesisProposalsConfiguration configuration,
             @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations, Model model,
             RedirectAttributes redirectAttrs) {
 
@@ -257,9 +258,11 @@ public class ThesisProposalsController {
                 throw new UnexistentThesisParticipantException();
             }
 
-            JsonArray jsonArray = (JsonArray) parser.parse(participantsJson);
+            JsonArray participantsArray = (JsonArray) parser.parse(participantsJson);
+            JsonArray externalsArray = (JsonArray) parser.parse(externalsJson);
 
-            service.editThesisProposal(Authenticate.getUser(), thesisProposalBean, thesisProposal, jsonArray);
+            service.editThesisProposal(Authenticate.getUser(), thesisProposalBean, thesisProposal, participantsArray,
+                    externalsArray);
             redirectAttrs.addAttribute("configuration", configuration != null ? configuration.getExternalId() : null);
             return new ModelAndView("redirect:/" + getBaseView());
         } catch (ThesisProposalException exception) {

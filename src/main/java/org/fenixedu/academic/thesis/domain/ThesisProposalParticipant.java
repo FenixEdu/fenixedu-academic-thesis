@@ -44,6 +44,19 @@ public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
         }
     }
 
+    public ThesisProposalParticipant(String name, String email, ThesisProposalParticipantType participantType, int percentage) {
+        super();
+        setThesisProposalParticipantType(participantType);
+        setExternalUser(new ExternalUser(name, email));
+
+        if (percentage >= 0 && percentage <= 100) {
+            setParticipationPercentage(percentage);
+        } else {
+            throw new DomainException("error.domain.percentage.out.of.bounds");
+        }
+
+    }
+
     public void delete() {
 
         DomainException.throwWhenDeleteBlocked(getDeletionBlockers());
@@ -54,11 +67,21 @@ public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
         this.setUser(null);
         this.setThesisProposal(null);
 
+        this.getExternalUser().delete();
+
         deleteDomainObject();
     }
 
     @Override
     protected void checkForDeletionBlockers(Collection<String> blockers) {
         super.checkForDeletionBlockers(blockers);
+    }
+
+    public String getName() {
+        if (getUser() != null) {
+            return getUser().getName();
+        } else {
+            return getExternalUser().getName() + " " + getExternalUser().getEmail();
+        }
     }
 }

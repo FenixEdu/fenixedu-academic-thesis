@@ -122,7 +122,7 @@ public class AdminThesisProposalsController {
         for (ThesisProposalParticipant participant : thesisProposal.getThesisProposalParticipantSet()) {
             String participantType = participant.getThesisProposalParticipantType().getExternalId();
             ThesisProposalParticipantBean bean =
-                    new ThesisProposalParticipantBean(participant.getUser(), participantType,
+                    new ThesisProposalParticipantBean(participant.getUser(), participant.getExternalUser(), participantType,
                             participant.getParticipationPercentage());
             thesisProposalParticipantsBean.add(bean);
         }
@@ -144,7 +144,8 @@ public class AdminThesisProposalsController {
 
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
     public ModelAndView editProposal(@ModelAttribute ThesisProposalBean thesisProposalBean,
-            @RequestParam String participantsJson, @RequestParam(required = false) ThesisProposalsConfiguration configuration,
+            @RequestParam String participantsJson, @RequestParam String externalsJson,
+            @RequestParam(required = false) ThesisProposalsConfiguration configuration,
             @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations, Model model,
             RedirectAttributes redirectAttrs) {
 
@@ -153,10 +154,12 @@ public class AdminThesisProposalsController {
         ThesisProposal thesisProposal = FenixFramework.getDomainObject(thesisProposalBean.getExternalId());
 
         JsonParser parser = new JsonParser();
-        JsonArray jsonArray = (JsonArray) parser.parse(participantsJson);
+        JsonArray participantsArray = (JsonArray) parser.parse(participantsJson);
+        JsonArray externalsArray = (JsonArray) parser.parse(externalsJson);
 
         try {
-            service.editThesisProposal(Authenticate.getUser(), thesisProposalBean, thesisProposal, jsonArray);
+            service.editThesisProposal(Authenticate.getUser(), thesisProposalBean, thesisProposal, participantsArray,
+                    externalsArray);
             redirectAttrs.addAttribute("configuration", configuration != null ? configuration.getExternalId() : null);
             return new ModelAndView("redirect:/admin-proposals");
         } catch (ThesisProposalException exception) {
@@ -245,8 +248,8 @@ public class AdminThesisProposalsController {
 
     @RequestMapping(value = "/createProposal", method = RequestMethod.POST)
     public ModelAndView createThesisProposals(@ModelAttribute ThesisProposalBean proposalBean,
-            @RequestParam String participantsJson, @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations,
-            Model model) {
+            @RequestParam String participantsJson, @RequestParam String externalsJson,
+            @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations, Model model) {
 
         try {
             if (thesisProposalsConfigurations == null || thesisProposalsConfigurations.isEmpty()) {
@@ -262,7 +265,7 @@ public class AdminThesisProposalsController {
             }
 
             proposalBean.setThesisProposalsConfigurations(thesisProposalsConfigurations);
-            service.createThesisProposal(proposalBean, participantsJson);
+            service.createThesisProposal(proposalBean, participantsJson, externalsJson);
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
             model.addAttribute("configurations", service.getCurrentThesisProposalsConfigurations());

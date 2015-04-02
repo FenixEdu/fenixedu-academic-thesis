@@ -144,7 +144,7 @@
 							<td>${candidacy.thesisProposal.title}</td>
 							<td>
 								<c:forEach items="${candidacy.thesisProposal.getSortedParticipants()}" var="participant">
-									<div>${participant.user.name} (${participant.participationPercentage}%)
+									<div>${participant.name} (${participant.participationPercentage}%)
 										<c:if test="${! empty participantLabelService}">
 											<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
 										</c:if>
@@ -173,7 +173,12 @@
 										</c:if>
 									</c:forEach>
 
-									<input type='button' class='detailsButton btn btn-default' data-observations="${candidacy.thesisProposal.observations}" data-requirements="${candidacy.thesisProposal.requirements}" data-goals="${candidacy.thesisProposal.goals}" data-localization="${candidacy.thesisProposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${candidacy.thesisProposal.externalId}">
+									<input type='button' class='detailsButton btn btn-default' data-observations='<c:out value="${candidacy.thesisProposal.observations}"/>'
+																																						 data-requirements='<c:out value="${candidacy.thesisProposal.requirements}"/>'
+																																						 data-goals='<c:out value="${candidacy.thesisProposal.goals}"/>'
+																																						 data-localization='<c:out value="${candidacy.thesisProposal.localization}"/>' 
+																																						 data-degrees="${result}" value='<spring:message code="button.details"/>'
+																																						 data-thesis="${candidacy.thesisProposal.externalId}">
 								</div>
 							</form:form>
 						</td>
@@ -278,7 +283,7 @@ $(function(){
 					<td>${proposal.title}</td>
 					<td>
 						<c:forEach items="${proposal.getSortedParticipants()}" var="participant">
-							<div>${participant.user.name} (${participant.participationPercentage}%)
+							<div>${participant.name} (${participant.participationPercentage}%)
 								<c:if test="${! empty participantLabelService}">
 									<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
 								</c:if>
@@ -299,7 +304,7 @@ $(function(){
 							<c:set var="result" scope="session" value="${result}, " />
 						</c:if>
 					</c:forEach>
-				<input type='button' class='detailsButton btn btn-default' data-observations="${proposal.observations}" data-requirements="${proposal.requirements}" data-goals="${proposal.goals}" data-localization="${proposal.localization}" data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${proposal.externalId}">
+				<input type='button' class='detailsButton btn btn-default' data-observations='<c:out value="${proposal.observations}"/>' data-requirements='<c:out value="${proposal.requirements}"/>' data-goals='<c:out value="${proposal.goals}"/>' data-localization='<c:out value="${proposal.localization}"/>' data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${proposal.externalId}">
 			</div>
 		</form:form>
 	</td>

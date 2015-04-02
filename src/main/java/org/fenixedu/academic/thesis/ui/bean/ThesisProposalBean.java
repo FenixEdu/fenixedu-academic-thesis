@@ -203,13 +203,23 @@ public class ThesisProposalBean {
                 ThesisProposalParticipantType participantType =
                         FenixFramework.getDomainObject(participantBean.getParticipantTypeExternalId());
 
-                User username = FenixFramework.getDomainObject(participantBean.getUserExternalId());
-
                 int percentage = participantBean.getPercentage();
 
-                ThesisProposalParticipant participant = new ThesisProposalParticipant(username, participantType, percentage);
+                if (participantBean.getUserExternalId() != null) {
+                    User username = FenixFramework.getDomainObject(participantBean.getUserExternalId());
 
-                participants.add(participant);
+                    ThesisProposalParticipant participant = new ThesisProposalParticipant(username, participantType, percentage);
+                    participants.add(participant);
+                }
+
+                if (participantBean.getName() != null) {
+
+                    ThesisProposalParticipant participant =
+                            new ThesisProposalParticipant(participantBean.getName(), participantBean.getEmail(), participantType,
+                                    percentage);
+                    participants.add(participant);
+                }
+
             }
 
             int totalPercentage =
