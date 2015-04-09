@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
+import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_Base {
@@ -151,4 +152,21 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
 
         return builder.toString();
     }
+
+    @Override
+    public void setProposalPeriod(org.joda.time.Interval proposalPeriod) {
+        DateTime start = proposalPeriod.getStart().withSecondOfMinute(0);
+        DateTime end = proposalPeriod.getEnd().withSecondOfMinute(0);
+
+        super.setProposalPeriod(new org.joda.time.Interval(start, end));
+    }
+
+    @Override
+    public void setCandidacyPeriod(org.joda.time.Interval candidacyPeriod) {
+        DateTime start = candidacyPeriod.getStart().withSecondOfMinute(0);
+        DateTime end = candidacyPeriod.getEnd().withSecondOfMinute(0);
+
+        super.setCandidacyPeriod(new org.joda.time.Interval(start, end));
+    }
+
 }

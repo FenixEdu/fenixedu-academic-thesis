@@ -192,11 +192,11 @@ $(".deleteConfiguration").on("click", function() {
 						<label for="proposalPeriodEnd" class="col-sm-4 control-label"><spring:message code='label.proposalPeriod'/></label>
 						<div class="col-sm-4">
 							<label for="proposalPeriodStart"  class="control-label"><spring:message code='label.start'/></label>
-							<input type="text" bennu-datetime name="proposalPeriodStart" class="form-control" id="proposalPeriodStart" required="required" value='${thesisProposalsConfigurationBean.proposalPeriodStart}'/>
+							<input type="text" bennu-datetime no-seconds name="proposalPeriodStart" class="form-control" id="proposalPeriodStart" required="required" value='${thesisProposalsConfigurationBean.proposalPeriodStart}'/>
 						</div>
 						<div class="col-sm-4">
 							<label for="proposalPeriodEnd" path="proposalPeriodEnd" class="control-label"><spring:message code='label.end'/></label>
-							<input type="text" bennu-datetime name="proposalPeriodEnd" class="form-control" id="proposalPeriodEnd" required="required" value='${thesisProposalsConfigurationBean.proposalPeriodEnd}'/>
+							<input type="text" bennu-datetime no-seconds name="proposalPeriodEnd" class="form-control" id="proposalPeriodEnd" required="required" value='${thesisProposalsConfigurationBean.proposalPeriodEnd}'/>
 						</div>
 					</div>
 
@@ -204,11 +204,11 @@ $(".deleteConfiguration").on("click", function() {
 						<label for="candidacyPeriodStart" class="col-sm-4 control-label"><spring:message code='label.candidacies'/></label>
 						<div class="col-sm-4">
 							<label for="candidacyPeriodStart"  class="control-label"><spring:message code='label.start'/></label>
-							<input type="text" bennu-datetime name="candidacyPeriodStart" class="form-control" id="candidacyPeriodStart"  required="required" value=''/>
+							<input type="text" bennu-datetime no-seconds name="candidacyPeriodStart" class="form-control" id="candidacyPeriodStart"  required="required" value=''/>
 						</div>
 						<div class="col-sm-4">
 							<label for="candidacyPeriodEnd" path="candidacyPeriodEnd" class="control-label"><spring:message code='label.end'/></label>
-							<input type="text" bennu-datetime name="candidacyPeriodEnd" class="form-control" id="candidacyPeriodEnd" required="required" value=''/>
+							<input type="text" bennu-datetime no-seconds name="candidacyPeriodEnd" class="form-control" id="candidacyPeriodEnd" required="required" value=''/>
 						</div>
 					</div>
 
