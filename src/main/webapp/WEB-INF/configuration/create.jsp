@@ -57,11 +57,11 @@ ${ portal.toolkit() }
     <label for="proposalPeriodEnd" class="col-sm-4 control-label"><spring:message code='label.proposalPeriod'/></label>
     <div class="col-sm-4">
       <label for="proposalPeriodStart"  class="col-sm-2 control-label"><spring:message code='label.start'/></label>
-      <input type="text" bennu-datetime name="proposalPeriodStart" class="form-control" id="proposalPeriodStart" placeholder="<spring:message code='label.start'/>" required="required" value='${command.proposalPeriodStart}'/>
+      <input type="text" bennu-datetime no-seconds name="proposalPeriodStart" class="form-control" id="proposalPeriodStart" placeholder="<spring:message code='label.start'/>" required="required" value='${command.proposalPeriodStart}'/>
     </div>
     <div class="col-sm-4">
       <label for="proposalPeriodEnd" path="proposalPeriodEnd" class="col-sm-2 control-label"><spring:message code='label.end'/></label>
-      <input type="text" bennu-datetime name="proposalPeriodEnd" class="form-control" id="proposalPeriodEnd" placeholder="<spring:message code='label.start'/>" required="required" value='${command.proposalPeriodEnd}'/>
+      <input type="text" bennu-datetime no-seconds name="proposalPeriodEnd" class="form-control" id="proposalPeriodEnd" placeholder="<spring:message code='label.start'/>" required="required" value='${command.proposalPeriodEnd}'/>
     </div>
   </div>
 
@@ -69,11 +69,11 @@ ${ portal.toolkit() }
     <label for="candidacyPeriodStart" class="col-sm-4 control-label"><spring:message code='label.candidacies'/></label>
     <div class="col-sm-4">
       <label for="candidacyPeriodStart"  class="col-sm-2 control-label"><spring:message code='label.start'/></label>
-      <input type="text" bennu-datetime name="candidacyPeriodStart" class="form-control" id="candidacyPeriodStart" placeholder="<spring:message code='label.start'/>" required="required" value='${command.candidacyPeriodStart}'/>
+      <input type="text" bennu-datetime no-seconds name="candidacyPeriodStart" class="form-control" id="candidacyPeriodStart" placeholder="<spring:message code='label.start'/>" required="required" value='${command.candidacyPeriodStart}'/>
     </div>
     <div class="col-sm-4">
       <label for="candidacyPeriodEnd" path="candidacyPeriodEnd" class="col-sm-2 control-label"><spring:message code='label.end'/></label>
-      <input type="text" bennu-datetime name="candidacyPeriodEnd" class="form-control" id="candidacyPeriodEnd" placeholder="<spring:message code='label.start'/>" required="required" value='${command.candidacyPeriodEnd}'/>
+      <input type="text" bennu-datetime no-seconds name="candidacyPeriodEnd" class="form-control" id="candidacyPeriodEnd" placeholder="<spring:message code='label.start'/>" required="required" value='${command.candidacyPeriodEnd}'/>
     </div>
   </div>
 
