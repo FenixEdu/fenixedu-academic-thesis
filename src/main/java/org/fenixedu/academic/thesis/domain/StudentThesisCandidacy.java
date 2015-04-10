@@ -45,6 +45,20 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
         }
     };
 
+    public final static Comparator<StudentThesisCandidacy> COMPARATOR_BY_CANDIDACY_PERIOD =
+            new Comparator<StudentThesisCandidacy>() {
+
+                @Override
+                public int compare(StudentThesisCandidacy arg0, StudentThesisCandidacy arg1) {
+                    return ThesisProposalsConfiguration.COMPARATOR_BY_CANDIDACY_PERIOD_START_DESC.compare(arg0
+                            .getThesisProposal().getSingleThesisProposalsConfiguration(), arg1.getThesisProposal()
+                            .getSingleThesisProposalsConfiguration());
+                }
+            };
+
+    public final static Comparator<StudentThesisCandidacy> COMPARATOR_BY_CANDIDACY_PERIOD_AND_PREFERENCE_NUMBER =
+            COMPARATOR_BY_CANDIDACY_PERIOD.thenComparing(COMPARATOR_BY_PREFERENCE_NUMBER);
+
     public StudentThesisCandidacy(Registration registration, Integer preferenceNumber, ThesisProposal thesisProposal) {
         super();
         setThesisProposalsSystem(ThesisProposalsSystem.getInstance());

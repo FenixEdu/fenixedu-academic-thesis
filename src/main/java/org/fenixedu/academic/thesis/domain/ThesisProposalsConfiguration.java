@@ -64,6 +64,9 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
                 }
             };
 
+    static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_CANDIDACY_PERIOD_START_DESC =
+            COMPARATOR_BY_CANDIDACY_PERIOD_START_ASC.reversed();
+
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_CANDIDACY_PERIOD_END_ASC =
             new Comparator<ThesisProposalsConfiguration>() {
                 @Override
