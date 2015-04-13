@@ -67,7 +67,9 @@ public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
         this.setUser(null);
         this.setThesisProposal(null);
 
-        this.getExternalUser().delete();
+        if (this.getExternalUser() != null) {
+            this.getExternalUser().delete();
+        }
 
         deleteDomainObject();
     }
