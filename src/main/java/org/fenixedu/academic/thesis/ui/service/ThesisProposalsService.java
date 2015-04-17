@@ -62,6 +62,7 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
+import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -265,7 +266,9 @@ public class ThesisProposalsService {
                 for (StudentThesisCandidacy studentCandidacy : registration.getStudentThesisCandidacySet()) {
                     if (studentCandidacy.getAcceptedByAdvisor()
                             && (!bestAccepted.containsKey(registration.getExternalId()) || studentCandidacy.getPreferenceNumber() < bestAccepted
-                                    .get(registration.getExternalId()).getPreferenceNumber())) {
+                                    .get(registration.getExternalId()).getPreferenceNumber())
+                            && !Sets.intersection(studentCandidacy.getThesisProposal().getThesisConfigurationSet(),
+                                    thesisProposal.getThesisConfigurationSet()).isEmpty()) {
                         bestAccepted.put(registration.getExternalId(), studentCandidacy);
                     }
                 }
@@ -603,7 +606,7 @@ public class ThesisProposalsService {
                 .getStudentThesisCandidacySet()
                 .stream()
                 .anyMatch(candidacy -> {
-                    //best accepted for that student
+                    // best accepted for that student
                         Optional<StudentThesisCandidacy> hit =
                                 candidacy.getRegistration().getStudentThesisCandidacySet().stream()
                                         .filter(StudentThesisCandidacy::getAcceptedByAdvisor)
