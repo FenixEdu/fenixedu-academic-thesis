@@ -194,11 +194,9 @@ public class ExportThesisProposalsService {
 
     private void fillSpreadSheet(List<ThesisProposal> thesisProposals, final Spreadsheet spreadsheet,
             List<Set<StudentThesisCandidacy>> studentCandidacies) {
-        for (ThesisProposal proposal : thesisProposals) {
-            if (proposal.getHidden() == false) {
-                fillProposalInfo(proposal, spreadsheet);
-            }
-            studentCandidacies.add(proposal.getStudentThesisCandidacySet());
-        }
+        thesisProposals.forEach(p -> {
+            fillProposalInfo(p, spreadsheet);
+            studentCandidacies.add(p.getStudentThesisCandidacySet());
+        });
     }
 }
