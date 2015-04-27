@@ -208,10 +208,10 @@ ${portal.toolkit()}
 						<spring:message code='label.title'/>
 					</th>
 					<th>
-						<spring:message code='label.participants'/>
+						<spring:message code='label.executionDegree' />
 					</th>
 					<th>
-						<spring:message code='label.proposal.status'/>
+						<spring:message code='label.participants'/>
 					</th>
 					<th>
 						<spring:message code='label.number.of.candidacies'/>
@@ -219,14 +219,19 @@ ${portal.toolkit()}
 					<th>
 						<spring:message code='label.student.candidacy.accepted'/>
 					</th>
+					<th>
+						<spring:message code='label.proposal.status'/>
+					</th>
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				<c:forEach items="${coordinatorProposals}" var="thesisProposal">
+				<c:set var="degreesLabels" value="${fn:join(service.getThesisProposalDegrees(thesisProposal), ',')}"/>
 					<tr>
 						<td>${thesisProposal.identifier}</td>
 						<td>${thesisProposal.title}</td>
+						<td>${degreesLabels}</td>
 						<td>
 							<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
 								<div>${participant.name} (${participant.participationPercentage}%)
@@ -236,6 +241,12 @@ ${portal.toolkit()}
 								</div>
 							</c:forEach>
 						</td>
+						<td>
+							${thesisProposal.getStudentThesisCandidacySet().size()}
+						</td>
+						<td>
+							<spring:message code="label.${service.isAccepted(thesisProposal) ? 'yes' : 'no'}"/>
+						</td>
 						<td class='proposalHidden' data-true="<spring:message code='label.proposal.status.hidden'/>" data-false="<spring:message code='label.proposal.status.visible'/>">
 							<c:if test="${thesisProposal.hidden}">
 								<spring:message code='label.proposal.status.hidden'/>
@@ -243,12 +254,6 @@ ${portal.toolkit()}
 							<c:if test="${!thesisProposal.hidden}">
 								<spring:message code='label.proposal.status.visible'/>
 							</c:if>
-						</td>
-						<td>
-							${thesisProposal.getStudentThesisCandidacySet().size()}
-						</td>
-						<td>
-							<spring:message code="label.${service.isAccepted(thesisProposal) ? 'yes' : 'no'}"/>
 						</td>
 						<td>
 							<c:set var="degreesLabels" value="${fn:join(service.getThesisProposalDegrees(thesisProposal), ',')}"/>
