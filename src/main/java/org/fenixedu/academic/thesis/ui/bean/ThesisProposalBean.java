@@ -19,6 +19,7 @@
 package org.fenixedu.academic.thesis.ui.bean;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -232,10 +233,10 @@ public class ThesisProposalBean {
                 for (ThesisProposalsConfiguration configuration : configurations) {
                     int proposalsCount =
                             configuration
-                                    .getThesisProposalSet()
-                                    .stream()
-                                    .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser())
-                                            .collect(Collectors.toSet()).contains(participant.getUser()))
+                            .getThesisProposalSet()
+                            .stream()
+                            .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser())
+                                    .filter(Objects::nonNull).collect(Collectors.toSet()).contains(participant.getUser()))
                                     .collect(Collectors.toSet()).size();
 
                     if (configuration.getMaxThesisProposalsByUser() != -1
