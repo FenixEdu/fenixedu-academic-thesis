@@ -210,7 +210,10 @@ public class AdminThesisProposalsController {
         Set<ThesisProposalsConfiguration> currentThesisProposalsConfigurations =
                 new HashSet<ThesisProposalsConfiguration>(
                         service.getCurrentThesisProposalsConfigurations(ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE));
-        currentThesisProposalsConfigurations.add(configuration);
+
+        Set<ThesisProposalsConfiguration> adminConfigs = service.getNotClosedAdminConfigs();
+
+        currentThesisProposalsConfigurations.addAll(adminConfigs);
 
         modelAndview.addObject("configurations", currentThesisProposalsConfigurations);
         modelAndview.addObject("participantTypeList", service.getThesisProposalParticipantTypes());

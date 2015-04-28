@@ -630,4 +630,10 @@ public class ThesisProposalsService {
                 .map(ExecutionDegree::getExecutionYear).distinct().sorted(ExecutionYear.COMPARATOR_BY_YEAR.reversed())
                 .collect(Collectors.toList());
     }
+
+    public Set<ThesisProposalsConfiguration> getNotClosedAdminConfigs() {
+        return Bennu.getInstance().getDegreesSet().stream().filter(d -> CoordinatorGroup.get(d).isMember(Authenticate.getUser()))
+                .flatMap(d -> d.getExecutionDegrees().stream()).flatMap(e -> e.getThesisProposalsConfigurationSet().stream())
+                .filter(config -> config.getCandidacyPeriod().getEnd().isAfterNow()).collect(Collectors.toSet());
+    }
 }
