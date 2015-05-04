@@ -383,7 +383,7 @@ public class ThesisProposalsService {
                         configuration
                                 .getThesisProposalSet()
                                 .stream()
-                                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser())
+                                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser()).filter(Objects::nonNull)
                                         .collect(Collectors.toSet()).contains(participant.getUser())).collect(Collectors.toSet())
                                 .size();
 
