@@ -212,6 +212,7 @@ public class AdminThesisProposalsController {
                         service.getCurrentThesisProposalsConfigurations(ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE));
         currentThesisProposalsConfigurations.add(configuration);
 
+        modelAndview.addObject("configuration", configuration);
         modelAndview.addObject("configurations", currentThesisProposalsConfigurations);
         modelAndview.addObject("participantTypeList", service.getThesisProposalParticipantTypes());
 
@@ -249,7 +250,8 @@ public class AdminThesisProposalsController {
     @RequestMapping(value = "/createProposal", method = RequestMethod.POST)
     public ModelAndView createThesisProposals(@ModelAttribute ThesisProposalBean proposalBean,
             @RequestParam String participantsJson, @RequestParam String externalsJson,
-            @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations, Model model) {
+            @RequestParam Set<ThesisProposalsConfiguration> thesisProposalsConfigurations, Model model, @RequestParam(
+                    required = false) ThesisProposalsConfiguration configuration) {
 
         try {
             if (thesisProposalsConfigurations == null || thesisProposalsConfigurations.isEmpty()) {
@@ -258,9 +260,9 @@ public class AdminThesisProposalsController {
 
             ThesisProposalsConfiguration base = thesisProposalsConfigurations.iterator().next();
 
-            for (ThesisProposalsConfiguration configuration : thesisProposalsConfigurations) {
-                if (!base.isEquivalent(configuration)) {
-                    throw new UnequivalentThesisConfigurationsException(base, configuration);
+            for (ThesisProposalsConfiguration config : thesisProposalsConfigurations) {
+                if (!base.isEquivalent(config)) {
+                    throw new UnequivalentThesisConfigurationsException(base, config);
                 }
             }
 
@@ -275,7 +277,7 @@ public class AdminThesisProposalsController {
             return new ModelAndView("proposals/create", model.asMap());
         }
 
-        return new ModelAndView("redirect:/admin-proposals");
+        return new ModelAndView("redirect:/admin-proposals?configuration=" + configuration.getExternalId());
     }
 
     @RequestMapping(value = "/delete/{oid}", method = RequestMethod.POST)

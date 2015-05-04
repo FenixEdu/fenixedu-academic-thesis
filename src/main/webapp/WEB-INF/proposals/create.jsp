@@ -40,7 +40,7 @@ ${portal.toolkit()}
 <p class="text-danger"><spring:message code="error.thesisProposal.${error}"/></p>
 </c:if>
 
-<form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalCreateForm">
+<form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}?configuration=${configuration.externalId}" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalCreateForm">
 
 <spring:message code='label.title' var='title'/>
 <spring:message code='label.observations' var='observations'/>
