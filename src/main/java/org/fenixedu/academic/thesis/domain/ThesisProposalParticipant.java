@@ -26,12 +26,17 @@ import org.fenixedu.bennu.core.domain.User;
 
 public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
 
-    public final static Comparator<ThesisProposalParticipant> COMPARATOR_BY_WEIGHT = new Comparator<ThesisProposalParticipant>() {
-        @Override
-        public int compare(ThesisProposalParticipant arg0, ThesisProposalParticipant arg1) {
-            return arg1.getThesisProposalParticipantType().getWeight() - arg0.getThesisProposalParticipantType().getWeight();
-        }
-    };
+    public final static Comparator<ThesisProposalParticipant> COMPARATOR_BY_WEIGHT = (arg0, arg1) -> arg1
+            .getThesisProposalParticipantType().getWeight() - arg0.getThesisProposalParticipantType().getWeight();
+
+    public final static Comparator<ThesisProposalParticipant> COMPARATOR_BY_PERCENTAGE = (arg0, arg1) -> arg1
+            .getParticipationPercentage() - arg0.getParticipationPercentage();
+
+    public final static Comparator<ThesisProposalParticipant> COMPARATOR_BY_NAME = (arg0, arg1) -> arg0.getName().compareTo(
+            arg1.getName());
+
+    public final static Comparator<ThesisProposalParticipant> COMPARATOR_BY_PERCENTAGE_AND_NAME = COMPARATOR_BY_PERCENTAGE
+            .thenComparing(COMPARATOR_BY_NAME).thenComparing(ThesisProposalParticipant::getExternalId);
 
     public ThesisProposalParticipant(User user, ThesisProposalParticipantType participantType, int percentage) {
         super();

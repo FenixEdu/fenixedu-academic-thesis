@@ -33,41 +33,27 @@ import org.fenixedu.bennu.core.i18n.BundleUtil;
 
 public class ThesisProposal extends ThesisProposal_Base {
 
-    public final static Comparator<ThesisProposal> COMPARATOR_BY_NUMBER_OF_CANDIDACIES = new Comparator<ThesisProposal>() {
+    public final static Comparator<ThesisProposal> COMPARATOR_BY_NUMBER_OF_CANDIDACIES = (arg0, arg1) -> {
+        int diff = arg1.getStudentThesisCandidacySet().size() - arg0.getStudentThesisCandidacySet().size();
 
-        @Override
-        public int compare(ThesisProposal arg0, ThesisProposal arg1) {
-            int diff = arg1.getStudentThesisCandidacySet().size() - arg0.getStudentThesisCandidacySet().size();
-
-            return diff != 0 ? diff / Math.abs(diff) : diff;
-        }
+        return diff != 0 ? diff / Math.abs(diff) : diff;
     };
 
-    public final static Comparator<ThesisProposal> COMPARATOR_BY_NUMBER_OF_CANDIDACIES_AND_ID = new Comparator<ThesisProposal>() {
-
-        @Override
-        public int compare(ThesisProposal arg0, ThesisProposal arg1) {
-            if (arg1.getStudentThesisCandidacySet().size() < arg0.getStudentThesisCandidacySet().size()) {
-                return -1;
+    public final static Comparator<ThesisProposal> COMPARATOR_BY_NUMBER_OF_CANDIDACIES_AND_ID = (arg0, arg1) -> {
+        if (arg1.getStudentThesisCandidacySet().size() < arg0.getStudentThesisCandidacySet().size()) {
+            return -1;
+        } else {
+            if (arg1.getStudentThesisCandidacySet().size() > arg0.getStudentThesisCandidacySet().size()) {
+                return 1;
             } else {
-                if (arg1.getStudentThesisCandidacySet().size() > arg0.getStudentThesisCandidacySet().size()) {
-                    return 1;
-                } else {
-                    return arg0.getIdentifier().compareTo(arg1.getIdentifier());
-                }
+                return arg0.getIdentifier().compareTo(arg1.getIdentifier());
             }
         }
     };
 
-    public final static Comparator<ThesisProposal> COMPARATOR_BY_PROPOSAL_PERIOD = new Comparator<ThesisProposal>() {
-
-        @Override
-        public int compare(ThesisProposal arg0, ThesisProposal arg1) {
-
-            return ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC.reversed().compare(
+    public final static Comparator<ThesisProposal> COMPARATOR_BY_PROPOSAL_PERIOD =
+            (arg0, arg1) -> ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC.reversed().compare(
                     arg0.getSingleThesisProposalsConfiguration(), arg1.getSingleThesisProposalsConfiguration());
-        }
-    };
 
     public static final String SIGNAL_CREATED = "fenixedu.academic.thesis.thesisProposal.created";
 
@@ -139,7 +125,7 @@ public class ThesisProposal extends ThesisProposal_Base {
 
         List<ThesisProposalParticipant> sortedParticipants =
                 this.getThesisProposalParticipantSet().stream().collect(Collectors.toList());
-        Collections.sort(sortedParticipants, ThesisProposalParticipant.COMPARATOR_BY_WEIGHT);
+        Collections.sort(sortedParticipants, ThesisProposalParticipant.COMPARATOR_BY_PERCENTAGE_AND_NAME);
 
         return sortedParticipants;
     }
