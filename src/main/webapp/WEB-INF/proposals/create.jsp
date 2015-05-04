@@ -346,7 +346,7 @@ ${portal.toolkit()}
     };
     var externals = $("#tableExternalBody").find(".tableExternalRow");
     for (index=0; index < externals.length; index++) {
-      external = externals.eq(index)
+      var external = externals.eq(index)
 
       name = external.find("#name").val()
       email = external.find("#email").val()

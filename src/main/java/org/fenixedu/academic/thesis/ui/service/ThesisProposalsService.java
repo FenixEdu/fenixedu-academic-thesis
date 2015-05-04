@@ -171,65 +171,68 @@ public class ThesisProposalsService {
 
         Set<ThesisProposalParticipantBean> participants = new HashSet<ThesisProposalParticipantBean>();
 
-        for (JsonElement elem : parser.parse(participantsJson).getAsJsonArray()) {
-            JsonObject jsonObj = elem.getAsJsonObject();
+        if (participantsJson != null && !participantsJson.isEmpty()) {
+            for (JsonElement elem : parser.parse(participantsJson).getAsJsonArray()) {
+                JsonObject jsonObj = elem.getAsJsonObject();
 
-            String userId = jsonObj.get("userId").getAsString();
-            String userType = jsonObj.get("userType").getAsString();
+                String userId = jsonObj.get("userId").getAsString();
+                String userType = jsonObj.get("userType").getAsString();
 
-            try {
-                int percentage = jsonObj.get("percentage").getAsInt();
+                try {
+                    int percentage = jsonObj.get("percentage").getAsInt();
 
-                if (percentage > 100 || percentage < 0) {
-                    throw new InvalidPercentageException(percentage);
+                    if (percentage > 100 || percentage < 0) {
+                        throw new InvalidPercentageException(percentage);
+                    }
+
+                    if (userType.isEmpty()) {
+                        throw new IllegalParticipantTypeException(User.findByUsername(userId));
+                    }
+
+                    if (userId == null || userId.isEmpty()) {
+                        throw new UnexistentThesisParticipantException();
+                    }
+
+                    participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType, percentage));
+                } catch (NumberFormatException e) {
+                    throw new InvalidPercentageException();
                 }
-
-                if (userType.isEmpty()) {
-                    throw new IllegalParticipantTypeException(User.findByUsername(userId));
-                }
-
-                if (userId == null || userId.isEmpty()) {
-                    throw new UnexistentThesisParticipantException();
-                }
-
-                participants.add(new ThesisProposalParticipantBean(User.findByUsername(userId), userType, percentage));
-            } catch (NumberFormatException e) {
-                throw new InvalidPercentageException();
             }
         }
 
-        for (JsonElement elem : parser.parse(externalsJson).getAsJsonArray()) {
-            JsonObject jsonObj = elem.getAsJsonObject();
+        if (externalsJson != null && !externalsJson.isEmpty()) {
+            for (JsonElement elem : parser.parse(externalsJson).getAsJsonArray()) {
+                JsonObject jsonObj = elem.getAsJsonObject();
 
-            String name = jsonObj.get("name").getAsString();
-            String email = jsonObj.get("email").getAsString();
-            String userType = jsonObj.get("userType").getAsString();
+                String name = jsonObj.get("name").getAsString();
+                String email = jsonObj.get("email").getAsString();
+                String userType = jsonObj.get("userType").getAsString();
 
-            try {
-                int percentage = jsonObj.get("percentage").getAsInt();
+                try {
+                    int percentage = jsonObj.get("percentage").getAsInt();
 
-                if (percentage > 100 || percentage < 0) {
-                    throw new InvalidPercentageException(percentage);
+                    if (percentage > 100 || percentage < 0) {
+                        throw new InvalidPercentageException(percentage);
+                    }
+
+                    if (userType.isEmpty()) {
+                        throw new IllegalParticipantTypeException();
+                    }
+
+                    if (name == null || name.isEmpty()) {
+                        throw new UnexistentThesisExternalParticipantException();
+                    }
+
+                    if (email == null || email.isEmpty()) {
+                        throw new UnexistentExternalEmailException();
+                    }
+
+                    participants.add(new ThesisProposalParticipantBean(name, email, userType, percentage));
+                } catch (NumberFormatException e) {
+                    throw new InvalidPercentageException();
                 }
-
-                if (userType.isEmpty()) {
-                    throw new IllegalParticipantTypeException();
-                }
-
-                if (name == null || name.isEmpty()) {
-                    throw new UnexistentThesisExternalParticipantException();
-                }
-
-                if (email == null || email.isEmpty()) {
-                    throw new UnexistentExternalEmailException();
-                }
-
-                participants.add(new ThesisProposalParticipantBean(name, email, userType, percentage));
-            } catch (NumberFormatException e) {
-                throw new InvalidPercentageException();
             }
         }
-
         if (participants.isEmpty()) {
             throw new UnexistentThesisParticipantException();
         }
