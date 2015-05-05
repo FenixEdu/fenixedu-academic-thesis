@@ -62,14 +62,32 @@ public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
     public StudentThesisCandidacy(Registration registration, Integer preferenceNumber, ThesisProposal thesisProposal) {
         super();
         setThesisProposalsSystem(ThesisProposalsSystem.getInstance());
-        setPreferenceNumber(preferenceNumber);
-        setAcceptedByAdvisor(false);
         setThesisProposal(thesisProposal);
         setRegistration(registration);
         setTimestamp(new DateTime());
+        setAcceptedByAdvisor(false);
+        setPreferenceNumber(preferenceNumber);
+        
+        new ProposalsLog(thesisProposal, this, "Creating new student thesis candidacy");
+    }
+
+    @Override
+    public void setPreferenceNumber(int preferenceNumber) {
+        new ProposalsLog(getThesisProposal(), this, "Updating preference number " + getPreferenceNumber() + " -> "
+                + preferenceNumber);
+        super.setPreferenceNumber(preferenceNumber);
+    }
+
+    @Override
+    public void setAcceptedByAdvisor(boolean acceptedByAdvisor) {
+        new ProposalsLog(getThesisProposal(), this, "Updating advisor acceptance " + getAcceptedByAdvisor() + " -> "
+                + acceptedByAdvisor);
+        super.setAcceptedByAdvisor(acceptedByAdvisor);
     }
 
     public void delete() {
+
+        new ProposalsLog(getThesisProposal(), null, "Deleting Student thesis candidacy");
 
         ThesisProposalsDomainException.throwWhenDeleteBlocked(getDeletionBlockers());
 

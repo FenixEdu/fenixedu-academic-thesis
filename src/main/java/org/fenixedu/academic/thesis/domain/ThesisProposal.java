@@ -101,6 +101,8 @@ public class ThesisProposal extends ThesisProposal_Base {
         getThesisProposalParticipantSet().addAll(participants);
         getThesisConfigurationSet().addAll(configurations);
         setHidden(true);
+
+        new ProposalsLog(this, null, "Creating new thesis proposal");
     }
 
     public int getNumberOfStudentCandidacies() {
@@ -108,6 +110,8 @@ public class ThesisProposal extends ThesisProposal_Base {
     }
 
     public void delete() {
+
+        new ProposalsLog(this, null, "Deleting thesis proposal");
 
         DomainException.throwWhenDeleteBlocked(getDeletionBlockers());
 
