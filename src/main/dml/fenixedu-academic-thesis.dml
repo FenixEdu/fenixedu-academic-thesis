@@ -46,6 +46,13 @@ class ExternalUser {
     public String email;
 }
 
+class ProposalsLog {
+	protected DateTime timestamp;
+	public String action;
+	public String thesisProposal;
+	public String candidacy;
+}
+
 // access groups relationships definition
 
 relation ThesisCreatorsGroup {
@@ -191,3 +198,15 @@ relation ThesisProposalParticipantParticipantType {
  		multiplicity 1..1;
  	}
  }
+ 
+ // Log relationships
+ 
+ relation ProposalsLogAuthor {
+ 	public .org.fenixedu.bennu.core.domain.User playsRole author {
+ 		multiplicity 1..1;
+ 	}
+ 	public ProposalsLog playsRole logger {
+ 		multiplicity 0..*;
+ 	}
+ }
+
