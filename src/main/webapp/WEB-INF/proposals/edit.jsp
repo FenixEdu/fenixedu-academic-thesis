@@ -231,8 +231,8 @@ ${portal.toolkit()}
 </div>
 
 <div class="col-sm-offset-3 col-sm-8">
-	<button type="submit" class="btn btn-default" id="submitButton">${saveButton}</button>
-	<button type="button" class="btn btn-danger" id="deleteButton"><spring:message code='button.delete'/></button>
+	<div class="col-sm-2"><button type="submit" class="btn btn-default" id="submitButton">${saveButton}</button></div>
+	<div class="col-sm-2"><button type="button" class="btn btn-danger" id="deleteButton" onclick="confirmDelete()"><spring:message code='button.delete'/></button></div>
 </div>
 
 </div>
@@ -395,8 +395,6 @@ function checkboxListener(e) {
 	}
 }
 
-$("#deleteButton").on("click", function(){ $("#deleteForm").submit(); })
-
 $(document).ready(function() {
 	checkboxListener(null);
 	<c:if test="${empty command.thesisProposalParticipantsBean}">
@@ -404,4 +402,12 @@ $(document).ready(function() {
 	</c:if>
 
 });
+
+function confirmDelete() {
+    var x;
+    if (confirm("<spring:message code='delete.confirm'/>") == true) {
+        $("#deleteForm").submit();
+    } 
+}
+
 </script>
