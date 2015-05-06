@@ -380,7 +380,7 @@ $(function(){
 		var e = $(evt.target);
 
 		['observations','requirements','goals','localization','degrees', 'candidates'].map(function(x){
-			$("#view ." + x).html(e.data(x));
+			$("#view ." + x).html(e.data(x).replace(/\n/g, '<br/>'));
 		});
 
 		$('#view').modal('show');
