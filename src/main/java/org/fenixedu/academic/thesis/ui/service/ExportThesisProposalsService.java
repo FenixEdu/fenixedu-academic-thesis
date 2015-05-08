@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,8 +34,6 @@ import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
-import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
-import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,49 +49,30 @@ public class ExportThesisProposalsService {
     ThesisProposalsService service;
     static String BUNDLE = "resources.FenixEduThesisProposalsResources";
 
-    private List<Object> getHeaders(List<ThesisProposal> thesisProposals) {
+    private List<Object> getHeaders(List<ThesisProposal> thesisProposals, int maxParticipants) {
         final List<Object> headers = new ArrayList<Object>();
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.number"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.state"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.title"));
+        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.state"));
 
-        Set<ThesisProposalParticipantType> types =
-                thesisProposals.stream().flatMap(proposal -> proposal.getThesisProposalParticipantSet().stream())
-                        .map(participant -> participant.getThesisProposalParticipantType()).distinct()
-                        .sorted(ThesisProposalParticipantType.COMPARATOR_BY_WEIGHT).collect(Collectors.toSet());
+        for (int i = 0; i < maxParticipants; i++) {
+            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.name") + (i + 1));
+            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.username") + (i + 1));
+            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.percentage") + (i + 1));
+        }
 
-        types.forEach(type -> {
-            headers.add(type.getName().getContent() + " - " + BundleUtil.getString(BUNDLE, "export.thesis.user.name"));
-            headers.add(type.getName().getContent() + " - " + BundleUtil.getString(BUNDLE, "export.thesis.user.username"));
-        });
-
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisor.percent"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.coadvisor.percent"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.external.tutor.name"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.external.tutor.mail"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.external.tutor.phone"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.external.company.name"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.external.company.address"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.scope"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.objectives"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.description"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.rqeuirements"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.expected.results"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.url"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.specialization.area"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.student.min"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.student.max"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.adequate"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.observations"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.tfc.location"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.student.number"));
-        //headers.add(BundleUtil.getString(BUNDLE, "export.thesis.student.name"));
+        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.candidacy.accepted.name"));
+        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.candidacy.accepted.number"));
         return headers;
     }
 
     private List<Object> getGroupHeaders() {
         final List<Object> headers = new ArrayList<Object>();
-        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.student") + 1);
+        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.student"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.prefAttr"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.pref") + 1);
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.pref") + 2);
@@ -102,15 +82,20 @@ public class ExportThesisProposalsService {
 
     public void exportThesisProposalsToExcel(ThesisProposalsConfiguration configuration, OutputStream outputStream)
             throws IOException {
+
         ExecutionDegree executionDegree = configuration.getExecutionDegree();
         List<ThesisProposal> thesisProposals = configuration.getThesisProposalSet().stream().collect(Collectors.toList());
-        List<String> metaKeys = new ArrayList<String>();
-        final List<Object> headers = getHeaders(thesisProposals);
+
+        int maxParticipants = thesisProposals.stream().mapToInt(p -> p.getThesisProposalParticipantSet().size()).max().orElse(0);
+
+        final List<Object> headers = getHeaders(thesisProposals, maxParticipants);
+
         final Spreadsheet spreadsheet =
                 new Spreadsheet("proposals_" + executionDegree.getAcademicInterval().getStart().getYear() + "_"
                         + executionDegree.getAcademicInterval().getEnd().getYear(), headers);
         List<Set<StudentThesisCandidacy>> studentCandidacies = new ArrayList<Set<StudentThesisCandidacy>>();
-        fillSpreadSheet(thesisProposals, spreadsheet, studentCandidacies);
+        fillSpreadSheet(thesisProposals, spreadsheet, studentCandidacies, maxParticipants);
+
         Spreadsheet newTab =
                 spreadsheet.addSpreadsheet("groups_" + executionDegree.getAcademicInterval().getStart().getYear() + "_"
                         + executionDegree.getAcademicInterval().getEnd().getYear(), getGroupHeaders());
@@ -167,35 +152,43 @@ public class ExportThesisProposalsService {
         }
     }
 
-    private void fillProposalInfo(ThesisProposal proposal, final Spreadsheet spreadsheet) {
+    private void fillProposalInfo(ThesisProposal proposal, final Spreadsheet spreadsheet, int maxParticipants) {
         final Row row = spreadsheet.addRow();
         row.setCell(proposal.getIdentifier());
-        //row.setCell(proposal.getState());
         row.setCell(proposal.getTitle());
-        String name;
-        String userName;
-        List<ThesisProposalParticipantType> tppt = service.getAllThesisProposalParticipantTypes();
-        tppt.stream().forEach(
-                type -> {
-                    List<ThesisProposalParticipant> thesisParticipant =
-                            proposal.getThesisProposalParticipantSet().stream()
-                                    .sorted(ThesisProposalParticipant.COMPARATOR_BY_WEIGHT)
-                                    .filter(tpp -> tpp.getThesisProposalParticipantType() == type).collect(Collectors.toList());
-                    row.setCell(thesisParticipant.stream().map(a -> a.getUser().getPerson().getName())
-                            .collect(Collectors.joining(", ")));
-                    row.setCell(thesisParticipant.stream().map(a -> a.getUser().getPerson().getUsername())
-                            .collect(Collectors.joining(", ")));
+        row.setCell(proposal.getHidden() ? BundleUtil.getString(BUNDLE, "label.proposal.status.hidden") : BundleUtil.getString(
+                BUNDLE, "label.proposal.status.visible"));
+
+        proposal.getSortedParticipants().forEach(
+                participant -> {
+                    row.setCell(participant.getName());
+                    row.setCell(participant.getUser() != null ? participant.getUser().getUsername() : BundleUtil.getString(
+                            BUNDLE, "export.thesis.advisors.username.external"));
+                    row.setCell(participant.getParticipationPercentage());
                 });
+        for (int i = proposal.getThesisProposalParticipantSet().size(); i < maxParticipants; i++) {
+            row.setCell("");
+            row.setCell("");
+            row.setCell("");
+        }
+
         row.setCell(proposal.getGoals());
         row.setCell(proposal.getRequirements());
         row.setCell(proposal.getObservations());
         row.setCell(proposal.getLocalization());
+
+        Optional<StudentThesisCandidacy> acceptedCandidacy =
+                proposal.getStudentThesisCandidacySet().stream().filter(candidacy -> candidacy.getAcceptedByAdvisor())
+                        .findFirst();
+
+        row.setCell(acceptedCandidacy.isPresent() ? acceptedCandidacy.get().getRegistration().getStudent().getName() : "");
+        row.setCell(acceptedCandidacy.isPresent() ? "" + acceptedCandidacy.get().getRegistration().getStudent().getNumber() : "");
     }
 
     private void fillSpreadSheet(List<ThesisProposal> thesisProposals, final Spreadsheet spreadsheet,
-            List<Set<StudentThesisCandidacy>> studentCandidacies) {
+            List<Set<StudentThesisCandidacy>> studentCandidacies, int maxParticipants) {
         thesisProposals.forEach(p -> {
-            fillProposalInfo(p, spreadsheet);
+            fillProposalInfo(p, spreadsheet, maxParticipants);
             studentCandidacies.add(p.getStudentThesisCandidacySet());
         });
     }
