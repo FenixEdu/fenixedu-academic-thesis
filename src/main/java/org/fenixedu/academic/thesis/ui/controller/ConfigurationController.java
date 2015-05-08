@@ -243,14 +243,20 @@ public class ConfigurationController {
             }
         }
 
-        thesisProposalsConfiguration.setProposalPeriod(proposalPeriod);
-        thesisProposalsConfiguration.setCandidacyPeriod(candidacyPeriod);
+        Set<ThesisProposalsConfiguration> sharedConfigs =
+                thesisProposalsConfiguration.getThesisProposalSet().stream()
+                        .flatMap(proposal -> proposal.getThesisConfigurationSet().stream()).collect(Collectors.toSet());
+        sharedConfigs.forEach(config -> {
+            config.setProposalPeriod(proposalPeriod);
+            config.setCandidacyPeriod(candidacyPeriod);
 
-        thesisProposalsConfiguration.setMaxThesisCandidaciesByStudent(configurationBean.getMaxThesisCandidaciesByStudent());
-        thesisProposalsConfiguration.setMaxThesisProposalsByUser(configurationBean.getMaxThesisProposalsByUser());
+            config.setMaxThesisCandidaciesByStudent(configurationBean.getMaxThesisCandidaciesByStudent());
+            config.setMaxThesisProposalsByUser(configurationBean.getMaxThesisProposalsByUser());
 
-        thesisProposalsConfiguration.setMinECTS1stCycle(configurationBean.getMinECTS1stCycle());
-        thesisProposalsConfiguration.setMinECTS2ndCycle(configurationBean.getMinECTS2ndCycle());
+            config.setMinECTS1stCycle(configurationBean.getMinECTS1stCycle());
+            config.setMinECTS2ndCycle(configurationBean.getMinECTS2ndCycle());
+        });
+
     }
 
     @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE, value = "/execution-year/{executionYear}/execution-degrees",
