@@ -21,6 +21,8 @@ import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
+import org.fenixedu.academic.domain.thesis.Thesis;
+import org.fenixedu.academic.domain.thesis.ThesisParticipationType;
 import org.fenixedu.academic.domain.util.email.Message;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
@@ -61,6 +63,7 @@ import org.springframework.stereotype.Service;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
+import pt.utl.ist.fenix.tools.util.i18n.MultiLanguageString;
 
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
@@ -386,9 +389,9 @@ public class ThesisProposalsService {
                         configuration
                                 .getThesisProposalSet()
                                 .stream()
-                                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser()).filter(Objects::nonNull)
-                                        .collect(Collectors.toSet()).contains(participant.getUser())).collect(Collectors.toSet())
-                                .size();
+                                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser())
+                                        .filter(Objects::nonNull).collect(Collectors.toSet()).contains(participant.getUser()))
+                                .collect(Collectors.toSet()).size();
 
                 if (!(isManager || isDegreeCoordinator) && configuration.getMaxThesisProposalsByUser() != -1
                         && proposalsCount >= configuration.getMaxThesisProposalsByUser()) {
@@ -437,6 +440,7 @@ public class ThesisProposalsService {
         }
 
         studentThesisCandidacy.setAcceptedByAdvisor(true);
+        createThesisForStudent(studentThesisCandidacy);
 
         int orderOfPreference = studentThesisCandidacy.getPreferenceNumber();
 
@@ -453,6 +457,55 @@ public class ThesisProposalsService {
         if (max.isPresent()) {
             sendStolenProposalMessage(max.get(), studentThesisCandidacy);
         }
+    }
+
+    private void createThesisForStudent(StudentThesisCandidacy studentThesisCandidacy) {
+
+        ThesisProposal proposal = studentThesisCandidacy.getThesisProposal();
+        Registration registration = studentThesisCandidacy.getRegistration();
+
+        ExecutionYear executionYear = proposal.getSingleThesisProposalsConfiguration().getExecutionDegree().getExecutionYear();
+
+        registration
+                .getDegree()
+                .getExecutionDegreesForExecutionYear(executionYear)
+                .stream()
+                .forEach(
+                        executionDegree -> {
+                            if (registration.getDissertationEnrolment() != null) {
+                                if (registration.hasDissertationThesis()) {
+                                    Thesis thesis = registration.getDissertationEnrolment().getThesis();
+                                    thesis.setTitle(MultiLanguageString.importFromString(proposal.getTitle()));
+
+                                    thesis.getParticipationsSet().stream().forEach(participation -> {
+                                        thesis.removeParticipations(participation);
+                                    });
+
+                                    for (ThesisProposalParticipant participant : proposal.getThesisProposalParticipantSet()) {
+                                        if (participant.getUser() != null) {
+                                            thesis.setOrientator(participant.getUser().getPerson());
+                                        } else {
+                                            thesis.addExternal(ThesisParticipationType.ORIENTATOR, participant.getExternalUser()
+                                                    .getName(), participant.getExternalUser().getEmail());
+                                        }
+                                    }
+                                } else {
+                                    Thesis thesis =
+                                            new Thesis(registration.getDegree(), registration.getDissertationEnrolment(),
+                                                    new MultiLanguageString(proposal.getTitle()));
+
+                                    for (ThesisProposalParticipant participant : proposal.getThesisProposalParticipantSet()) {
+                                        if (participant.getUser() != null) {
+                                            thesis.setOrientator(participant.getUser().getPerson());
+                                        } else {
+                                            thesis.addExternal(ThesisParticipationType.ORIENTATOR, participant.getExternalUser()
+                                                    .getName(), participant.getExternalUser().getEmail());
+                                        }
+                                    }
+                                }
+                            } else {
+                            }
+                        });
     }
 
     @Atomic(mode = TxMode.WRITE)
