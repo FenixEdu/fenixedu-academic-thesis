@@ -52,6 +52,8 @@ public class ExportThesisProposalsService {
     private List<Object> getHeaders(List<ThesisProposal> thesisProposals, int maxParticipants) {
         final List<Object> headers = new ArrayList<Object>();
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.number"));
+        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.candidacy.accepted.number"));
+        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.candidacy.accepted.name"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.title"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.state"));
 
@@ -65,8 +67,6 @@ public class ExportThesisProposalsService {
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.rqeuirements"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.observations"));
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.tfc.location"));
-        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.candidacy.accepted.name"));
-        headers.add(BundleUtil.getString(BUNDLE, "export.thesis.candidacy.accepted.number"));
         return headers;
     }
 
@@ -132,7 +132,7 @@ public class ExportThesisProposalsService {
         Map<Degree, Set<String>> translationMap = new HashMap<Degree, Set<String>>();
         List<Registration> regs =
                 studentCandidacies.stream().flatMap(m -> m.stream()).map(stc -> stc.getRegistration())
-                        .collect(Collectors.toList());
+                .collect(Collectors.toList());
         for (Registration r : regs) {
             Set<String> names;
             if (translationMap.containsKey(r.getDegree())) {
@@ -155,6 +155,13 @@ public class ExportThesisProposalsService {
     private void fillProposalInfo(ThesisProposal proposal, final Spreadsheet spreadsheet, int maxParticipants) {
         final Row row = spreadsheet.addRow();
         row.setCell(proposal.getIdentifier());
+
+        Optional<StudentThesisCandidacy> acceptedCandidacy =
+                proposal.getStudentThesisCandidacySet().stream().filter(candidacy -> candidacy.getAcceptedByAdvisor())
+                        .findFirst();
+        row.setCell(acceptedCandidacy.isPresent() ? "" + acceptedCandidacy.get().getRegistration().getStudent().getNumber() : "");
+        row.setCell(acceptedCandidacy.isPresent() ? acceptedCandidacy.get().getRegistration().getStudent().getName() : "");
+
         row.setCell(proposal.getTitle());
         row.setCell(proposal.getHidden() ? BundleUtil.getString(BUNDLE, "label.proposal.status.hidden") : BundleUtil.getString(
                 BUNDLE, "label.proposal.status.visible"));
@@ -176,13 +183,6 @@ public class ExportThesisProposalsService {
         row.setCell(proposal.getRequirements());
         row.setCell(proposal.getObservations());
         row.setCell(proposal.getLocalization());
-
-        Optional<StudentThesisCandidacy> acceptedCandidacy =
-                proposal.getStudentThesisCandidacySet().stream().filter(candidacy -> candidacy.getAcceptedByAdvisor())
-                        .findFirst();
-
-        row.setCell(acceptedCandidacy.isPresent() ? acceptedCandidacy.get().getRegistration().getStudent().getName() : "");
-        row.setCell(acceptedCandidacy.isPresent() ? "" + acceptedCandidacy.get().getRegistration().getStudent().getNumber() : "");
     }
 
     private void fillSpreadSheet(List<ThesisProposal> thesisProposals, final Spreadsheet spreadsheet,
