@@ -171,6 +171,13 @@ public class AdminThesisProposalsController {
     @RequestMapping(method = RequestMethod.GET, value = "candidates")
     public String listCandidates(Model model, @RequestParam(required = false) ThesisProposalsConfiguration configuration) {
 
+        List<ThesisProposalsConfiguration> configurations =
+                service.getThesisProposalsConfigurationsForCoordinator(Authenticate.getUser());
+
+        if (configuration == null && !configurations.isEmpty()) {
+            configuration = configurations.iterator().next();
+        }
+
         Map<Registration, TreeSet<StudentThesisCandidacy>> registrations = service.getCoordinatorCandidacies(configuration);
 
         model.addAttribute("registrations", registrations);
@@ -280,7 +287,8 @@ public class AdminThesisProposalsController {
             return new ModelAndView("proposals/create", model.asMap());
         }
 
-        return new ModelAndView("redirect:/admin-proposals?configuration=" + configuration.getExternalId());
+        return new ModelAndView("redirect:/admin-proposals"
+                + (configuration != null ? "?configuration=" + configuration.getExternalId() : ""));
     }
 
     @RequestMapping(value = "/delete/{oid}", method = RequestMethod.POST)
