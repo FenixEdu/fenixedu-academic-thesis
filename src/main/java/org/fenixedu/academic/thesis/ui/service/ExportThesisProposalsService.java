@@ -58,9 +58,9 @@ public class ExportThesisProposalsService {
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.state"));
 
         for (int i = 0; i < maxParticipants; i++) {
-            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.name") + (i + 1));
-            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.username") + (i + 1));
-            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.percentage") + (i + 1));
+            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.name") + " " + (i + 1));
+            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.username") + " " + (i + 1));
+            headers.add(BundleUtil.getString(BUNDLE, "export.thesis.advisors.percentage") + " " + (i + 1));
         }
 
         headers.add(BundleUtil.getString(BUNDLE, "export.thesis.objectives"));
