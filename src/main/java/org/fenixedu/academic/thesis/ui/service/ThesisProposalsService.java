@@ -45,6 +45,7 @@ import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfiguration
 import org.fenixedu.academic.thesis.ui.exception.UnexistentExternalEmailException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisExternalParticipantException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantException;
+import org.fenixedu.academic.util.MultiLanguageString;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
@@ -63,7 +64,6 @@ import org.springframework.stereotype.Service;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
-import pt.utl.ist.fenix.tools.util.i18n.MultiLanguageString;
 
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
@@ -483,7 +483,8 @@ public class ThesisProposalsService {
 
                                     for (ThesisProposalParticipant participant : proposal.getThesisProposalParticipantSet()) {
                                         if (participant.getUser() != null) {
-                                            thesis.setOrientator(participant.getUser().getPerson());
+                                            thesis.addParticipant(participant.getUser().getPerson(),
+                                                    ThesisParticipationType.ORIENTATOR);
                                         } else {
                                             thesis.addExternal(ThesisParticipationType.ORIENTATOR, participant.getExternalUser()
                                                     .getName(), participant.getExternalUser().getEmail());
@@ -496,7 +497,8 @@ public class ThesisProposalsService {
 
                                     for (ThesisProposalParticipant participant : proposal.getThesisProposalParticipantSet()) {
                                         if (participant.getUser() != null) {
-                                            thesis.setOrientator(participant.getUser().getPerson());
+                                            thesis.addParticipant(participant.getUser().getPerson(),
+                                                    ThesisParticipationType.ORIENTATOR);
                                         } else {
                                             thesis.addExternal(ThesisParticipationType.ORIENTATOR, participant.getExternalUser()
                                                     .getName(), participant.getExternalUser().getEmail());
