@@ -459,7 +459,7 @@ public class ThesisProposalsService {
         }
     }
 
-    private void createThesisForStudent(StudentThesisCandidacy studentThesisCandidacy) {
+    public static void createThesisForStudent(StudentThesisCandidacy studentThesisCandidacy) {
 
         ThesisProposal proposal = studentThesisCandidacy.getThesisProposal();
         Registration registration = studentThesisCandidacy.getRegistration();
