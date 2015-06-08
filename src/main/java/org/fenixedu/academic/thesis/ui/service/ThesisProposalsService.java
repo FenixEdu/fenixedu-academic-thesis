@@ -531,7 +531,8 @@ public class ThesisProposalsService {
 
         Set<String> bccs =
                 oldCandidacy.getThesisProposal().getThesisProposalParticipantSet().stream()
-                        .map(p -> p.getUser().getProfile().getEmail()).collect(Collectors.toSet());
+                        .map(p -> p.getUser() != null ? p.getUser().getProfile().getEmail() : p.getExternalUser().getEmail())
+                        .collect(Collectors.toSet());
 
         String link =
                 CoreConfiguration.getConfiguration().applicationUrl() + "/proposals/manage/"
