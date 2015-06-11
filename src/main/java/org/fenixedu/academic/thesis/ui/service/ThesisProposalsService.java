@@ -475,7 +475,7 @@ public class ThesisProposalsService {
                             if (registration.getDissertationEnrolment() != null) {
                                 if (registration.hasDissertationThesis()) {
                                     Thesis thesis = registration.getDissertationEnrolment().getThesis();
-                                    thesis.setTitle(MultiLanguageString.importFromString(proposal.getTitle()));
+                                    thesis.setTitle(new MultiLanguageString(proposal.getTitle()));
 
                                     thesis.getParticipationsSet().stream().forEach(participation -> {
                                         thesis.removeParticipations(participation);
