@@ -477,9 +477,13 @@ public class ThesisProposalsService {
                                     Thesis thesis = registration.getDissertationEnrolment().getThesis();
                                     thesis.setTitle(new MultiLanguageString(proposal.getTitle()));
 
-                                    thesis.getParticipationsSet().stream().forEach(participation -> {
-                                        thesis.removeParticipations(participation);
-                                    });
+                                    thesis.getParticipationsSet()
+                                            .stream()
+                                            .filter(p -> p.getType() == ThesisParticipationType.ORIENTATOR
+                                                    || p.getType() == ThesisParticipationType.COORIENTATOR)
+                                            .forEach(participation -> {
+                                                participation.delete();
+                                            });
 
                                     for (ThesisProposalParticipant participant : proposal.getThesisProposalParticipantSet()) {
                                         if (participant.getUser() != null) {
