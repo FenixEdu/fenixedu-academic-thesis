@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.fenixedu.academic.domain.Degree;
+import org.fenixedu.academic.domain.Enrolment;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.Teacher;
@@ -472,9 +473,16 @@ public class ThesisProposalsService {
                 .stream()
                 .forEach(
                         executionDegree -> {
-                            if (registration.getDissertationEnrolment() != null) {
+                            Enrolment dissertationEnrolment = registration.getDissertationEnrolment();
+
+                            ExecutionYear candidacyExecutionYear =
+                                    studentThesisCandidacy.getThesisProposal().getSingleThesisProposalsConfiguration()
+                                            .getExecutionDegree().getExecutionYear();
+
+                            if (dissertationEnrolment != null
+                                    && dissertationEnrolment.getExecutionYear() == candidacyExecutionYear) {
                                 if (registration.hasDissertationThesis()) {
-                                    Thesis thesis = registration.getDissertationEnrolment().getThesis();
+                                    Thesis thesis = dissertationEnrolment.getThesis();
                                     thesis.setTitle(new MultiLanguageString(proposal.getTitle()));
 
                                     thesis.getParticipationsSet()
@@ -496,8 +504,8 @@ public class ThesisProposalsService {
                                     }
                                 } else {
                                     Thesis thesis =
-                                            new Thesis(registration.getDegree(), registration.getDissertationEnrolment(),
-                                                    new MultiLanguageString(proposal.getTitle()));
+                                            new Thesis(registration.getDegree(), dissertationEnrolment, new MultiLanguageString(
+                                                    proposal.getTitle()));
 
                                     for (ThesisProposalParticipant participant : proposal.getThesisProposalParticipantSet()) {
                                         if (participant.getUser() != null) {
