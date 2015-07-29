@@ -48,12 +48,12 @@ import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantExce
 import org.fenixedu.academic.util.MultiLanguageString;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.commons.i18n.I18N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -288,7 +288,7 @@ public class ThesisProposalsService {
     public void editThesisProposal(User currentUser, ThesisProposalBean thesisProposalBean, ThesisProposal thesisProposal,
             JsonArray participantsArray, JsonArray externalsArray) throws ThesisProposalException {
 
-        boolean isManager = DynamicGroup.get("managers").isMember(currentUser);
+        boolean isManager = Group.managers().isMember(currentUser);
         boolean isDegreeCoordinator =
                 thesisProposal.getExecutionDegreeSet().stream()
                         .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(currentUser));

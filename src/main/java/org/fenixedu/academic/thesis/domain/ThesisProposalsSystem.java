@@ -22,7 +22,6 @@ import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.DegreeHelper;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 
 import pt.ist.fenixframework.Atomic;
@@ -33,8 +32,8 @@ public class ThesisProposalsSystem extends ThesisProposalsSystem_Base {
     private ThesisProposalsSystem() {
         super();
         setBennu(Bennu.getInstance());
-        setCanManageGroup(DynamicGroup.get("managers"));
-        setCanCreateThesisGroup(DynamicGroup.get("thesisCreators"));
+        setCanManageGroup(Group.managers());
+        setCanCreateThesisGroup(Group.dynamic("thesisCreators"));
         setProposalsCounter(0);
     }
 
