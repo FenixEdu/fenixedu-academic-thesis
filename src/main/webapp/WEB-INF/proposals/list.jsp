@@ -36,6 +36,7 @@ ${portal.toolkit()}
 	<p><spring:message code="label.proposals.well"/></p>
 	<c:if test="${not empty executionYears}">
 		<form role="form" method="GET" action="${pageContext.request.contextPath}/${baseAction}" class="form" id="thesisConfigForm">
+			${csrf.field()}
 			<div class="form-group">
 				<label for="executionYear"><spring:message code="label.configuration"/></label>
 				<select name="executionYear" id="executionYear" class="form-control">

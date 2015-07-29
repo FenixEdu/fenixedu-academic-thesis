@@ -77,6 +77,7 @@ ${portal.toolkit()}
 					</td>
 					<td>
 						<form role="form" method="GET" action="${pageContext.request.contextPath}/${baseAction}/transpose/${thesisProposal.externalId}" class="form-horizontal" id="thesisProposalTransposeForm">
+							${csrf.field()}
 							<button type="submit" class="btn btn-default"><spring:message code="button.transpose"/></button>
 						</form>
 					</td>

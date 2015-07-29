@@ -56,7 +56,8 @@ ${portal.toolkit()}
 		<div class="col-sm-8">
 
 <form:form role="form" method="POST" action="${pageContext.request.contextPath}/participantsType/updateWeights" class="form-horizontal">
-<button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#create"><spring:message code="button.create"/></button>
+	${csrf.field()}
+	<button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#create"><spring:message code="button.create"/></button>
 <input type="hidden" name="json" id="json"/>
 <button type="submit" class="btn btn-default" style="display:none;" id="saveButton"><spring:message code="button.order.save"/> </button>
 </form:form>
@@ -101,7 +102,8 @@ ${portal.toolkit()}
 <!-- Modal -->
 <div class="modal fade" id="create" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 <form role="form" method="POST" action="/participantsType/" class="form-horizontal" commandname="participantTypeBean" id="participantTypeBean">
-  <div class="modal-dialog">
+	${csrf.field()}
+	<div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
 			<button type="button" class="close"><span class="sr-only"><spring:message code="button.close"/></span></button>

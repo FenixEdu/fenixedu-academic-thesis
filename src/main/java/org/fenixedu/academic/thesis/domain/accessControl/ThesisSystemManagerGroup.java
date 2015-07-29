@@ -19,7 +19,6 @@
 package org.fenixedu.academic.thesis.domain.accessControl;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.fenixedu.academic.domain.DegreeHelper;
@@ -39,12 +38,12 @@ public class ThesisSystemManagerGroup extends FenixGroupStrategy {
     public static final String THESIS_SYSTEM_MANAGERS = "thesisSystemManagers";
 
     @Override
-    public Set<User> getMembers() {
+    public Stream<User> getMembers() {
         return computeGroupForMembers().getMembers();
     }
 
     @Override
-    public Set<User> getMembers(DateTime when) {
+    public Stream<User> getMembers(DateTime when) {
         return computeGroupForMembers().getMembers(when);
     }
 

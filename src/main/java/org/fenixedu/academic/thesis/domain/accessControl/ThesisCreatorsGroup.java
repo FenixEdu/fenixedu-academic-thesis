@@ -18,7 +18,7 @@
  */
 package org.fenixedu.academic.thesis.domain.accessControl;
 
-import java.util.Set;
+import java.util.stream.Stream;
 
 import org.fenixedu.academic.domain.accessControl.FenixGroupStrategy;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
@@ -34,12 +34,12 @@ public class ThesisCreatorsGroup extends FenixGroupStrategy {
     public static final String THESIS_CREATORS = "thesisCreators";
 
     @Override
-    public Set<User> getMembers() {
+    public Stream<User> getMembers() {
         return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().getMembers();
     }
 
     @Override
-    public Set<User> getMembers(DateTime when) {
+    public Stream<User> getMembers(DateTime when) {
         return ThesisProposalsSystem.getInstance().getCanCreateThesisGroup().getMembers(when);
     }
 

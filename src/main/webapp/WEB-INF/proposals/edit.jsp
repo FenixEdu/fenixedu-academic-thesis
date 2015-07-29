@@ -36,6 +36,7 @@ ${portal.toolkit()}
 </div>
 
 <form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalBean">
+	${csrf.field()}
 	<input type="hidden" name="configuration" value="${configuration.externalId}"/>
 
 <c:if test="${!empty error}">

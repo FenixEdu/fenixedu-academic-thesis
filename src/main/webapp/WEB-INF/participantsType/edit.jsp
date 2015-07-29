@@ -34,6 +34,7 @@ ${portal.toolkit()}
 
 <div class="row">
 	<form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/editParticipantType" class="form-horizontal" commandname="participantTypeBean" id="participantTypeBean">
+		${csrf.field()}
 		<div class="form-group">
 			<spring:message code='label.participantType.name' var="participantTypeName"/>
 			<div class="form-group">
@@ -58,6 +59,7 @@ ${portal.toolkit()}
 	</form>
 
 	<form method="POST" action="${pageContext.request.contextPath}/configuration/deleteParticipantType/${participantType.externalId}" id="deleteForm">
+		${csrf.field()}
 	</form>
 
 	<script type="text/javascript">

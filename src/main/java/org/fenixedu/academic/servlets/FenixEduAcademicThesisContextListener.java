@@ -3,8 +3,8 @@ package org.fenixedu.academic.servlets;
 import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.DegreeHelper;
 import org.fenixedu.academic.domain.accessControl.PersistentCoordinatorGroup;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;

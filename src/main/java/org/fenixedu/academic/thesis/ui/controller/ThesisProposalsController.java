@@ -39,7 +39,7 @@ import org.fenixedu.academic.thesis.ui.exception.UnexistentConfigurationExceptio
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantException;
 import org.fenixedu.academic.thesis.ui.service.ParticipantLabelService;
 import org.fenixedu.academic.thesis.ui.service.ThesisProposalsService;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -182,7 +182,7 @@ public class ThesisProposalsController {
     public ModelAndView editProposalForm(@PathVariable("oid") ThesisProposal thesisProposal,
             @RequestParam(required = false) ThesisProposalsConfiguration configuration, Model model) {
 
-        boolean isManager = DynamicGroup.get("managers").isMember(Authenticate.getUser());
+        boolean isManager = Group.managers().isMember(Authenticate.getUser());
         boolean isDegreeCoordinator =
                 thesisProposal.getExecutionDegreeSet().stream()
                         .anyMatch(execDegree -> CoordinatorGroup.get(execDegree.getDegree()).isMember(Authenticate.getUser()));

@@ -356,13 +356,12 @@ $("#executionDegreeSelect").change(function(){
 <p>
 	<div class="row">
 		<div class="col-sm-8">
-
 			<form:form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/updateWeights" class="form-horizontal">
-			<button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#createParticipantType"><spring:message code="button.create"/></button>
-			<input type="hidden" name="json" id="json"/>
-			<button type="submit" class="btn btn-default" style="display:none;" id="saveButton"><spring:message code="button.order.save"/> </button>
-		</form:form>
-
+				${csrf.field()}
+				<button type="button"  class="btn btn-primary" data-toggle="modal" data-target="#createParticipantType"><spring:message code="button.create"/></button>
+				<input type="hidden" name="json" id="json"/>
+				<button type="submit" class="btn btn-default" style="display:none;" id="saveButton"><spring:message code="button.order.save"/> </button>
+			</form:form>
 	</div>
 	<div class="col-sm-4">
 	</div>

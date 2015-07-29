@@ -37,7 +37,7 @@ import org.fenixedu.academic.thesis.ui.bean.ConfigurationBean;
 import org.fenixedu.academic.thesis.ui.bean.ParticipantTypeBean;
 import org.fenixedu.academic.thesis.ui.exception.OverlappingIntervalsException;
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -98,7 +98,7 @@ public class ConfigurationController {
 
         model.addAttribute("participantTypeList", participantTypeList);
 
-        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
+        model.addAttribute("isManager", Group.managers().isMember(Authenticate.getUser()));
 
         return "/configuration/list";
     }

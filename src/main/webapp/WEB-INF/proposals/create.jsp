@@ -41,6 +41,7 @@ ${portal.toolkit()}
 </c:if>
 
 <form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}?configuration=${configuration.externalId}" class="form-horizontal" commandname="thesisProposalBean" id="thesisProposalCreateForm">
+${csrf.field()}
 
 <spring:message code='label.title' var='title'/>
 <spring:message code='label.observations' var='observations'/>

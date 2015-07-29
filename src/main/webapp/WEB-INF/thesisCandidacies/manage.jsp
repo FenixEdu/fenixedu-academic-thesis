@@ -76,7 +76,8 @@
 				<td>
 					<c:if test="${!studentThesisCandidacy.acceptedByAdvisor}">
 					<form:form role="form" method="POST" action="${pageContext.request.contextPath}/${action}/${studentThesisCandidacy.externalId}" class="form-horizontal">
-				<c:choose>
+					${csrf.field()}
+						<c:choose>
 				<c:when test="${not empty coordinatorManagement}">
 					<button type="submit" class="btn btn-default acceptButton">
 						<spring:message code='button.candidacy.accept' />
@@ -100,7 +101,8 @@
 	</c:if>
 	<c:if test="${studentThesisCandidacy.acceptedByAdvisor}">
 	<form:form role="form" method="POST" action="${pageContext.request.contextPath}/${baseAction}/reject/${studentThesisCandidacy.externalId}" class="form-horizontal">
-	<button type="submit" class="btn btn-default removeButton">
+		${csrf.field()}
+		<button type="submit" class="btn btn-default removeButton">
 		<spring:message code='button.candidacy.reject' />
 	</button>
 </form:form>
