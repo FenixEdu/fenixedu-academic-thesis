@@ -245,7 +245,9 @@ public class ConfigurationController {
 
         Set<ThesisProposalsConfiguration> sharedConfigs =
                 thesisProposalsConfiguration.getThesisProposalSet().stream()
-                        .flatMap(proposal -> proposal.getThesisConfigurationSet().stream()).collect(Collectors.toSet());
+                .flatMap(proposal -> proposal.getThesisConfigurationSet().stream()).collect(Collectors.toSet());
+        sharedConfigs.add(thesisProposalsConfiguration);
+
         sharedConfigs.forEach(config -> {
             config.setProposalPeriod(proposalPeriod);
             config.setCandidacyPeriod(candidacyPeriod);
