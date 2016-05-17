@@ -14,7 +14,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.Enrolment;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
@@ -161,10 +160,11 @@ public class ThesisProposalsService {
     }
 
     public List<ThesisProposalsConfiguration> getThesisProposalsConfigurationsForCoordinator(User coordinator) {
-        return Degree.readBolonhaDegrees().stream().flatMap(degree -> degree.getExecutionDegrees().stream())
-                .filter(executionDegree -> CoordinatorGroup.get(executionDegree.getDegree()).isMember(coordinator))
-                .flatMap(executionDegree -> executionDegree.getThesisProposalsConfigurationSet().stream()).distinct()
-                .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC).collect(Collectors.toList());
+        return coordinator.getPerson().getCoordinatorsSet().stream()
+                        .flatMap(c -> c.getExecutionDegree().getThesisProposalsConfigurationSet().stream()
+                                .distinct())
+                        .sorted(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC)
+                        .collect(Collectors.toList());
     }
 
     @Atomic(mode = TxMode.WRITE)
