@@ -554,11 +554,15 @@ public class ThesisProposalsService {
                 messageSource.getMessage("stolen.proposal.message.subject", new Object[] { oldCandidacy.getThesisProposal()
                         .getIdentifier() }, I18N.getLocale());
 
+        String  newParticipantDisplayName = newParticipant.getUser() != null ?
+                newParticipant.getUser().getProfile().getDisplayName():
+                newParticipant.getExternalUser().getName();
+
         String body =
                 messageSource.getMessage("stolen.proposal.message.body", new Object[] {
                         oldCandidacy.getRegistration().getStudent().getPerson().getUser().getProfile().getDisplayName(),
                         oldCandidacy.getThesisProposal().getTitle(), oldCandidacy.getPreferenceNumber(),
-                        newCandidacy.getThesisProposal().getTitle(), newParticipant.getUser().getProfile().getDisplayName(),
+                        newCandidacy.getThesisProposal().getTitle(), newParticipantDisplayName,
                         newCandidacy.getPreferenceNumber(), link, getAuthenticateGetUserName().orElse("System") },
                         I18N.getLocale());
 
