@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -19,10 +18,21 @@
     <inceptionYear>2014</inceptionYear>
 
     <properties>
+        <version.org.fenixedu.academic>5.0.0</version.org.fenixedu.academic>
+        <version.org.fenixedu.fenixedu-spaces>1.6.1</version.org.fenixedu.fenixedu-spaces>
         <version.org.fenixedu.bennu>3.4.1</version.org.fenixedu.bennu>
         <version.org.fenixedu.bennu.spring>1.2.0</version.org.fenixedu.bennu.spring>
-        <version.org.fenixedu.academic>5.0.0</version.org.fenixedu.academic>
+        <version.org.fenixedu.fenixedu-commons>1.1.0</version.org.fenixedu.fenixedu-commons>
+        <version.com.google.guava.guava>17.0</version.com.google.guava.guava>
+        <version.joda.time.joda.time>2.3</version.joda.time.joda.time>
+        <version.com.google.code.gson.gson>2.2.4</version.com.google.code.gson.gson>
+        <version.javax.ws.rs.javax.ws.rs.api>2.0</version.javax.ws.rs.javax.ws.rs.api>
     </properties>
+
+    <issueManagement>
+        <system>JIRA</system>
+        <url>https://jira.fenixedu.org/browse/THS</url>
+    </issueManagement>
 
     <licenses>
         <license>
@@ -31,6 +41,11 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <ciManagement>
+        <system>Travis CI</system>
+        <url>https://travis-ci.org/FenixEdu/fenixedu-academic-thesis</url>
+    </ciManagement>
 
     <scm>
         <connection>scm:git:git@github.com:fenixedu/fenixedu-academic-thesis.git</connection>
@@ -47,12 +62,17 @@
         </dependency>
         <dependency>
             <groupId>org.fenixedu</groupId>
+            <artifactId>fenixedu-spaces</artifactId>
+            <version>${version.org.fenixedu.fenixedu-spaces}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fenixedu</groupId>
             <artifactId>bennu-core</artifactId>
             <version>${version.org.fenixedu.bennu}</version>
         </dependency>
         <dependency>
             <groupId>org.fenixedu</groupId>
-            <artifactId>bennu-io</artifactId>
+            <artifactId>bennu-scheduler</artifactId>
             <version>${version.org.fenixedu.bennu}</version>
         </dependency>
         <dependency>
@@ -62,13 +82,38 @@
         </dependency>
         <dependency>
             <groupId>org.fenixedu</groupId>
+            <artifactId>bennu-io</artifactId>
+            <version>${version.org.fenixedu.bennu}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fenixedu</groupId>
             <artifactId>bennu-spring</artifactId>
             <version>${version.org.fenixedu.bennu.spring}</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>jstl</artifactId>
-            <version>1.2</version>
+            <groupId>org.fenixedu</groupId>
+            <artifactId>fenixedu-commons</artifactId>
+            <version>${version.org.fenixedu.fenixedu-commons}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${version.com.google.guava.guava}</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${version.joda.time.joda.time}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${version.com.google.code.gson.gson}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>${version.javax.ws.rs.javax.ws.rs.api}</version>
         </dependency>
     </dependencies>
 
