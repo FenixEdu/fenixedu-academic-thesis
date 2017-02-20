@@ -52,7 +52,7 @@ ${ portal.toolkit() }
 
 <div class="row">
   <form:form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/create" class="form-horizontal" commandname="thesisProposalsConfigurationBean" id="thesisProposalCreateForm">
-
+    ${csrf.field()}
   <div class="form-group">
     <label for="proposalPeriodEnd" class="col-sm-4 control-label"><spring:message code='label.proposalPeriod'/></label>
     <div class="col-sm-4">

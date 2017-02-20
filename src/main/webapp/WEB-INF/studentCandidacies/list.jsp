@@ -99,6 +99,7 @@
 				</p>
 			</div>
 				<form:form role="form" method="POST" action="${pageContext.request.contextPath}/studentCandidacies/updatePreferences" class="form-horizontal">
+					${csrf.field()}
 					<input type="hidden" name="json" id="json" />
 					<button type="submit" class="btn btn-default" id="savePreferencesButton" style="display:none;"><spring:message code="button.preferences.save"/></button>
 				</form:form>
@@ -292,23 +293,24 @@ $(function(){
 				</td>
 				<td>
 					<form:form method="POST" action="${pageContext.request.contextPath}/studentCandidacies/candidate/${proposal.externalId}">
-					<div class="btn-group btn-group-xs">
-						<button type="submit" class="btn btn-default" id="applyButton"><spring:message code="button.proposal.apply"/></button>
+						${csrf.field()}
+						<div class="btn-group btn-group-xs">
+							<button type="submit" class="btn btn-default" id="applyButton"><spring:message code="button.proposal.apply"/></button>
 
-						<input type="hidden" name="registration" value="${node.key.externalId}">
+							<input type="hidden" name="registration" value="${node.key.externalId}">
 
-						<c:set var="result" scope="session" value='' />
-						<c:forEach items="${proposal.executionDegreeSet}" var="executionDegree" varStatus="i">
-						<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
-						<c:if test="${i.index != proposal.executionDegreeSet.size() - 1}">
-							<c:set var="result" scope="session" value="${result}, " />
-						</c:if>
-					</c:forEach>
-				<input type='button' class='detailsButton btn btn-default' data-observations='<c:out value="${proposal.observations}"/>' data-requirements='<c:out value="${proposal.requirements}"/>' data-goals='<c:out value="${proposal.goals}"/>' data-localization='<c:out value="${proposal.localization}"/>' data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${proposal.externalId}">
-			</div>
-		</form:form>
-	</td>
-</tr>
+							<c:set var="result" scope="session" value='' />
+							<c:forEach items="${proposal.executionDegreeSet}" var="executionDegree" varStatus="i">
+								<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
+								<c:if test="${i.index != proposal.executionDegreeSet.size() - 1}">
+									<c:set var="result" scope="session" value="${result}, " />
+								</c:if>
+							</c:forEach>
+							<input type='button' class='detailsButton btn btn-default' data-observations='<c:out value="${proposal.observations}"/>' data-requirements='<c:out value="${proposal.requirements}"/>' data-goals='<c:out value="${proposal.goals}"/>' data-localization='<c:out value="${proposal.localization}"/>' data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${proposal.externalId}">
+						</div>
+					</form:form>
+				</td>
+			</tr>
 </c:forEach>
 </c:forEach>
 </tbody>

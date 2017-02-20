@@ -63,6 +63,7 @@ ${portal.toolkit()}
 
 
 <form class="form" id="chooseConfiguration" method="GET">
+	${csrf.field()}
 	<div class="form-group">
 		<label for="configuration"><spring:message code="label.configuration"/></label>
 		<select id="configuration" name="configuration" class="form-control">
@@ -139,6 +140,7 @@ ${portal.toolkit()}
   <div class="panel-heading"><spring:message code="label.filter" /></div>
   <div class="panel-body">
     <form class="form" method="GET" id="search">
+		${csrf.field()}
     	<input type="hidden" name="configuration" value="${configuration.externalId}"/>
 		<table class="table table-condensed">
 			<thead>

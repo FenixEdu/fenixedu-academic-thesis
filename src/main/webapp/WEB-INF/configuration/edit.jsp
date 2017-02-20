@@ -36,7 +36,7 @@ ${ portal.toolkit() }
 
 <div class="row">
   <form:form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/edit" class="form-horizontal" commandname="thesisProposalsConfigurationBean" id="thesisProposalCreateForm">
-
+  ${csrf.field()}
   <c:if test="${!empty editException}">
   <p class="text-danger"><spring:message code="error.thesisProposal.configuration.create.used"/></p>
 </c:if>
