@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.student.Student;
@@ -81,6 +82,22 @@ public class StudentCandidaciesController {
         model.addAttribute("candidaciesSize", candidaciesSize);
         model.addAttribute("candidaciesByConfig", candidaciesByConfig);
         model.addAttribute("proposalsByReg", proposalsByReg);
+
+        Map<ThesisProposal, Integer> applicationCountByProposalConfig =
+        candidaciesByConfig.values().stream().flatMap(List::stream)
+                .collect(Collectors.toMap(StudentThesisCandidacy::getThesisProposal,
+                        c -> c.getThesisProposal().getStudentThesisCandidacySet().size()));
+        model.addAttribute("applicationCountByProposalConfig", applicationCountByProposalConfig);
+
+        Map<ThesisProposal, Integer> applicationCountByProposalReg = proposalsByReg.values().stream().flatMap(Set::stream)
+                .collect(Collectors.toMap(tp -> tp, tp -> tp.getStudentThesisCandidacySet().size()));
+        model.addAttribute("applicationCountByProposalReg", applicationCountByProposalReg);
+
+        Set<ThesisProposal> acceptedProposals = proposalsByReg.values().stream().flatMap(Set::stream)
+                .flatMap(tp -> tp.getStudentThesisCandidacySet().stream()).filter(candidacy -> candidacy.getAcceptedByAdvisor())
+                .map(candidacy -> candidacy.getThesisProposal())
+                .collect(Collectors.toSet());
+        model.addAttribute("acceptedProposals", acceptedProposals);
 
         return "studentCandidacies/list";
     }
