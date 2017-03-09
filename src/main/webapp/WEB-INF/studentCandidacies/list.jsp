@@ -124,6 +124,9 @@
 										<spring:message code='label.participants' />
 									</th>
 									<th>
+										<spring:message code='label.thesisProposal.applicationCount' />
+									</th>
+									<th>
 										<spring:message code='label.student.candidacy.accepted'/>
 									</th>
 									<th></th>
@@ -151,6 +154,7 @@
 									</div>
 							</c:forEach>
 						</td>
+						<td>${applicationCountByProposalConfig[candidacy.thesisProposal]}</td>
 						<td>
 							<c:if test="${candidacy.acceptedByAdvisor}">
 								<spring:message code='label.yes'/>
@@ -216,6 +220,10 @@ $(document).ready(function() {
 	margin-top: 7px;
 	margin-left: 10px;
 }
+
+.existingCandidaciesTable tr > td:nth-child(5){
+	text-align: center;
+}
 </style>
 
 <script type="text/javascript">
@@ -258,7 +266,7 @@ $(function(){
 </c:if>
 	<c:if test="${proposalsSize > 0}">
 	<div class="table-responsive">
-		<table class="table" id="candidaciesTable">
+		<table class="table existingCandidaciesTable" id="candidaciesTable">
 			<thead>
 				<tr>
 					<th>
@@ -269,6 +277,12 @@ $(function(){
 					</th>
 					<th>
 						<spring:message code='label.participants' />
+					</th>
+					<th>
+						<spring:message code='label.thesisProposal.applicationCount' />
+					</th>
+					<th>
+						<spring:message code='label.thesisProposal.status' />
 					</th>
 					<th></th>
 				</tr>
@@ -289,6 +303,17 @@ $(function(){
 								</c:if>
 							</div>
 					</c:forEach>
+				</td>
+				<td>${applicationCountByProposalReg[proposal]}</td>
+				<td>
+					<c:choose>
+						<c:when test="${acceptedProposals.contains(proposal)}">
+							<span class="label label-warning"><spring:message code='label.thesisProposal.assigned' /></span>
+						</c:when>
+						<c:otherwise>
+							<span class="label label-success"><spring:message code='label.thesisProposal.unassigned' /></span>
+						</c:otherwise>
+					</c:choose>
 				</td>
 				<td>
 					<form:form method="POST" action="${pageContext.request.contextPath}/studentCandidacies/candidate/${proposal.externalId}">
