@@ -179,6 +179,7 @@ $(".deleteConfiguration").on("click", function() {
 <!-- Modal -->
 <div class="modal fade" id="create" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/create" class="form-horizontal" id="thesisProposalCreateForm">
+		${csrf.field()}
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -422,6 +423,7 @@ $("#executionDegreeSelect").change(function(){
 <!-- Modal -->
 <div class="modal fade" id="createParticipantType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<form role="form" method="POST" action="${pageContext.request.contextPath}/configuration/createParticipantType" class="form-horizontal" commandname="participantTypeBean" id="participantTypeBean">
+		${csrf.field()}
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
