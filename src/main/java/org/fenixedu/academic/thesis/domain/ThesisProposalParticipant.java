@@ -86,7 +86,7 @@ public class ThesisProposalParticipant extends ThesisProposalParticipant_Base {
 
     public String getName() {
         if (getUser() != null) {
-            return getUser().getName();
+            return getUser().getProfile().getDisplayName();
         } else {
             return getExternalUser().getName() + " " + getExternalUser().getEmail();
         }
