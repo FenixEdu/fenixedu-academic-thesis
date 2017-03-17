@@ -72,7 +72,7 @@ ${portal.toolkit()}
 					<td>${thesisProposal.title}</td>
 					<td>
 						<c:forEach items="${thesisProposal.getSortedParticipants()}" var="participant">
-							<div>${participant.user.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
+							<div>${participant.user.profile.name} <small>as</small> <b>${participant.thesisProposalParticipantType.name.content}</b></div>
 						</c:forEach>
 					</td>
 					<td>
