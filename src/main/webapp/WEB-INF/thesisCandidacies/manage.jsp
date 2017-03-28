@@ -68,7 +68,7 @@
 						<span class="badge"><spring:message code='label.proposal.attributed'/></span>
 					</c:if>
 					<c:if test="${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber < studentThesisCandidacy.preferenceNumber}">
-						<p><spring:message code='label.candidate.already.accepted' arguments="${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.identifier};${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber};${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.getSortedParticipants().get(0).user.profile.name}" argumentSeparator=";"/></p>
+						<p><spring:message code='label.candidate.already.accepted' arguments="${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.identifier};${bestAccepted.get(studentThesisCandidacy.registration.externalId).preferenceNumber};${bestAccepted.get(studentThesisCandidacy.registration.externalId).thesisProposal.getSortedParticipants().get(0).user.profile.displayName}" argumentSeparator=";"/></p>
 					</c:if>
 				</td>
 				<td> ${studentThesisCandidacy.preferenceNumber}</td>
