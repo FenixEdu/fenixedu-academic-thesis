@@ -240,6 +240,7 @@ ${portal.toolkit()}
 </form:form>
 
 <form method="POST" action="${pageContext.request.contextPath}/${baseAction}/delete/${command.externalId}" id="deleteForm">
+${csrf.field()}
 </form>
 
 
