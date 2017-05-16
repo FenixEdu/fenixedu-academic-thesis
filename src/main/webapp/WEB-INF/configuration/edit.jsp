@@ -133,7 +133,7 @@ ${ portal.toolkit() }
 
 </form:form>
 </div>
-<form method="POST" action="${pageContext.request.contextPath}/configuration/delete/${command.externalId}" id="deleteForm"></form>
+<form method="POST" action="${pageContext.request.contextPath}/configuration/delete/${command.externalId}" id="deleteForm">${csrf.field()}</form>
 
 <script type="text/javascript">
 $("#deleteButton").on("click", function(){ $("#deleteForm").submit(); })
