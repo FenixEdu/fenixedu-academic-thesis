@@ -86,7 +86,8 @@ public class StudentCandidaciesController {
         Map<ThesisProposal, Integer> applicationCountByProposalConfig =
         candidaciesByConfig.values().stream().flatMap(List::stream)
                 .collect(Collectors.toMap(StudentThesisCandidacy::getThesisProposal,
-                        c -> c.getThesisProposal().getStudentThesisCandidacySet().size()));
+                        c -> c.getThesisProposal().getStudentThesisCandidacySet().size(), Integer::max , HashMap::new));
+
         model.addAttribute("applicationCountByProposalConfig", applicationCountByProposalConfig);
 
         Map<ThesisProposal, Integer> applicationCountByProposalReg = proposalsByReg.values().stream().flatMap(Set::stream)
@@ -94,8 +95,9 @@ public class StudentCandidaciesController {
         model.addAttribute("applicationCountByProposalReg", applicationCountByProposalReg);
 
         Set<ThesisProposal> acceptedProposals = proposalsByReg.values().stream().flatMap(Set::stream)
-                .flatMap(tp -> tp.getStudentThesisCandidacySet().stream()).filter(candidacy -> candidacy.getAcceptedByAdvisor())
-                .map(candidacy -> candidacy.getThesisProposal())
+                .flatMap(tp -> tp.getStudentThesisCandidacySet().stream()).filter(
+                        StudentThesisCandidacy::getAcceptedByAdvisor)
+                .map(StudentThesisCandidacy::getThesisProposal)
                 .collect(Collectors.toSet());
         model.addAttribute("acceptedProposals", acceptedProposals);
 
