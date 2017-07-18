@@ -45,7 +45,6 @@ import org.fenixedu.academic.thesis.ui.exception.UnequivalentThesisConfiguration
 import org.fenixedu.academic.thesis.ui.exception.UnexistentExternalEmailException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisExternalParticipantException;
 import org.fenixedu.academic.thesis.ui.exception.UnexistentThesisParticipantException;
-import org.fenixedu.academic.util.MultiLanguageString;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
@@ -55,21 +54,22 @@ import org.fenixedu.bennu.core.signals.DomainObjectEvent;
 import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.i18n.I18N;
+import org.fenixedu.commons.i18n.LocalizedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-import pt.ist.fenixframework.FenixFramework;
-
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
+import pt.ist.fenixframework.FenixFramework;
 
 @Service
 public class ThesisProposalsService {
@@ -483,7 +483,7 @@ public class ThesisProposalsService {
                                     && dissertationEnrolment.getExecutionYear() == candidacyExecutionYear) {
                                 if (registration.hasDissertationThesis()) {
                                     Thesis thesis = dissertationEnrolment.getThesis();
-                                    thesis.setTitle(new MultiLanguageString(proposal.getTitle()));
+                                    thesis.setTitle(new LocalizedString(I18N.getLocale(), proposal.getTitle()));
 
                                     thesis.getParticipationsSet()
                                             .stream()
@@ -504,8 +504,7 @@ public class ThesisProposalsService {
                                     }
                                 } else {
                                     Thesis thesis =
-                                            new Thesis(registration.getDegree(), dissertationEnrolment, new MultiLanguageString(
-                                                    proposal.getTitle()));
+                                            new Thesis(registration.getDegree(), dissertationEnrolment, new LocalizedString(I18N.getLocale(), proposal.getTitle()));
 
                                     for (ThesisProposalParticipant participant : proposal.getThesisProposalParticipantSet()) {
                                         if (participant.getUser() != null) {
