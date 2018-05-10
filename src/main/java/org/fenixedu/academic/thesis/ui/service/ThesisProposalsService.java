@@ -23,7 +23,6 @@ import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.thesis.Thesis;
 import org.fenixedu.academic.domain.thesis.ThesisParticipationType;
-import org.fenixedu.academic.domain.util.email.Message;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
@@ -55,6 +54,7 @@ import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
+import org.fenixedu.messaging.core.domain.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -565,7 +565,11 @@ public class ThesisProposalsService {
                         newCandidacy.getPreferenceNumber(), link, getAuthenticateGetUserName().orElse("System") },
                         I18N.getLocale());
 
-        new Message(Bennu.getInstance().getSystemSender(), null, null, subject, body, bccs);
+        Message.fromSystem()
+                .subject(subject)
+                .textBody(body)
+                .singleBcc(bccs)
+                .send();
     }
 
     @Atomic(mode = TxMode.WRITE)
