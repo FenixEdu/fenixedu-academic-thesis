@@ -91,7 +91,7 @@ public class StudentCandidaciesController {
         model.addAttribute("applicationCountByProposalConfig", applicationCountByProposalConfig);
 
         Map<ThesisProposal, Integer> applicationCountByProposalReg = proposalsByReg.values().stream().flatMap(Set::stream)
-                .collect(Collectors.toMap(tp -> tp, tp -> tp.getStudentThesisCandidacySet().size()));
+                .collect(Collectors.toMap(tp -> tp, tp -> tp.getStudentThesisCandidacySet().size(), (a, b) -> a + b));
         model.addAttribute("applicationCountByProposalReg", applicationCountByProposalReg);
 
         Set<ThesisProposal> acceptedProposals = proposalsByReg.values().stream().flatMap(Set::stream)
