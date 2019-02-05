@@ -18,6 +18,7 @@
  */
 package org.fenixedu.academic.thesis.domain;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -32,48 +33,29 @@ import org.joda.time.Interval;
 
 public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_Base {
 
-    static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE =
-            new Comparator<ThesisProposalsConfiguration>() {
-                @Override
-                public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
+    static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE = (o1, o2) -> {
 
-                    int yearComp =
-                            o2.getExecutionDegree().getExecutionYear().compareTo(o1.getExecutionDegree().getExecutionYear());
+        int yearComp =
+                o2.getExecutionDegree().getExecutionYear().compareTo(o1.getExecutionDegree().getExecutionYear());
 
-                    return yearComp != 0 ? yearComp : o2.getExecutionDegree().getPresentationName()
-                            .compareTo(o1.getExecutionDegree().getPresentationName());
-                }
-            };
+        return yearComp != 0 ? yearComp : o2.getExecutionDegree().getPresentationName()
+                .compareTo(o1.getExecutionDegree().getPresentationName());
+    };
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC =
-            new Comparator<ThesisProposalsConfiguration>() {
-                @Override
-                public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
-                    return o1.getProposalPeriod().getStart().compareTo(o2.getProposalPeriod().getStart());
-                }
-            };
+            Comparator.comparing(o -> o.getProposalPeriod().getStart());
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_PROPOSAL_PERIOD_START_DESC =
             COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC.reversed();
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_CANDIDACY_PERIOD_START_ASC =
-            new Comparator<ThesisProposalsConfiguration>() {
-                @Override
-                public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
-                    return o1.getCandidacyPeriod().getStart().compareTo(o2.getCandidacyPeriod().getStart());
-                }
-            };
+            Comparator.comparing(o -> o.getCandidacyPeriod().getStart());
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_CANDIDACY_PERIOD_START_DESC =
             COMPARATOR_BY_CANDIDACY_PERIOD_START_ASC.reversed();
 
     static final public Comparator<ThesisProposalsConfiguration> COMPARATOR_BY_CANDIDACY_PERIOD_END_ASC =
-            new Comparator<ThesisProposalsConfiguration>() {
-                @Override
-                public int compare(ThesisProposalsConfiguration o1, ThesisProposalsConfiguration o2) {
-                    return o2.getCandidacyPeriod().getEnd().compareTo(o1.getCandidacyPeriod().getEnd());
-                }
-            };
+            (o1, o2) -> o2.getCandidacyPeriod().getEnd().compareTo(o1.getCandidacyPeriod().getEnd());
 
     public ThesisProposalsConfiguration(Interval proposalPeriod, Interval candidacyPeriod, ExecutionDegree executionDegree,
             int maxThesisCandidaciesByStudent, int maxThesisProposalsByUser, int minECTS1stCycle, int minECTS2ndCycle) {
@@ -138,19 +120,19 @@ public class ThesisProposalsConfiguration extends ThesisProposalsConfiguration_B
         builder.append(getExecutionDegree().getExecutionYear().getQualifiedName());
 
         List<ThesisProposalsConfiguration> configurations =
-                getExecutionDegree().getThesisProposalsConfigurationSet().stream().collect(Collectors.toList());
+                new ArrayList<>(getExecutionDegree().getThesisProposalsConfigurationSet());
 
         if (configurations.size() > 1) {
             configurations =
                     configurations.stream().sorted(ThesisProposalsConfiguration.COMPARATOR_BY_CANDIDACY_PERIOD_START_ASC)
                             .collect(Collectors.toList());
 
-            Integer configurationNumber = configurations.indexOf(this) + 1;
+            int configurationNumber = configurations.indexOf(this) + 1;
 
             builder.append(" ");
 
             builder.append(BundleUtil.getString("resources.FenixEduThesisProposalsResources", "label.configuration.number",
-                    configurationNumber.toString()));
+                    Integer.toString(configurationNumber)));
         }
 
         return builder.toString();

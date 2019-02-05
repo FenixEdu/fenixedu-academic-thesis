@@ -22,6 +22,7 @@ import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.thesis.Thesis;
+import org.fenixedu.academic.domain.thesis.ThesisEvaluationParticipant;
 import org.fenixedu.academic.domain.thesis.ThesisParticipationType;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
@@ -88,7 +89,7 @@ public class ThesisProposalsService {
             Boolean isAttributed, Boolean hasCandidacy) {
 
         if (configuration == null) {
-            return new ArrayList<ThesisProposal>();
+            return new ArrayList<>();
         }
 
         Stream<ThesisProposal> proposalsStream = configuration.getThesisProposalSet().stream();
@@ -126,12 +127,11 @@ public class ThesisProposalsService {
                 .distinct()
                 .filter(proposal -> proposal.getThesisProposalParticipantSet().stream()
                         .anyMatch(participant -> participant.getUser() != null && participant.getUser().equals(user)))
-                .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     public List<ThesisProposal> getThesisProposals(User user, ThesisProposalsConfiguration configuration) {
-        return ThesisProposal.readProposalsByUserAndConfiguration(user, configuration).stream()
-                .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES).collect(Collectors.toList());
+        return new ArrayList<>(ThesisProposal.readProposalsByUserAndConfiguration(user, configuration));
     }
 
     public List<ThesisProposalsConfiguration> getThesisProposalsConfigurations(User user) {
@@ -173,7 +173,7 @@ public class ThesisProposalsService {
 
         JsonParser parser = new JsonParser();
 
-        Set<ThesisProposalParticipantBean> participants = new HashSet<ThesisProposalParticipantBean>();
+        Set<ThesisProposalParticipantBean> participants = new HashSet<>();
 
         if (participantsJson != null && !participantsJson.isEmpty()) {
             for (JsonElement elem : parser.parse(participantsJson).getAsJsonArray()) {
@@ -242,15 +242,14 @@ public class ThesisProposalsService {
         }
 
         User thesisCreator = Authenticate.getUser();
-        if (!proposalBean.getExecutionDegreeSet().stream()
-                .anyMatch(e -> CoordinatorGroup.get(e.getDegree()).isMember(thesisCreator))
-                && !participants.stream().map(bean -> bean.getUser()).anyMatch(u -> u != null && u.equals(thesisCreator))) {
+        if (proposalBean.getExecutionDegreeSet().stream().noneMatch(e -> CoordinatorGroup.get(e.getDegree()).isMember(thesisCreator))
+                && participants.stream().map(ThesisProposalParticipantBean::getUser).noneMatch(u -> u != null && u.equals(thesisCreator))) {
             throw new ParticipantNotIncludedException();
         }
 
         proposalBean.setThesisProposalParticipantsBean(participants);
         ThesisProposal thesisProposal = new ThesisProposalBean.Builder(proposalBean).build();
-        Signal.emit(ThesisProposal.SIGNAL_CREATED, new DomainObjectEvent<ThesisProposal>(thesisProposal));
+        Signal.emit(ThesisProposal.SIGNAL_CREATED, new DomainObjectEvent<>(thesisProposal));
         return thesisProposal;
     }
 
@@ -265,7 +264,7 @@ public class ThesisProposalsService {
     }
 
     public Map<String, StudentThesisCandidacy> getBestAccepted(ThesisProposal thesisProposal) {
-        HashMap<String, StudentThesisCandidacy> bestAccepted = new HashMap<String, StudentThesisCandidacy>();
+        HashMap<String, StudentThesisCandidacy> bestAccepted = new HashMap<>();
 
         for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
             Registration registration = candidacy.getRegistration();
@@ -297,7 +296,7 @@ public class ThesisProposalsService {
             throw new CannotEditUsedThesisProposalsException(thesisProposal);
         }
 
-        ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<ThesisProposalParticipantBean>();
+        ArrayList<ThesisProposalParticipantBean> participantsBean = new ArrayList<>();
 
         for (JsonElement elem : participantsArray) {
             JsonObject jsonObj = elem.getAsJsonObject();
@@ -366,7 +365,7 @@ public class ThesisProposalsService {
 
         thesisProposal.getThesisProposalParticipantSet().clear();
 
-        ArrayList<ThesisProposalParticipant> participants = new ArrayList<ThesisProposalParticipant>();
+        ArrayList<ThesisProposalParticipant> participants = new ArrayList<>();
 
         int totalPercentage =
                 participantsBean.stream().map(ThesisProposalParticipantBean::getPercentage).reduce(0, (a, b) -> a + b);
@@ -390,7 +389,7 @@ public class ThesisProposalsService {
                         configuration
                                 .getThesisProposalSet()
                                 .stream()
-                                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(p -> p.getUser())
+                                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream().map(ThesisProposalParticipant::getUser)
                                         .filter(Objects::nonNull).collect(Collectors.toSet()).contains(participant.getUser()))
                                 .collect(Collectors.toSet()).size();
 
@@ -455,9 +454,7 @@ public class ThesisProposalsService {
                                 && candidacy.getPreferenceNumber() > orderOfPreference)
                         .max(StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
 
-        if (max.isPresent()) {
-            sendStolenProposalMessage(max.get(), studentThesisCandidacy);
-        }
+        max.ifPresent(thesisCandidacy -> sendStolenProposalMessage(thesisCandidacy, studentThesisCandidacy));
     }
 
     public static void createThesisForStudent(StudentThesisCandidacy studentThesisCandidacy) {
@@ -489,9 +486,7 @@ public class ThesisProposalsService {
                                             .stream()
                                             .filter(p -> p.getType() == ThesisParticipationType.ORIENTATOR
                                                     || p.getType() == ThesisParticipationType.COORIENTATOR)
-                                            .forEach(participation -> {
-                                                participation.delete();
-                                            });
+                                            .forEach(ThesisEvaluationParticipant::delete);
 
                                     for (ThesisProposalParticipant participant : proposal.getThesisProposalParticipantSet()) {
                                         if (participant.getUser() != null) {
@@ -616,20 +611,18 @@ public class ThesisProposalsService {
     }
 
     public List<ThesisProposal> getRecentProposals(User user) {
-        Set<ThesisProposal> proposals =
-                user.getThesisProposalParticipantSet().stream().map(participant -> participant.getThesisProposal())
-                        .collect(Collectors.toSet());
+        Set<ThesisProposal> proposals = user.getThesisProposalParticipantSet().stream().map(ThesisProposalParticipant::getThesisProposal).collect(Collectors.toSet());
 
-        HashMap<String, Set<ThesisProposal>> proposalTitleMap = new HashMap<String, Set<ThesisProposal>>();
+        HashMap<String, Set<ThesisProposal>> proposalTitleMap = new HashMap<>();
 
         for (ThesisProposal proposal : proposals) {
             if (!proposalTitleMap.containsKey(proposal.getTitle())) {
-                proposalTitleMap.put(proposal.getTitle(), new HashSet<ThesisProposal>());
+                proposalTitleMap.put(proposal.getTitle(), new HashSet<>());
             }
             proposalTitleMap.get(proposal.getTitle()).add(proposal);
         }
 
-        Set<ThesisProposal> recentProposals = new HashSet<ThesisProposal>();
+        Set<ThesisProposal> recentProposals = new HashSet<>();
         for (String key : proposalTitleMap.keySet()) {
             recentProposals.add(proposalTitleMap.get(key).stream().max(ThesisProposal.COMPARATOR_BY_PROPOSAL_PERIOD).get());
         }
@@ -641,7 +634,7 @@ public class ThesisProposalsService {
 
     public Map<Registration, TreeSet<StudentThesisCandidacy>> getCoordinatorCandidacies(ThesisProposalsConfiguration configuration) {
 
-        Map<Registration, TreeSet<StudentThesisCandidacy>> map = new HashMap<Registration, TreeSet<StudentThesisCandidacy>>();
+        Map<Registration, TreeSet<StudentThesisCandidacy>> map = new HashMap<>();
 
         configuration
                 .getThesisProposalSet()
@@ -651,8 +644,7 @@ public class ThesisProposalsService {
                 .forEach(
                         candidacy -> {
                             if (!map.containsKey(candidacy.getRegistration())) {
-                                map.put(candidacy.getRegistration(), new TreeSet<StudentThesisCandidacy>(
-                                        StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER));
+                                map.put(candidacy.getRegistration(), new TreeSet<>(StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER));
                             }
                             map.get(candidacy.getRegistration()).add(candidacy);
                         });
@@ -661,18 +653,15 @@ public class ThesisProposalsService {
 
     public String[] getThesisProposalDegrees(ThesisProposal proposal) {
         return proposal.getExecutionDegreeSet().stream().map(executionDegree -> executionDegree.getDegree().getSigla())
-                .collect(Collectors.toList()).toArray(new String[0]);
+                .toArray(String[]::new);
     }
 
     public String[] getThesisProposalCandidates(ThesisProposal proposal) {
-        return proposal
-                .getStudentThesisCandidacySet()
-                .stream()
-                .map(candidacy -> {
-                    User user = candidacy.getRegistration().getStudent().getPerson().getUser();
-                    return user.getProfile().getDisplayName() + " (" + user.getUsername() + ") - "
-                            + BundleUtil.getString(BUNDLE, "label.preference.number") + ": " + candidacy.getPreferenceNumber();
-                }).collect(Collectors.toList()).toArray(new String[0]);
+        return proposal.getStudentThesisCandidacySet().stream().map(candidacy -> {
+            User user = candidacy.getRegistration().getStudent().getPerson().getUser();
+            return user.getProfile().getDisplayName() + " (" + user.getUsername() + ") - " + BundleUtil
+                    .getString(BUNDLE, "label.preference.number") + ": " + candidacy.getPreferenceNumber();
+        }).toArray(String[]::new);
     }
 
     public boolean isAccepted(ThesisProposal proposal) {
@@ -690,12 +679,7 @@ public class ThesisProposalsService {
                                         .filter(StudentThesisCandidacy::getAcceptedByAdvisor)
                                         .min(StudentThesisCandidacy.COMPARATOR_BY_PREFERENCE_NUMBER);
 
-                        if (!hit.isPresent()
-                                || (hit.isPresent() && hit.get().getPreferenceNumber() > candidacy.getPreferenceNumber())) {
-                            return true;
-                        } else {
-                            return false;
-                        }
+                    return !hit.isPresent() || hit.get().getPreferenceNumber() > candidacy.getPreferenceNumber();
                     });
     }
 

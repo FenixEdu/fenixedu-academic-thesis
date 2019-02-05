@@ -23,14 +23,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.fenixedu.academic.domain.DegreeCurricularPlan;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.StudentCurricularPlan;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.student.Student;
+import org.fenixedu.academic.domain.studentCurriculum.CurriculumModule;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
@@ -126,8 +127,11 @@ public class StudentCandidaciesService {
     }
 
     public Set<ThesisProposalsConfiguration> getConfigurationsForRegistration(Registration reg) {
-        return reg.getAllCurriculumGroups().stream().map(group -> group.getDegreeCurricularPlanOfDegreeModule())
-                .filter(Objects::nonNull).map(dcp -> dcp.getDegree()).flatMap(degree -> degree.getExecutionDegrees().stream())
+        return reg.getAllCurriculumGroups().stream()
+                .map(CurriculumModule::getDegreeCurricularPlanOfDegreeModule)
+                .filter(Objects::nonNull)
+                .map(DegreeCurricularPlan::getDegree)
+                .flatMap(degree -> degree.getExecutionDegrees().stream())
                 .flatMap((ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet().stream())
                 .collect(Collectors.toSet());
     }
@@ -146,8 +150,7 @@ public class StudentCandidaciesService {
 
         Set<ThesisProposalsConfiguration> configs = getStudentConfigurations(student);
 
-        HashMap<ThesisProposalsConfiguration, List<StudentThesisCandidacy>> candidaciesByConfig =
-                new HashMap<ThesisProposalsConfiguration, List<StudentThesisCandidacy>>();
+        HashMap<ThesisProposalsConfiguration, List<StudentThesisCandidacy>> candidaciesByConfig = new HashMap<>();
 
         configs.forEach(config -> {
             List<StudentThesisCandidacy> studentCandidacies =
@@ -161,7 +164,7 @@ public class StudentCandidaciesService {
     }
 
     public HashMap<Registration, Set<ThesisProposal>> getOpenProposalsByReg(Student student) {
-        HashMap<Registration, Set<ThesisProposal>> proposalsByReg = new HashMap<Registration, Set<ThesisProposal>>();
+        HashMap<Registration, Set<ThesisProposal>> proposalsByReg = new HashMap<>();
 
         student.getActiveRegistrations().forEach(
                 reg -> {
@@ -171,9 +174,7 @@ public class StudentCandidaciesService {
                                     .filter(config -> config.getCandidacyPeriod().containsNow())
                                     .flatMap(config -> config.getThesisProposalSet().stream())
                                     .filter(proposal -> !proposal.getHidden())
-                                    .filter(proposal -> !(proposal.getStudentThesisCandidacySet().stream()
-                                            .map(candidacy -> candidacy.getRegistration().getStudent()).anyMatch(st -> st
-                                            .equals(student)))).collect(Collectors.toSet());
+                                    .collect(Collectors.toSet());
                     proposalsByReg.put(reg, openProposals);
                 });
 
@@ -182,7 +183,7 @@ public class StudentCandidaciesService {
 
     public Set<ThesisProposalsConfiguration> getSuggestedConfigs(Student student) {
 
-        Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<ThesisProposalsConfiguration>();
+        Set<ThesisProposalsConfiguration> suggestedConfigs = new HashSet<>();
         student.getActiveRegistrations().forEach(
                 reg -> {
                     Set<ThesisProposalsConfiguration> regConfigs = getConfigurationsForRegistration(reg);
@@ -192,11 +193,7 @@ public class StudentCandidaciesService {
                                     .collect(Collectors.toSet());
 
                     if (openRegConfigs.isEmpty()) {
-                        Optional<ThesisProposalsConfiguration> nextConfig =
-                                regConfigs.stream().max(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC);
-                        if (nextConfig.isPresent()) {
-                            suggestedConfigs.add(nextConfig.get());
-                        }
+                        regConfigs.stream().max(ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC).ifPresent(suggestedConfigs::add);
                     } else {
                         suggestedConfigs.addAll(openRegConfigs);
                     }

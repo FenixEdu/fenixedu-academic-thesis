@@ -28,6 +28,25 @@
 
 ${portal.toolkit()}
 
+
+<spring:url var="datatablesUrl" value="/js/dataTables/media/js/jquery.dataTables.latest.min.js"/>
+<spring:url var="datatablesBootstrapJsUrl" value="/js/dataTables/media/js/jquery.dataTables.bootstrap.min.js"/>
+<spring:url var="datatablesCssUrl" value="/css/dataTables/dataTables.bootstrap.min.css"/>
+
+<script type="text/javascript" src="${datatablesUrl}"></script>
+<script type="text/javascript" src="${datatablesBootstrapJsUrl}"></script>
+<link rel="stylesheet" href="${datatablesCssUrl}">
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('#proposalsTable').DataTable( {
+			"paging": false,
+			"order": [[ 4, "desc" ]],
+			"columnDefs": [{ "orderable": false, "targets": [6] }]
+		} );
+	});
+</script>
+
 <div class="page-header">
 	<h1><spring:message code="title.thesisProposal.management"/></h1>
 </div>
@@ -89,27 +108,15 @@ ${portal.toolkit()}
 
 <hr />
 
-<table class="table">
+<table id="proposalsTable" class="table table-bordered table-hover">
 	<thead>
 		<tr>
-			<th>
-				<spring:message code='label.thesis.id'/>
-			</th>
-			<th>
-				<spring:message code='label.title'/>
-			</th>
-			<th>
-				<spring:message code='label.executionDegree' />
-			</th>
-			<th>
-				<spring:message code='label.participants'/>
-			</th>
-			<th>
-				<spring:message code='label.number.of.candidacies'/>
-			</th>
-			<th>
-				<spring:message code='label.proposal.status'/>
-			</th>
+			<th><spring:message code='label.thesis.id'/></th>
+			<th><spring:message code='label.title'/></th>
+			<th><spring:message code='label.executionDegree'/></th>
+			<th><spring:message code='label.participants'/></th>
+			<th><spring:message code='label.number.of.candidacies'/></th>
+			<th><spring:message code='label.proposal.status'/></th>
 			<th></th>
 		</tr>
 	</thead>

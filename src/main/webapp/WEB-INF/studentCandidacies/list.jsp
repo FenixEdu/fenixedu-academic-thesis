@@ -25,6 +25,86 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
+<spring:url var="datatablesUrl" value="/js/dataTables/media/js/jquery.dataTables.latest.min.js"/>
+<spring:url var="datatablesBootstrapJsUrl" value="/js/dataTables/media/js/jquery.dataTables.bootstrap.min.js"/>
+<spring:url var="datatablesCssUrl" value="/css/dataTables/dataTables.bootstrap.min.css"/>
+
+<script type="text/javascript" src="${datatablesUrl}"></script>
+<script type="text/javascript" src="${datatablesBootstrapJsUrl}"></script>
+<link rel="stylesheet" href="${datatablesCssUrl}">
+
+
+<style>
+	tfoot {
+		display: table-header-group;
+	}
+	.dataTables_filter input {
+		width: 400px !important;
+	}
+</style>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		var oTable = $('.existingCandidaciesTable').DataTable( {
+			"pageLength": 50,
+			"paging": true,
+			"order": [[ 0, "asc" ]],
+			"columnDefs": [
+					{ "orderable": false, "targets": [5] },
+			],
+			initComplete: function () {
+				this.api().columns([3,4]).every( function () {
+					var column = this;
+					var select = $('<select><option value="">----</option></select>')
+							.appendTo( $(column.footer()).empty() )
+							.on( 'change', function () {
+								var val = $.fn.dataTable.util.escapeRegex(
+										$(this).val()
+								);
+								column
+										.search( val ? '^'+val+'$' : '', true, false )
+										.draw();
+							} );
+
+					column.data().unique().sort().each( function ( d, j ) {
+						var val = $('<div/>').html(d).text();
+						if(column.search() === '^'+val+'$'){
+							select.append( '<option value="'+val+'" selected="selected">'+val+'</option>' )
+						} else {
+							select.append( '<option value="'+val+'">'+val+'</option>' )
+						}
+					} );
+				} );
+				$('.dataTables_filter input').unbind();
+				$('.dataTables_filter input').bind('keyup', function(e) {
+					if(e.keyCode == 13) {
+						oTable.search( this.value ).draw();
+					}
+				});
+				$('.dataTables_filter input')
+						.attr('data-toggle', 'tooltip')
+						.attr('data-placement', 'top')
+						.attr('title', 'Press Enter to update the table')
+						.tooltip();
+
+			}
+		} );
+		$('.existingCandidaciesTable').DataTable().on( 'draw', function () {
+			$(".detailsButton").on("click", function(evt){
+				var e = $(evt.target);
+
+				['observations','requirements','goals','localization','degrees'].map(function(x){
+					$("#view ." + x).html(e.data(x).replace(/\n/g, '<br/>'));
+				});
+
+				$('#view').modal('show');
+			});
+		} );
+		// $('.dataTables_filter').remove();
+	});
+</script>
+
+
 <script src="${pageContext.request.contextPath}/js/jquery.tablednd.js" type="text/javascript"></script>
 
 <style type="text/css">
@@ -115,21 +195,12 @@
 						<table class="table" id="${(node.key.candidacyPeriod.containsNow()) ? 'candidaciesTable' : ''}">
 							<thead>
 								<tr>
-									<th>
-										<spring:message code='label.thesis.id' />
-									</th>
-									<th>
-										<spring:message code='label.title' />
-									</th>
-									<th>
-										<spring:message code='label.participants' />
-									</th>
-									<th>
-										<spring:message code='label.thesisProposal.applicationCount' />
-									</th>
-									<th>
-										<spring:message code='label.student.candidacy.accepted'/>
-									</th>
+									<th><spring:message code='label.thesis.id' /></th>
+									<th><spring:message code='label.title' /></th>
+									<th><spring:message code='label.participants' /></th>
+									<th><spring:message code='label.thesisProposal.applicationCount' /></th>
+									<th><spring:message code='label.student.candidacy.accepted'/></th>
+									<th><spring:message code='label.thesisProposal.status' /></th>
 									<th></th>
 								</tr>
 							</thead>
@@ -163,6 +234,16 @@
 							<c:if test="${!candidacy.acceptedByAdvisor}">
 								<spring:message code='label.no'/>
 							</c:if>
+						</td>
+						<td>
+							<c:choose>
+								<c:when test="${acceptedProposals.contains(candidacy.thesisProposal)}">
+									<span class="label label-warning"><spring:message code='label.thesisProposal.assigned' /></span>
+								</c:when>
+								<c:otherwise>
+									<span class="label label-success"><spring:message code='label.thesisProposal.unassigned' /></span>
+								</c:otherwise>
+							</c:choose>
 						</td>
 						<td>
 							<form:form method="GET" action="${pageContext.request.contextPath}/studentCandidacies/delete/${candidacy.externalId}">
@@ -249,100 +330,94 @@ $(function(){
 
 </div>
 
-<div role="tabpanel" class="tab-pane" id="profile">
+		<div role="tabpanel" class="tab-pane" id="profile">
 
-	<div class="well">
-		<p>
-			<spring:message code="label.candidacies.proposals.well" />
-		</p>
-	</div>
+			<div class="well">
+				<p><spring:message code="label.candidacies.proposals.well" /></p>
+			</div>
 
-	<c:if test="${!(proposalsSize > 0)}">
-		<div class="alert alert-warning" role="alert">
-			<p>
-				<spring:message code='label.student.proposals.empty'/>
-			</p>
-		</p>
-	</div>
-</c:if>
-	<c:if test="${proposalsSize > 0}">
-	<div class="table-responsive">
-		<table class="table existingCandidaciesTable" id="candidaciesTable">
-			<thead>
-				<tr>
-					<th>
-						<spring:message code='label.thesis.id' />
-					</th>
-					<th>
-						<spring:message code='label.title' />
-					</th>
-					<th>
-						<spring:message code='label.participants' />
-					</th>
-					<th>
-						<spring:message code='label.thesisProposal.applicationCount' />
-					</th>
-					<th>
-						<spring:message code='label.thesisProposal.status' />
-					</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				<c:forEach items="${proposalsByReg}" var="node">
+			<c:if test="${!(proposalsSize > 0)}">
+				<div class="alert alert-warning" role="alert">
+					<p><spring:message code='label.student.proposals.empty'/></p>
+				</div>
+			</c:if>
+			<c:if test="${proposalsSize > 0}">
+			<div class="table-responsive">
+				<table id="candidaciesTable" class="table table-bordered table-hover existingCandidaciesTable">
+					<thead>
+						<tr>
+							<th><spring:message code='label.thesis.id' /></th>
+							<th><spring:message code='label.title' /></th>
+							<th><spring:message code='label.participants' /></th>
+							<th><spring:message code='label.thesisProposal.applicationCount' /></th>
+							<th><spring:message code='label.thesisProposal.status' /></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tfoot>
+						<tr>
+							<th style="width: 10%"></th>
+							<th style="width: 30%"></th>
+							<th></th>
+							<th style="width: 10%"></th>
+							<th style="width: 10%"></th>
+							<th></th>
+						</tr>
+					</tfoot>
+					<tbody>
+						<c:forEach items="${proposalsByReg}" var="node">
+						<c:forEach items="${node.value}" var="proposal">
 
-				<c:forEach items="${node.value}" var="proposal">
-
-				<tr>
-					<td>${proposal.identifier}</td>
-					<td>${proposal.title}</td>
-					<td>
-						<c:forEach items="${proposal.getSortedParticipants()}" var="participant">
-							<div>${participant.name} (${participant.participationPercentage}%)
-								<c:if test="${! empty participantLabelService}">
-									<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
-								</c:if>
-							</div>
-					</c:forEach>
-				</td>
-				<td>${applicationCountByProposalReg[proposal]}</td>
-				<td>
-					<c:choose>
-						<c:when test="${acceptedProposals.contains(proposal)}">
-							<span class="label label-warning"><spring:message code='label.thesisProposal.assigned' /></span>
-						</c:when>
-						<c:otherwise>
-							<span class="label label-success"><spring:message code='label.thesisProposal.unassigned' /></span>
-						</c:otherwise>
-					</c:choose>
-				</td>
-				<td>
-					<form:form method="POST" action="${pageContext.request.contextPath}/studentCandidacies/candidate/${proposal.externalId}">
-						${csrf.field()}
-						<div class="btn-group btn-group-xs">
-							<button type="submit" class="btn btn-default" id="applyButton"><spring:message code="button.proposal.apply"/></button>
-
-							<input type="hidden" name="registration" value="${node.key.externalId}">
-
-							<c:set var="result" scope="session" value='' />
-							<c:forEach items="${proposal.executionDegreeSet}" var="executionDegree" varStatus="i">
-								<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
-								<c:if test="${i.index != proposal.executionDegreeSet.size() - 1}">
-									<c:set var="result" scope="session" value="${result}, " />
-								</c:if>
+						<tr>
+							<td>${proposal.identifier}</td>
+							<td>${proposal.title}</td>
+							<td>
+								<c:forEach items="${proposal.getSortedParticipants()}" var="participant">
+									<div>${participant.name} (${participant.participationPercentage}%)
+										<c:if test="${! empty participantLabelService}">
+											<small>-</small> <b>${participantLabelService.getInstitutionRole(participant)}</b>
+										</c:if>
+									</div>
 							</c:forEach>
-							<input type='button' class='detailsButton btn btn-default' data-observations='<c:out value="${proposal.observations}"/>' data-requirements='<c:out value="${proposal.requirements}"/>' data-goals='<c:out value="${proposal.goals}"/>' data-localization='<c:out value="${proposal.localization}"/>' data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${proposal.externalId}">
-						</div>
-					</form:form>
-				</td>
-			</tr>
-</c:forEach>
-</c:forEach>
-</tbody>
-</table>
-</div>
-</c:if>
-</div>
+						</td>
+						<td>${applicationCountByProposalReg[proposal]}</td>
+						<td>
+							<c:choose>
+								<c:when test="${acceptedProposals.contains(proposal)}">
+									<span class="label label-warning"><spring:message code='label.thesisProposal.assigned' /></span>
+								</c:when>
+								<c:otherwise>
+									<span class="label label-success"><spring:message code='label.thesisProposal.unassigned' /></span>
+								</c:otherwise>
+							</c:choose>
+						</td>
+						<td>
+							<form:form method="POST" action="${pageContext.request.contextPath}/studentCandidacies/candidate/${proposal.externalId}">
+								${csrf.field()}
+								<div class="btn-group btn-group-xs">
+									<button type="submit" class="btn btn-default" id="applyButton"><spring:message code="button.proposal.apply"/></button>
+
+									<input type="hidden" name="registration" value="${node.key.externalId}">
+
+									<c:set var="result" scope="session" value='' />
+									<c:forEach items="${proposal.executionDegreeSet}" var="executionDegree" varStatus="i">
+										<c:set var="result" scope="session" value="${result}${executionDegree.degree.sigla}" />
+										<c:if test="${i.index != proposal.executionDegreeSet.size() - 1}">
+											<c:set var="result" scope="session" value="${result}, " />
+										</c:if>
+									</c:forEach>
+									<input type='button' class='detailsButton btn btn-default' data-observations='<c:out value="${proposal.observations}"/>' data-requirements='<c:out value="${proposal.requirements}"/>' data-goals='<c:out value="${proposal.goals}"/>' data-localization='<c:out value="${proposal.localization}"/>' data-degrees="${result}" value='<spring:message code="button.details"/>' data-thesis="${proposal.externalId}">
+								</div>
+							</form:form>
+						</td>
+						</tr>
+						</c:forEach>
+						</c:forEach>
+					</tbody>
+				</table>
+			</div>
+			</c:if>
+		</div>
 
 
 <!-- Modal -->
