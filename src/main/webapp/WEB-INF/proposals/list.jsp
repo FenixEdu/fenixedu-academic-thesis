@@ -93,7 +93,7 @@ ${portal.toolkit()}
 	<thead>
 		<tr>
 			<th>
-				<spring:message code='label.thesis.id'/>
+				<a href="${pageContext.request.contextPath}/teaching/final-work/proposals/sortedBy?sorted=${sorted}&executionYear=${executionYear.externalId}"><spring:message code='label.thesis.id'/></a>
 			</th>
 			<th>
 				<spring:message code='label.title'/>

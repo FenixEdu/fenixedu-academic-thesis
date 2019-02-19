@@ -50,6 +50,9 @@ public class ThesisProposal extends ThesisProposal_Base {
             }
         }
     };
+    public final static Comparator<ThesisProposal> COMPARATOR_BY_ID = (arg0, arg1) -> {      
+                return arg0.getIdentifier().compareTo(arg1.getIdentifier());                 
+    };
 
     public final static Comparator<ThesisProposal> COMPARATOR_BY_PROPOSAL_PERIOD =
             (arg0, arg1) -> ThesisProposalsConfiguration.COMPARATOR_BY_PROPOSAL_PERIOD_START_ASC.reversed().compare(

@@ -54,6 +54,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.google.common.base.Strings;
 import pt.ist.fenixframework.FenixFramework;
 
 import com.google.gson.JsonArray;
@@ -76,14 +77,14 @@ public class ThesisProposalsController {
         return "proposals";
     }
 
-    private String listProposals(Model model, ExecutionYear executionYear) {
-        return listProposals(model, executionYear, null, null, null);
+    private String listProposals(Model model, ExecutionYear executionYear, String order) {
+        return listProposals(model, executionYear, null, null, null, order);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public String listProposals(Model model, @RequestParam(required = false) ExecutionYear executionYear, @RequestParam(
             required = false) Boolean isVisible, @RequestParam(required = false) Boolean isAttributed, @RequestParam(
-            required = false) Boolean hasCandidacy) {
+            required = false) Boolean hasCandidacy, @RequestParam(required=false ,name="sorted") String order) {
 
         List<ExecutionYear> executionYears = service.getThesisProposalsConfigurationsExecutionYears(Authenticate.getUser());
 
@@ -98,7 +99,7 @@ public class ThesisProposalsController {
         model.addAttribute("baseAction", getBaseView());
         model.addAttribute("service", service);
         model.addAttribute("executionYears", executionYears);
-        model.addAttribute("proposals", service.getThesisProposals(Authenticate.getUser(), executionYear));
+        
         if (executionYear != null) {
             final ExecutionYear year = executionYear;
             model.addAttribute(
@@ -108,8 +109,27 @@ public class ThesisProposalsController {
                             .collect(Collectors.toList()));
         }
         model.addAttribute("executionYear", executionYear);
+        if(!Strings.isNullOrEmpty(order)) {
+            List<ThesisProposal> thesisProposals = service.getThesisProposalsByOrder(Authenticate.getUser(), executionYear);
+            if(order.equals("desc")) {
+                model.addAttribute("proposals", thesisProposals);
+                model.addAttribute("sorted", "asc");
+            }else {
+                
+                model.addAttribute("proposals",thesisProposals.stream().sorted(ThesisProposal.COMPARATOR_BY_ID.reversed()).collect(Collectors.toList()));
+                model.addAttribute("sorted", "desc");
+            }
+        }else {
+            model.addAttribute("proposals", service.getThesisProposals(Authenticate.getUser(), executionYear));
+            model.addAttribute("sorted", "desc");
+        }
+        return"proposals/list";
+    }
 
-        return "proposals/list";
+    @RequestMapping(value = "/sortedBy/{order}", method = RequestMethod.GET)
+    public ModelAndView sortedBy(@PathVariable("order") String order,@RequestParam(required = false) String executionYear, Model model) {
+        ExecutionYear executionYear2 = FenixFramework.getDomainObject(executionYear);
+        return new ModelAndView(listProposals(model,executionYear2, order));
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.GET)
@@ -157,7 +177,7 @@ public class ThesisProposalsController {
             return error(proposalBean, model);
         }
 
-        return new ModelAndView(listProposals(model, null));
+        return new ModelAndView(listProposals(model, null, null));
     }
 
     protected ModelAndView error(ThesisProposalBean proposalBean, Model model) {
@@ -172,7 +192,7 @@ public class ThesisProposalsController {
 
         if (!service.delete(thesisProposal)) {
             model.addAttribute("deleteException", true);
-            return new ModelAndView(listProposals(model, null));
+            return new ModelAndView(listProposals(model, null, null));
         }
 
         return new ModelAndView("redirect:/" + getBaseView());
@@ -236,7 +256,7 @@ public class ThesisProposalsController {
         } catch (ThesisProposalException exception) {
             model.addAttribute("error", exception.getClass().getSimpleName());
             model.addAttribute("adminEdit", false);
-            return new ModelAndView(listProposals(model, configuration.getExecutionDegree().getExecutionYear()));
+            return new ModelAndView(listProposals(model, configuration.getExecutionDegree().getExecutionYear(), null));
         }
     }
 

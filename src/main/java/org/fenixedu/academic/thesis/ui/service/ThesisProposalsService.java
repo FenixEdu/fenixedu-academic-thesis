@@ -128,6 +128,17 @@ public class ThesisProposalsService {
                         .anyMatch(participant -> participant.getUser() != null && participant.getUser().equals(user)))
                 .sorted(ThesisProposal.COMPARATOR_BY_NUMBER_OF_CANDIDACIES).collect(Collectors.toList());
     }
+    
+    public List<ThesisProposal> getThesisProposalsByOrder(User user, ExecutionYear year) {
+        return getThesisProposalsConfigurations(user)
+                .stream()
+                .filter(p -> p.getExecutionDegree().getExecutionYear().equals(year))
+                .flatMap(configuration -> configuration.getThesisProposalSet().stream())
+                .distinct()
+                .filter(proposal -> proposal.getThesisProposalParticipantSet().stream()
+                        .anyMatch(participant -> participant.getUser() != null && participant.getUser().equals(user)))
+                .sorted(ThesisProposal.COMPARATOR_BY_ID).collect(Collectors.toList());
+    }
 
     public List<ThesisProposal> getThesisProposals(User user, ThesisProposalsConfiguration configuration) {
         return ThesisProposal.readProposalsByUserAndConfiguration(user, configuration).stream()
