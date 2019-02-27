@@ -29,32 +29,15 @@ import org.joda.time.DateTime;
 public class StudentThesisCandidacy extends StudentThesisCandidacy_Base {
 
     public final static Comparator<StudentThesisCandidacy> COMPARATOR_BY_PREFERENCE_NUMBER =
-            new Comparator<StudentThesisCandidacy>() {
+            Comparator.comparingInt(StudentThesisCandidacy::getPreferenceNumber);
 
-                @Override
-                public int compare(StudentThesisCandidacy arg0, StudentThesisCandidacy arg1) {
-                    return arg0.getPreferenceNumber() - arg1.getPreferenceNumber();
-                }
-            };
-
-    public final static Comparator<StudentThesisCandidacy> COMPARATOR_BY_DATETIME = new Comparator<StudentThesisCandidacy>() {
-
-        @Override
-        public int compare(StudentThesisCandidacy arg0, StudentThesisCandidacy arg1) {
-            return arg0.getTimestamp().compareTo(arg1.getTimestamp());
-        }
-    };
+    public final static Comparator<StudentThesisCandidacy> COMPARATOR_BY_DATETIME =
+            Comparator.comparing(StudentThesisCandidacy::getTimestamp);
 
     public final static Comparator<StudentThesisCandidacy> COMPARATOR_BY_CANDIDACY_PERIOD =
-            new Comparator<StudentThesisCandidacy>() {
-
-                @Override
-                public int compare(StudentThesisCandidacy arg0, StudentThesisCandidacy arg1) {
-                    return ThesisProposalsConfiguration.COMPARATOR_BY_CANDIDACY_PERIOD_START_DESC.compare(arg0
-                            .getThesisProposal().getSingleThesisProposalsConfiguration(), arg1.getThesisProposal()
-                            .getSingleThesisProposalsConfiguration());
-                }
-            };
+            (arg0, arg1) -> ThesisProposalsConfiguration.COMPARATOR_BY_CANDIDACY_PERIOD_START_DESC
+                    .compare(arg0.getThesisProposal().getSingleThesisProposalsConfiguration(),
+                            arg1.getThesisProposal().getSingleThesisProposalsConfiguration());
 
     public final static Comparator<StudentThesisCandidacy> COMPARATOR_BY_CANDIDACY_PERIOD_AND_PREFERENCE_NUMBER =
             COMPARATOR_BY_CANDIDACY_PERIOD.thenComparing(COMPARATOR_BY_PREFERENCE_NUMBER);

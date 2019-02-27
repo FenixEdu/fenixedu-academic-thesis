@@ -19,7 +19,6 @@
 package org.fenixedu.academic.thesis.domain;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -70,7 +69,7 @@ public class ThesisProposal extends ThesisProposal_Base {
     public ThesisProposal(String title, String observations, String requirements, String goals, String localization,
             List<ThesisProposalParticipant> participants, Set<ThesisProposalsConfiguration> configurations) {
 
-        this(title, observations, requirements, goals, localization, new HashSet<ThesisProposalParticipant>(participants),
+        this(title, observations, requirements, goals, localization, new HashSet<>(participants),
                 configurations);
     }
 
@@ -126,12 +125,9 @@ public class ThesisProposal extends ThesisProposal_Base {
     }
 
     public List<ThesisProposalParticipant> getSortedParticipants() {
-
-        List<ThesisProposalParticipant> sortedParticipants =
-                this.getThesisProposalParticipantSet().stream().collect(Collectors.toList());
-        Collections.sort(sortedParticipants, ThesisProposalParticipant.COMPARATOR_BY_PERCENTAGE_AND_NAME);
-
-        return sortedParticipants;
+        return this.getThesisProposalParticipantSet().stream()
+                .sorted(ThesisProposalParticipant.COMPARATOR_BY_PERCENTAGE_AND_NAME)
+                .collect(Collectors.toList());
     }
 
     public static Set<ThesisProposal> readProposalsByUserAndConfiguration(User user, ThesisProposalsConfiguration configuration) {
@@ -143,12 +139,12 @@ public class ThesisProposal extends ThesisProposal_Base {
                     .filter(proposal -> proposal.getThesisProposalParticipantSet().stream()
                             .anyMatch(participant -> participant.getUser().equals(user))).collect(Collectors.toSet());
         } else {
-            return new HashSet<ThesisProposal>();
+            return new HashSet<>();
         }
     }
 
     public Set<ExecutionDegree> getExecutionDegreeSet() {
-        return this.getThesisConfigurationSet().stream().map(config -> config.getExecutionDegree()).collect(Collectors.toSet());
+        return this.getThesisConfigurationSet().stream().map(ThesisProposalsConfiguration::getExecutionDegree).collect(Collectors.toSet());
     }
 
     @Override
