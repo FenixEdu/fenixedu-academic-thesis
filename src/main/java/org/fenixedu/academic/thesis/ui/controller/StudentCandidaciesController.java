@@ -70,8 +70,8 @@ public class StudentCandidaciesController {
         Map<ThesisProposalsConfiguration, List<StudentThesisCandidacy>> candidaciesByConfig =
                 service.getCandidaciesByConfig(student);
 
-        int proposalsSize = proposalsByReg.values().stream().map(Set::size).reduce(0, (a, b) -> a + b);
-        int candidaciesSize = candidaciesByConfig.values().stream().map(List::size).reduce(0, (a, b) -> a + b);
+        int proposalsSize = proposalsByReg.values().stream().map(Set::size).reduce(0, Integer::sum);
+        int candidaciesSize = candidaciesByConfig.values().stream().map(List::size).reduce(0, Integer::sum);
 
         if (participantLabelService != null) {
             model.addAttribute("participantLabelService", participantLabelService);
@@ -91,12 +91,13 @@ public class StudentCandidaciesController {
         model.addAttribute("applicationCountByProposalConfig", applicationCountByProposalConfig);
 
         Map<ThesisProposal, Integer> applicationCountByProposalReg = proposalsByReg.values().stream().flatMap(Set::stream)
-                .collect(Collectors.toMap(tp -> tp, tp -> tp.getStudentThesisCandidacySet().size(), (a, b) -> a + b));
+                .collect(Collectors.toMap(tp -> tp, tp -> tp.getStudentThesisCandidacySet().size(), Integer::sum));
         model.addAttribute("applicationCountByProposalReg", applicationCountByProposalReg);
 
-        Set<ThesisProposal> acceptedProposals = proposalsByReg.values().stream().flatMap(Set::stream)
-                .flatMap(tp -> tp.getStudentThesisCandidacySet().stream()).filter(
-                        StudentThesisCandidacy::getAcceptedByAdvisor)
+        Set<ThesisProposal> acceptedProposals = proposalsByReg.values().stream()
+                .flatMap(Set::stream)
+                .flatMap(tp -> tp.getStudentThesisCandidacySet().stream())
+                .filter(StudentThesisCandidacy::getAcceptedByAdvisor)
                 .map(StudentThesisCandidacy::getThesisProposal)
                 .collect(Collectors.toSet());
         model.addAttribute("acceptedProposals", acceptedProposals);
