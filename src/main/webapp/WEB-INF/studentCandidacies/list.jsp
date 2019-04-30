@@ -206,6 +206,7 @@
 							</thead>
 							<tbody>
 								<c:set var="anyAccepted" scope="session" value="false"/>
+								<c:set var="anyAcceptedProposal" scope="session" value="false"/>
 								<c:forEach items="${node.value}" var="candidacy">
 									<tr class="studentThesisCandidacyRow  ${(candidacy.acceptedByAdvisor && !anyAccepted) ? 'thesis-selected' : '' } sortableRow" data-studentThesisCandidacy-id="${candidacy.externalId}" data-preference="${candidacy.preferenceNumber}">
 
@@ -237,7 +238,8 @@
 						</td>
 						<td>
 							<c:choose>
-								<c:when test="${acceptedProposals.contains(candidacy.thesisProposal)}">
+								<c:when test="${candidacy.acceptedByAdvisor && !anyAcceptedProposal}">
+									<c:set var="anyAcceptedProposal" scope="session" value="true"/>
 									<span class="label label-warning"><spring:message code='label.thesisProposal.assigned' /></span>
 								</c:when>
 								<c:otherwise>
