@@ -41,6 +41,8 @@ class ThesisProposalParticipantType {
     public boolean inactive;
 }
 
+class reports.ThesisProposalsReportFile extends .org.fenixedu.academic.domain.reports.GepReportFile {}
+
 class ExternalUser {
     public String name;
     public String email;
