@@ -18,14 +18,8 @@
  */
 package org.fenixedu.academic.thesis.ui.service;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import org.fenixedu.academic.domain.DegreeCurricularPlan;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.StudentCurricularPlan;
@@ -42,13 +36,17 @@ import org.fenixedu.academic.thesis.ui.exception.Unsuficient1stCycleCreditsExcep
 import org.fenixedu.academic.thesis.ui.exception.Unsuficient2ndCycleCreditsException;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentCandidaciesService {
@@ -98,9 +96,9 @@ public class StudentCandidaciesService {
             throw new Unsuficient1stCycleCreditsException();
         }
 
-        if (studentCurricularPlan.getSecondCycle() == null
-                || thesisProposalsConfiguration.getMinECTS2ndCycle() > studentCurricularPlan.getSecondCycle()
-                        .getAprovedEctsCredits()) {
+        final int min2ndCycle = thesisProposalsConfiguration.getMinECTS2ndCycle();
+        if (min2ndCycle > 0 && (studentCurricularPlan.getSecondCycle() == null
+                || min2ndCycle > studentCurricularPlan.getSecondCycle().getAprovedEctsCredits())) {
             throw new Unsuficient2ndCycleCreditsException();
         }
 
