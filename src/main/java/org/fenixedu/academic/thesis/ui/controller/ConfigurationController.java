@@ -18,14 +18,11 @@
  */
 package org.fenixedu.academic.thesis.ui.controller;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import jvstm.cps.ConsistencyException;
-
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.degreeStructure.CycleType;
@@ -56,15 +53,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.configuration.management",
         accessGroup = "#managers | thesisSystemManagers")
@@ -270,7 +268,7 @@ public class ConfigurationController {
 
         List<ExecutionDegree> executionDegreeList =
                 ExecutionDegree.getAllByExecutionYear(executionYear).stream()
-                        .filter(executionDegree -> executionDegree.getDegree().getCycleTypes().contains(CycleType.SECOND_CYCLE))
+                        .filter(executionDegree -> isFirstOrSecondCycle(executionDegree))
                         .filter((x) -> ThesisProposalsSystem.canManage(x.getDegree(), Authenticate.getUser()))
                         .collect(Collectors.toList());
 
@@ -280,6 +278,11 @@ public class ConfigurationController {
         executionDegreeList.forEach(executionDegree -> response.add(executionDegreeToJson(executionDegree)));
 
         return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
+    }
+
+    private boolean isFirstOrSecondCycle(final ExecutionDegree executionDegree) {
+        final Collection<CycleType> cycleTypes = executionDegree.getDegree().getCycleTypes();
+        return cycleTypes.contains(CycleType.SECOND_CYCLE) || cycleTypes.contains(CycleType.FIRST_CYCLE);
     }
 
     private JsonElement executionDegreeToJson(ExecutionDegree executionDegree) {
