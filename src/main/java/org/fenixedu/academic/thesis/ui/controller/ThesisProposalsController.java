@@ -221,6 +221,13 @@ public class ThesisProposalsController {
                                     thesisProposal.getLocalization(), thesisProposal.getThesisConfigurationSet(),
                                     thesisProposal.getStudentThesisCandidacySet(), thesisProposalParticipantsBean,
                                     thesisProposal.getHidden(), thesisProposal.getExternalId());
+                    thesisProposalBean.setExternalColaboration(thesisProposal.getExternalColaboration());
+                    thesisProposalBean.setExternalInstitution(thesisProposal.getExternalInstitution());
+                    thesisProposalBean.setAcceptExternalColaborationTerms(thesisProposal.getAcceptExternalColaborationTerms());
+                    thesisProposalBean.setAcceptEthicsAndDataProtection(thesisProposal.getAcceptEthicsAndDataProtection());
+                    thesisProposalBean.setCapstone(thesisProposal.getIsCapstone());
+                    thesisProposalBean.setMinStudents(thesisProposal.getMinStudents());
+                    thesisProposalBean.setMaxStudents(thesisProposal.getMaxStudents());
 
                     ModelAndView mav = new ModelAndView("proposals/edit", "command", thesisProposalBean);
 

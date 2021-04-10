@@ -1,4 +1,4 @@
-<%--
+<%@ page import="org.fenixedu.academic.thesis.domain.ThesisProposalsSystem" %><%--
 
     Copyright © 2014 Instituto Superior Técnico
 
@@ -48,6 +48,10 @@ ${csrf.field()}
 <spring:message code='label.requirements' var='requirements'/>
 <spring:message code='label.goals' var='goals'/>
 <spring:message code='label.localization' var='localization'/>
+<spring:message code='label.externalColaboration' var='externalColaboration'/>
+<spring:message code='label.externalInstitution' var='externalInstitution'/>
+<spring:message code='label.isCapstone' var='isCapstone'/>
+<spring:message code='label.numberStudents' var='numberStudents'/>
 <spring:message code='label.executionDegrees' var='executionDegrees'/>
 <spring:message code='label.participants' var='participants'/>
 <spring:message code='label.participantType.select' var='selectParticipantType'/>
@@ -197,11 +201,42 @@ ${csrf.field()}
 <input type="hidden" name="externalsJson" id="externalsJson"/>
 
 <div class="form-group row">
+  <form:label for="thesisProposalWithExternalColaboration" path="externalColaboration" class="col-sm-2 control-label">${externalColaboration}</form:label>
+  <div class="col-sm-10">
+    <form:radiobutton path = "externalColaboration" value = "true" id="thesisProposalWithExternalColaboration" onClick="checkboxListener(this); showExternalBlock();"/>
+    <spring:message code='label.yes'/>
+    <form:radiobutton path = "externalColaboration" value = "false" id="thesisProposalWithExternalColaborationNo" onClick="checkboxListener(this); hideExternalBlock();"/>
+    <spring:message code='label.no'/>
+  </div>
+</div>
+
+  <div id="externalBlock" style="display: none;">
+  <div class="form-group row">
+    <form:label for="thesisProposalExternalInstitution" path="externalInstitution" class="col-sm-2 control-label">${externalInstitution}</form:label>
+    <div class="col-sm-10">
+      <form:input type="text" class="form-control" id="thesisProposalExternalInstitution" path="externalInstitution" placeholder="${externalInstitution}"/>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <form:label for="thesisProposalAcceptExternalColaborationTerms" path="acceptExternalColaborationTerms" class="col-sm-2 control-label"> </form:label>
+    <div class="col-sm-10">
+      <form:checkbox path="acceptExternalColaborationTerms" id="thesisProposalAcceptExternalColaborationTerms" onClick="checkboxListener(this)"/>
+      <% if (ThesisProposalsSystem.getInstance().getAcceptExternalColaborationTerms() != null) { %>
+      <%= ThesisProposalsSystem.getInstance().getAcceptExternalColaborationTerms().getContent() %>
+      <% } %>
+    </div>
+  </div>
+  </div>
+
+  <div class="form-group row">
   <form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label>
   <div class="col-sm-10">
     <form:textarea rows="5" class="form-control" id="thesisProposalObservations" path="observations" placeholder="${observations}"/>
   </div>
 </div>
+
+
 
 <div class="form-group row">
   <label class="col-sm-2 control-label">${executionDegrees}</label>
@@ -216,7 +251,45 @@ ${csrf.field()}
 </div>
 </div>
 
-<br>
+  <div class="form-group row">
+    <form:label for="thesisProposalMinNumberStudents" path="minStudents" class="col-sm-2 control-label">${numberStudents}</form:label>
+
+    <div class="col-sm-2">
+      <div class="input-group">
+        <div class="input-group-addon">min</div>
+        <form:input path="minStudents" value="${minStudents}" name="minStudents" id="thesisProposalMinNumberStudents"/>
+      </div>
+    </div>
+    <div class="col-sm-2">
+      <div class="input-group">
+        <div class="input-group-addon">max</div>
+        <form:input path="maxStudents" value="${maxStudents}" name="maxStudents" id="thesisProposalMaxNumberStudents"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <form:label for="thesisProposalIsCapstone" path="capstone" class="col-sm-2 control-label">${isCapstone}</form:label>
+    <div class="col-sm-10">
+      <form:radiobutton path = "capstone" value = "true" id="thesisProposalIsCapstone" />
+      <spring:message code='label.yes'/>
+      <form:radiobutton path = "capstone" value = "false"  />
+      <spring:message code='label.no'/>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <form:label for="thesisProposalAcceptEthicsAndDataProtection" path="acceptEthicsAndDataProtection" class="col-sm-2 control-label"> </form:label>
+    <div class="col-sm-10">
+      <form:checkbox path="acceptEthicsAndDataProtection" id="thesisProposalAcceptEthicsAndDataProtection" onClick="checkboxListener(this)" />
+      <% if (ThesisProposalsSystem.getInstance().getAcceptEthicsAndDataProtection() != null) { %>
+      <%= ThesisProposalsSystem.getInstance().getAcceptEthicsAndDataProtection().getContent() %>
+      <% } %>
+    </div>
+  </div>
+
+
+  <br>
 <br>
 <div class="col-sm-offset-2 col-sm-10">
   <button type="submit" class="btn btn-default" id="submitButton" disabled="true">${createButton}</button>
@@ -365,7 +438,10 @@ ${csrf.field()}
   });
 
   function checkboxListener(e) {
-    if($("#configurationsSelect").find(":checked").size() > 0) {
+    if($("#configurationsSelect").find(":checked").size() > 0
+        && $("#thesisProposalAcceptEthicsAndDataProtection").is(":checked")
+        && ($("#thesisProposalAcceptExternalColaborationTerms").is(":checked")
+                    || $("#thesisProposalWithExternalColaborationNo").is(":checked"))) {
       $("#submitButton").attr("disabled", false);
     }
     else {
@@ -373,13 +449,23 @@ ${csrf.field()}
     }
   }
 
+  function showExternalBlock() {
+      document.getElementById("externalBlock").style.display = "block";
+  }
+
+  function hideExternalBlock() {
+    document.getElementById("externalBlock").style.display = "none";
+  }
+
   $(document).ready(function() {
 	  checkboxListener(null);
 	  <c:if test="${empty command.thesisProposalParticipantsBean}">
 	  	$("#addParticipant").click();
 	  </c:if>
-
+      document.getElementById('thesisProposalMinNumberStudents').type = 'number';
+      document.getElementById('thesisProposalMinNumberStudents').min = '1';
+      document.getElementById('thesisProposalMaxNumberStudents').type = 'number';
+      document.getElementById('thesisProposalMaxNumberStudents').min = '1';
   });
-
 
 </script>

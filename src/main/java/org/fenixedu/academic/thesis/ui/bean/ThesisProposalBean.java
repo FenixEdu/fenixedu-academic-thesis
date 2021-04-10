@@ -18,11 +18,6 @@
  */
 package org.fenixedu.academic.thesis.ui.bean;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
@@ -33,10 +28,14 @@ import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsExcepti
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.TotalParticipantPercentageException;
 import org.fenixedu.bennu.core.domain.User;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ThesisProposalBean {
 
@@ -45,6 +44,13 @@ public class ThesisProposalBean {
     private String requirements;
     private String goals;
     private String localization;
+    private boolean externalColaboration;
+    private String externalInstitution;
+    private boolean acceptExternalColaborationTerms;
+    private boolean acceptEthicsAndDataProtection;
+    private boolean isCapstone;
+    private int minStudents = 1;
+    private int maxStudents = 1;
     private Set<ThesisProposalsConfiguration> thesisProposalsConfigurations;
     private Set<StudentThesisCandidacy> studentThesisCandidacy;
     private Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean;
@@ -89,6 +95,66 @@ public class ThesisProposalBean {
 
     public void setLocalization(String localization) {
         this.localization = localization;
+    }
+
+    public boolean getExternalColaboration() {
+        return externalColaboration;
+    }
+
+    public void setExternalColaboration(boolean externalColaboration) {
+        this.externalColaboration = externalColaboration;
+    }
+
+    public String getExternalInstitution() {
+        return externalInstitution;
+    }
+
+    public void setExternalInstitution(String externalInstitution) {
+        this.externalInstitution = externalInstitution;
+    }
+
+    public boolean isExternalColaboration() {
+        return externalColaboration;
+    }
+
+    public boolean isAcceptExternalColaborationTerms() {
+        return acceptExternalColaborationTerms;
+    }
+
+    public void setAcceptExternalColaborationTerms(boolean acceptExternalColaborationTerms) {
+        this.acceptExternalColaborationTerms = acceptExternalColaborationTerms;
+    }
+
+    public boolean isAcceptEthicsAndDataProtection() {
+        return acceptEthicsAndDataProtection;
+    }
+
+    public void setAcceptEthicsAndDataProtection(boolean acceptEthicsAndDataProtection) {
+        this.acceptEthicsAndDataProtection = acceptEthicsAndDataProtection;
+    }
+
+    public boolean isCapstone() {
+        return isCapstone;
+    }
+
+    public void setCapstone(boolean capstone) {
+        isCapstone = capstone;
+    }
+
+    public int getMinStudents() {
+        return minStudents;
+    }
+
+    public void setMinStudents(int minStudents) {
+        this.minStudents = minStudents;
+    }
+
+    public int getMaxStudents() {
+        return maxStudents;
+    }
+
+    public void setMaxStudents(int maxStudents) {
+        this.maxStudents = maxStudents;
     }
 
     public Set<ThesisProposalsConfiguration> getThesisProposalsConfigurations() {
@@ -173,6 +239,14 @@ public class ThesisProposalBean {
             thesisProposalParticipantsBean.add(bean);
         }
         setThesisProposalParticipantsBean(thesisProposalParticipantsBean);
+
+        this.externalColaboration = thesisProposal.getExternalColaboration();
+        this.externalInstitution = thesisProposal.getExternalInstitution();
+        this.acceptExternalColaborationTerms = thesisProposal.getAcceptExternalColaborationTerms();
+        this.acceptEthicsAndDataProtection = thesisProposal.getAcceptEthicsAndDataProtection();
+        this.isCapstone = thesisProposal.getIsCapstone();
+        this.minStudents = thesisProposal.getMinStudents();
+        this.maxStudents = thesisProposal.getMaxStudents();
     }
 
     public static class Builder {
@@ -184,6 +258,13 @@ public class ThesisProposalBean {
         private final String localization;
         private final Set<ThesisProposalsConfiguration> configurations;
         private final Set<ThesisProposalParticipantBean> thesisProposalParticipantsBean;
+        public boolean externalColaboration;
+        public String externalInstitution;
+        public boolean acceptExternalColaborationTerms;
+        public boolean acceptEthicsAndDataProtection;
+        public boolean isCapstone;
+        public int minStudents;
+        public int maxStudents;
 
         public Builder(ThesisProposalBean proposalBean) {
             this.title = proposalBean.getTitle();
@@ -193,6 +274,13 @@ public class ThesisProposalBean {
             this.localization = proposalBean.getLocalization();
             this.configurations = proposalBean.getThesisProposalsConfigurations();
             this.thesisProposalParticipantsBean = proposalBean.getThesisProposalParticipantsBean();
+            this.externalColaboration = proposalBean.getExternalColaboration();
+            this.externalInstitution = proposalBean.getExternalInstitution();
+            this.acceptExternalColaborationTerms = proposalBean.isAcceptExternalColaborationTerms();
+            this.acceptEthicsAndDataProtection = proposalBean.isAcceptEthicsAndDataProtection();
+            this.isCapstone = proposalBean.isCapstone();
+            this.minStudents = proposalBean.getMinStudents();
+            this.maxStudents = proposalBean.getMaxStudents();
         }
 
         @Atomic(mode = TxMode.WRITE)
@@ -246,7 +334,15 @@ public class ThesisProposalBean {
                 }
             }
 
-            return new ThesisProposal(title, observations, requirements, goals, localization, participants, configurations);
+            final ThesisProposal thesisProposal = new ThesisProposal(title, observations, requirements, goals, localization, participants, configurations);
+            thesisProposal.setExternalColaboration(externalColaboration);
+            thesisProposal.setExternalInstitution(externalInstitution);
+            thesisProposal.setAcceptExternalColaborationTerms(acceptExternalColaborationTerms);
+            thesisProposal.setAcceptEthicsAndDataProtection(acceptEthicsAndDataProtection);
+            thesisProposal.setIsCapstone(isCapstone);
+            thesisProposal.setMinStudents(minStudents);
+            thesisProposal.setMaxStudents(maxStudents);
+            return thesisProposal;
         }
     }
 

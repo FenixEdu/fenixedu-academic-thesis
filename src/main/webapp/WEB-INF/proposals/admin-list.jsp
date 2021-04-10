@@ -1,4 +1,7 @@
-<%--
+<%@ page import="org.fenixedu.academic.thesis.domain.ThesisProposal" %>
+<%@ page import="java.util.List" %>
+<%@ page import="org.fenixedu.academic.domain.ExecutionDegree" %>
+<%@ page import="org.fenixedu.academic.thesis.ui.service.ThesisProposalsService" %><%--
 
     Copyright © 2014 Instituto Superior Técnico
 
@@ -271,7 +274,7 @@ ${portal.toolkit()}
 									<spring:message code="label.toggle.hide"/>
 								</c:if>
 							</button>
-							<button class='detailsButton btn btn-default' data-observations="<c:out escapeXml="true" value="${thesisProposal.observations}"/>" data-requirements="<c:out escapeXml="true" value="${thesisProposal.requirements}"/>" data-goals="<c:out escapeXml="true" value="${thesisProposal.goals}"/>" data-localization="<c:out value="${thesisProposal.localization}"/>" data-degrees="${degreesLabels}" data-candidates="${candidatesLabels}"value='<spring:message code="button.details"/>' data-thesis="${thesisProposal.externalId}">
+							<button class='detailsButton btn btn-default' data-id="<c:out escapeXml="true" value="${thesisProposal.externalId}"/>">
 								<spring:message code="label.details"/>
 							</button>
 							<a href="${pageContext.request.contextPath}/admin-proposals/edit/${thesisProposal.externalId}" class="btn btn-default">
@@ -307,42 +310,75 @@ form{
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.goals'/></label>
 					<div class="col-sm-10">
-						<div class="information goals"></div>
+						<div id="goals" class="information goals"></div>
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.requirements'/></label>
 					<div class="col-sm-10">
-						<div class="information requirements"></div>
+						<div id="requirements" class="information requirements"></div>
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.localization'/></label>
 					<div class="col-sm-10">
-						<div class="information localization"></div>
+						<div id="localization" class="information localization"></div>
+					</div>
+				</div>
+
+				<div id="externalInstitutionBlock" class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.externalInstitution'/></label>
+					<div class="col-sm-10">
+						<div id="externalInstitution" class="information externalInstitution"></div>
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.observations'/></label>
 					<div class="col-sm-10">
-						<div class="information observations"></div>
+						<div id="observations" class="information observations"></div>
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.executionDegrees'/></label>
 					<div class="col-sm-10">
-						<div class="information degrees"></div>
+						<div class="information degrees">
+							<ul id="degrees">
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.isCapstone'/></label>
+					<div class="col-sm-10">
+						<div class="information capstone">
+							<span id="capstoneYes"><spring:message code="label.yes"/></span>
+							<span id="capstoneNo"><spring:message code="label.no"/></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.numberStudents'/></label>
+					<div class="col-sm-10">
+						<div class="information numberStudents">
+							Min: <span id="minStudents"> </span>
+							Max: <span id="mxStudents"> </span>
+						</div>
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.candidates'/></label>
 					<div class="col-sm-10">
-						<div class="information candidates"></div>
+						<div class="information candidates">
+							<ul id="candidates">
+							</ul>
+						</div>
 					</div>
 				</div>
 
@@ -380,10 +416,39 @@ jQuery(document).ready(function(){
 $(function(){
 	$(".detailsButton").on("click", function(evt){
 		var e = $(evt.target);
+		var tid = e.data('id');
 
-		['observations','requirements','goals','localization','degrees', 'candidates'].map(function(x){
-			$("#view ." + x).html(e.data(x).replace(/\n/g, '<br/>'));
-		});
+		<% for (final ThesisProposal thesisProposal : (List<ThesisProposal>) request.getAttribute("coordinatorProposals")) { %>
+			if (tid == '<%= thesisProposal.getExternalId() %>') {
+				$("#goals").html('<%= thesisProposal.getGoals().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+				$("#requirements").html('<%= thesisProposal.getRequirements().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+				$("#localization").html('<%= thesisProposal.getLocalization().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+				<% if (thesisProposal.getExternalColaboration()) { %>
+					$("#externalInstitution").html('<%= thesisProposal.getExternalInstitution().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+					$("#externalInstitutionBlock").show();
+				<% } else { %>
+					$("#externalInstitutionBlock").hide();
+				<% } %>
+				$("#observations").html('<%= thesisProposal.getObservations().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+				$("#degrees").empty();
+				<% for (final ExecutionDegree executionDegree : thesisProposal.getExecutionDegreeSet()) { %>
+					$("#degrees").append('<li><%= executionDegree.getDegreeCurricularPlan().getDegree().getSigla() %></li>');
+				<% } %>
+				<% if (thesisProposal.getIsCapstone()) { %>
+					$("#capstoneYes").show();
+					$("#capstoneNo").hide();
+				<% } else { %>
+					$("#capstoneNo").show();
+					$("#capstoneYes").hide();
+				<% } %>
+				$("#minStudents").html('<%= thesisProposal.getMinStudents() %>');
+				$("#mxStudents").html('<%= thesisProposal.getMaxStudents() %>');
+				$("#candidates").empty();
+				<% for (String s : new ThesisProposalsService().getThesisProposalCandidates(thesisProposal)) { %>
+					$("#candidates").append('<li><%= s %></li>');
+				<% } %>
+			}
+		<% } %>
 
 		$('#view').modal('show');
 	});
