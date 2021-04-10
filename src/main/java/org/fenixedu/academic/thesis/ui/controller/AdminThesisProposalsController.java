@@ -18,17 +18,8 @@
  */
 package org.fenixedu.academic.thesis.ui.controller;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
@@ -57,11 +48,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import pt.ist.fenixframework.FenixFramework;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
+import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 @SpringFunctionality(app = ThesisProposalsController.class, title = "title.thesisProposal.admin.management",
         accessGroup = "thesisSystemManagers | thesisCreators")
@@ -132,6 +129,13 @@ public class AdminThesisProposalsController {
                         thesisProposal.getRequirements(), thesisProposal.getGoals(), thesisProposal.getLocalization(),
                         thesisProposal.getThesisConfigurationSet(), thesisProposal.getStudentThesisCandidacySet(),
                         thesisProposalParticipantsBean, thesisProposal.getHidden(), thesisProposal.getExternalId());
+        thesisProposalBean.setExternalColaboration(thesisProposal.getExternalColaboration());
+        thesisProposalBean.setExternalInstitution(thesisProposal.getExternalInstitution());
+        thesisProposalBean.setAcceptExternalColaborationTerms(thesisProposal.getAcceptExternalColaborationTerms());
+        thesisProposalBean.setAcceptEthicsAndDataProtection(thesisProposal.getAcceptEthicsAndDataProtection());
+        thesisProposalBean.setCapstone(thesisProposal.getIsCapstone());
+        thesisProposalBean.setMinStudents(thesisProposal.getMinStudents());
+        thesisProposalBean.setMaxStudents(thesisProposal.getMaxStudents());
 
         ModelAndView mav = new ModelAndView("proposals/edit", "command", thesisProposalBean);
         Set<ThesisProposalsConfiguration> configurations = thesisProposal.getThesisConfigurationSet();

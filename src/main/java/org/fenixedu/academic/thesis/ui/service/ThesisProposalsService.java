@@ -1,19 +1,10 @@
 package org.fenixedu.academic.thesis.ui.service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.fenixedu.academic.domain.Enrolment;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
@@ -61,16 +52,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-
-import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ThesisProposalsService {
@@ -429,6 +427,13 @@ public class ThesisProposalsService {
             throw new OutOfProposalPeriodException();
         }
         thesisProposal.setLocalization(thesisProposalBean.getLocalization());
+        thesisProposal.setExternalColaboration(thesisProposalBean.getExternalColaboration());
+        thesisProposal.setExternalInstitution(thesisProposalBean.getExternalInstitution());
+        thesisProposal.setAcceptExternalColaborationTerms(thesisProposalBean.isAcceptExternalColaborationTerms());
+        thesisProposal.setAcceptEthicsAndDataProtection(thesisProposalBean.isAcceptEthicsAndDataProtection());
+        thesisProposal.setIsCapstone(thesisProposalBean.isCapstone());
+        thesisProposal.setMinStudents(thesisProposalBean.getMinStudents());
+        thesisProposal.setMaxStudents(thesisProposalBean.getMaxStudents());
     }
 
     @Atomic(mode = TxMode.WRITE)

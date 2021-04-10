@@ -4,6 +4,8 @@ package org.fenixedu.academic.thesis.domain;
 
 class ThesisProposalsSystem {
     	protected int proposalsCounter;
+    	public LocalizedString acceptExternalColaborationTerms;
+    	public LocalizedString acceptEthicsAndDataProtection;
 }
 
 class ThesisProposalsConfiguration {
@@ -23,6 +25,13 @@ class ThesisProposal {
  	public String goals;
  	public String localization;
  	public boolean hidden;
+    public boolean externalColaboration;
+    public String externalInstitution;
+    public boolean acceptExternalColaborationTerms;
+    public boolean acceptEthicsAndDataProtection;
+    public boolean isCapstone;
+    public int minStudents;
+    public int maxStudents;
  }
 
 class StudentThesisCandidacy {
