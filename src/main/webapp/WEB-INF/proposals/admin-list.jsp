@@ -328,6 +328,26 @@ form{
 					</div>
 				</div>
 
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.isCapstone'/></label>
+					<div class="col-sm-10">
+						<div class="information capstone">
+							<span id="capstoneYes"><spring:message code="label.yes"/></span>
+							<span id="capstoneNo"><spring:message code="label.no"/></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.numberStudents'/></label>
+					<div class="col-sm-10">
+						<div class="information numberStudents">
+							Min: <span id="minStudents"> </span>
+							Max: <span id="mxStudents"> </span>
+						</div>
+					</div>
+				</div>
+
 				<div id="externalInstitutionBlock" class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.externalInstitution'/></label>
 					<div class="col-sm-10">
@@ -348,26 +368,6 @@ form{
 						<div class="information degrees">
 							<ul id="degrees">
 							</ul>
-						</div>
-					</div>
-				</div>
-
-				<div class="form-group">
-					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.isCapstone'/></label>
-					<div class="col-sm-10">
-						<div class="information capstone">
-							<span id="capstoneYes"><spring:message code="label.yes"/></span>
-							<span id="capstoneNo"><spring:message code="label.no"/></span>
-						</div>
-					</div>
-				</div>
-
-				<div class="form-group">
-					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.numberStudents'/></label>
-					<div class="col-sm-10">
-						<div class="information numberStudents">
-							Min: <span id="minStudents"> </span>
-							Max: <span id="mxStudents"> </span>
 						</div>
 					</div>
 				</div>
