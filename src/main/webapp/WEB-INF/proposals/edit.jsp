@@ -205,6 +205,33 @@ ${portal.toolkit()}
 </div>
 
 	<div class="form-group row">
+		<form:label for="thesisProposalIsCapstone" path="capstone" class="col-sm-2 control-label">${isCapstone}</form:label>
+		<div class="col-sm-10">
+			<form:radiobutton path = "capstone" value = "true" id="thesisProposalIsCapstone" />
+			<spring:message code='label.yes'/>
+			<form:radiobutton path = "capstone" value = "false"  />
+			<spring:message code='label.no'/>
+		</div>
+	</div>
+
+	<div class="form-group row">
+		<form:label for="thesisProposalMinNumberStudents" path="minStudents" class="col-sm-2 control-label">${numberStudents}</form:label>
+
+		<div class="col-sm-2">
+			<div class="input-group">
+				<div class="input-group-addon">min</div>
+				<form:input path="minStudents" value="${minStudents}" name="minStudents" id="thesisProposalMinNumberStudents"/>
+			</div>
+		</div>
+		<div class="col-sm-2">
+			<div class="input-group">
+				<div class="input-group-addon">max</div>
+				<form:input path="maxStudents" value="${maxStudents}" name="maxStudents" id="thesisProposalMaxNumberStudents"/>
+			</div>
+		</div>
+	</div>
+
+	<div class="form-group row">
 		<form:label for="thesisProposalWithExternalColaboration" path="externalColaboration" class="col-sm-2 control-label">${externalColaboration}</form:label>
 		<div class="col-sm-10">
 			<form:radiobutton path = "externalColaboration" value = "true" id="thesisProposalWithExternalColaboration" onClick="checkboxListener(this); showExternalBlock();"/>
@@ -233,7 +260,17 @@ ${portal.toolkit()}
 		</div>
 	</div>
 
-<div class="form-group">
+	<div class="form-group row">
+		<form:label for="thesisProposalAcceptEthicsAndDataProtection" path="acceptEthicsAndDataProtection" class="col-sm-2 control-label"> </form:label>
+		<div class="col-sm-10">
+			<form:checkbox path="acceptEthicsAndDataProtection" id="thesisProposalAcceptEthicsAndDataProtection" onClick="checkboxListener(this)" />
+			<% if (ThesisProposalsSystem.getInstance().getAcceptEthicsAndDataProtection() != null) { %>
+			<%= ThesisProposalsSystem.getInstance().getAcceptEthicsAndDataProtection().getContent() %>
+			<% } %>
+		</div>
+	</div>
+
+	<div class="form-group">
 	<form:label for="thesisProposalObservations" path="observations" class="col-sm-2 control-label">${observations}</form:label>
 	<div class="col-sm-10">
 		<form:textarea rows="5" class="form-control" id="thesisProposalObservations" path="observations" placeholder="${observations}"/>
@@ -263,43 +300,6 @@ ${portal.toolkit()}
 	</c:forEach>
 </div>
 </div>
-
-	<div class="form-group row">
-		<form:label for="thesisProposalMinNumberStudents" path="minStudents" class="col-sm-2 control-label">${numberStudents}</form:label>
-
-		<div class="col-sm-2">
-			<div class="input-group">
-				<div class="input-group-addon">min</div>
-				<form:input path="minStudents" value="${minStudents}" name="minStudents" id="thesisProposalMinNumberStudents"/>
-			</div>
-		</div>
-		<div class="col-sm-2">
-			<div class="input-group">
-				<div class="input-group-addon">max</div>
-				<form:input path="maxStudents" value="${maxStudents}" name="maxStudents" id="thesisProposalMaxNumberStudents"/>
-			</div>
-		</div>
-	</div>
-
-	<div class="form-group row">
-		<form:label for="thesisProposalIsCapstone" path="capstone" class="col-sm-2 control-label">${isCapstone}</form:label>
-		<div class="col-sm-10">
-			<form:radiobutton path = "capstone" value = "true" id="thesisProposalIsCapstone" />
-			<spring:message code='label.yes'/>
-			<form:radiobutton path = "capstone" value = "false"  />
-			<spring:message code='label.no'/>
-		</div>
-	</div>
-
-	<div class="form-group row">
-		<form:label for="thesisProposalAcceptEthicsAndDataProtection" path="acceptEthicsAndDataProtection" class="col-sm-2 control-label"> </form:label>
-		<div class="col-sm-10">
-			<form:checkbox path="acceptEthicsAndDataProtection" id="thesisProposalAcceptEthicsAndDataProtection" onClick="checkboxListener(this)" />
-			<% if (ThesisProposalsSystem.getInstance().getAcceptEthicsAndDataProtection() != null) { %>
-			<%= ThesisProposalsSystem.getInstance().getAcceptEthicsAndDataProtection().getContent() %>
-			<% } %>
-		</div>
-	</div>
 
 	<div class="col-sm-offset-3 col-sm-8">
 	<div class="col-sm-2"><button type="submit" class="btn btn-default" id="submitButton">${saveButton}</button></div>
