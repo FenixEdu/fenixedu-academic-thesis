@@ -10,6 +10,7 @@ import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.Teacher;
 import org.fenixedu.academic.domain.accessControl.CoordinatorGroup;
+import org.fenixedu.academic.domain.degreeStructure.CycleType;
 import org.fenixedu.academic.domain.exceptions.DomainException;
 import org.fenixedu.academic.domain.student.Registration;
 import org.fenixedu.academic.domain.thesis.Thesis;
@@ -432,8 +433,21 @@ public class ThesisProposalsService {
         thesisProposal.setAcceptExternalColaborationTerms(thesisProposalBean.isAcceptExternalColaborationTerms());
         thesisProposal.setAcceptEthicsAndDataProtection(thesisProposalBean.isAcceptEthicsAndDataProtection());
         thesisProposal.setIsCapstone(thesisProposalBean.isCapstone());
-        thesisProposal.setMinStudents(thesisProposalBean.getMinStudents());
-        thesisProposal.setMaxStudents(thesisProposalBean.getMaxStudents());
+        if (!thesisProposalBean.isCapstone() || hasSecondCycle(thesisProposalBean.getThesisProposalsConfigurations())) {
+            thesisProposal.setMinStudents(1);
+            thesisProposal.setMaxStudents(1);
+        } else {
+            thesisProposal.setMinStudents(thesisProposalBean.getMinStudents());
+            thesisProposal.setMaxStudents(Integer.max(thesisProposalBean.getMaxStudents(), thesisProposalBean.getMaxStudents()));
+        }
+    }
+
+    private boolean hasSecondCycle(final Set<ThesisProposalsConfiguration> configurations) {
+        return configurations.stream()
+                .map(configuration -> configuration.getExecutionDegree())
+                .filter(executionDegree -> executionDegree != null)
+                .flatMap(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream())
+                .anyMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE);
     }
 
     @Atomic(mode = TxMode.WRITE)
