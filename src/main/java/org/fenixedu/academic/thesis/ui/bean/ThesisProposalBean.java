@@ -19,6 +19,7 @@
 package org.fenixedu.academic.thesis.ui.bean;
 
 import org.fenixedu.academic.domain.ExecutionDegree;
+import org.fenixedu.academic.domain.degreeStructure.CycleType;
 import org.fenixedu.academic.thesis.domain.StudentThesisCandidacy;
 import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
@@ -340,9 +341,22 @@ public class ThesisProposalBean {
             thesisProposal.setAcceptExternalColaborationTerms(acceptExternalColaborationTerms);
             thesisProposal.setAcceptEthicsAndDataProtection(acceptEthicsAndDataProtection);
             thesisProposal.setIsCapstone(isCapstone);
-            thesisProposal.setMinStudents(minStudents);
-            thesisProposal.setMaxStudents(maxStudents);
+            if (!isCapstone || hasSecondCycle()) {
+                thesisProposal.setMinStudents(1);
+                thesisProposal.setMaxStudents(1);
+            } else {
+                thesisProposal.setMinStudents(minStudents);
+                thesisProposal.setMaxStudents(Integer.max(minStudents, maxStudents));
+            }
             return thesisProposal;
+        }
+
+        private boolean hasSecondCycle() {
+            return configurations.stream()
+                    .map(configuration -> configuration.getExecutionDegree())
+                    .filter(executionDegree -> executionDegree != null)
+                    .flatMap(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream())
+                    .anyMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE);
         }
     }
 
