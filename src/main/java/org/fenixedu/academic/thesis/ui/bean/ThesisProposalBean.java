@@ -341,7 +341,7 @@ public class ThesisProposalBean {
             thesisProposal.setAcceptExternalColaborationTerms(acceptExternalColaborationTerms);
             thesisProposal.setAcceptEthicsAndDataProtection(acceptEthicsAndDataProtection);
             thesisProposal.setIsCapstone(isCapstone);
-            if (!isCapstone || hasSecondCycle()) {
+            if (hasSecondCycle() && !isCapstone) {
                 thesisProposal.setMinStudents(1);
                 thesisProposal.setMaxStudents(1);
             } else {
