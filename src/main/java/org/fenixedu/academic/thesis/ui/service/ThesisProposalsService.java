@@ -433,19 +433,17 @@ public class ThesisProposalsService {
         thesisProposal.setAcceptExternalColaborationTerms(thesisProposalBean.isAcceptExternalColaborationTerms());
         thesisProposal.setAcceptEthicsAndDataProtection(thesisProposalBean.isAcceptEthicsAndDataProtection());
         thesisProposal.setIsCapstone(thesisProposalBean.isCapstone());
-        if (!thesisProposalBean.isCapstone() || hasSecondCycle(thesisProposalBean.getThesisProposalsConfigurations())) {
+        if (hasSecondCycle(thesisProposal) && !thesisProposal.getIsCapstone()) {
             thesisProposal.setMinStudents(1);
             thesisProposal.setMaxStudents(1);
         } else {
             thesisProposal.setMinStudents(thesisProposalBean.getMinStudents());
-            thesisProposal.setMaxStudents(Integer.max(thesisProposalBean.getMaxStudents(), thesisProposalBean.getMaxStudents()));
+            thesisProposal.setMaxStudents(Integer.max(thesisProposalBean.getMinStudents(), thesisProposalBean.getMaxStudents()));
         }
     }
 
-    private boolean hasSecondCycle(final Set<ThesisProposalsConfiguration> configurations) {
-        return configurations.stream()
-                .map(configuration -> configuration.getExecutionDegree())
-                .filter(executionDegree -> executionDegree != null)
+    private boolean hasSecondCycle(final ThesisProposal thesisProposal) {
+        return thesisProposal.getExecutionDegreeSet().stream()
                 .flatMap(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream())
                 .anyMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE);
     }
