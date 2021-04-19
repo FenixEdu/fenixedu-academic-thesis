@@ -30,6 +30,7 @@ class ThesisProposal {
     public boolean acceptExternalColaborationTerms;
     public boolean acceptEthicsAndDataProtection;
     public boolean isCapstone;
+    public boolean isForFirstCycle;
     public int minStudents;
     public int maxStudents;
  }

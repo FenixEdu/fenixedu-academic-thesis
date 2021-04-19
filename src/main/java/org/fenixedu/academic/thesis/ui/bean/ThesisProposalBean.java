@@ -25,6 +25,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposal;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
+import org.fenixedu.academic.thesis.ui.exception.InvalidFirstCycleOptionForSelectedDegreesException;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.TotalParticipantPercentageException;
@@ -50,6 +51,7 @@ public class ThesisProposalBean {
     private boolean acceptExternalColaborationTerms;
     private boolean acceptEthicsAndDataProtection;
     private boolean isCapstone;
+    private boolean isForFirstCycle;
     private int minStudents = 1;
     private int maxStudents = 1;
     private Set<ThesisProposalsConfiguration> thesisProposalsConfigurations;
@@ -140,6 +142,14 @@ public class ThesisProposalBean {
 
     public void setCapstone(boolean capstone) {
         isCapstone = capstone;
+    }
+
+    public boolean isForFirstCycle() {
+        return isForFirstCycle;
+    }
+
+    public void setForFirstCycle(boolean forFirstCycle) {
+        isForFirstCycle = forFirstCycle;
     }
 
     public int getMinStudents() {
@@ -246,6 +256,7 @@ public class ThesisProposalBean {
         this.acceptExternalColaborationTerms = thesisProposal.getAcceptExternalColaborationTerms();
         this.acceptEthicsAndDataProtection = thesisProposal.getAcceptEthicsAndDataProtection();
         this.isCapstone = thesisProposal.getIsCapstone();
+        this.isForFirstCycle = thesisProposal.getIsForFirstCycle();
         this.minStudents = thesisProposal.getMinStudents();
         this.maxStudents = thesisProposal.getMaxStudents();
     }
@@ -264,6 +275,7 @@ public class ThesisProposalBean {
         public boolean acceptExternalColaborationTerms;
         public boolean acceptEthicsAndDataProtection;
         public boolean isCapstone;
+        public boolean isForFirstCycle;
         public int minStudents;
         public int maxStudents;
 
@@ -280,6 +292,7 @@ public class ThesisProposalBean {
             this.acceptExternalColaborationTerms = proposalBean.isAcceptExternalColaborationTerms();
             this.acceptEthicsAndDataProtection = proposalBean.isAcceptEthicsAndDataProtection();
             this.isCapstone = proposalBean.isCapstone();
+            this.isForFirstCycle = proposalBean.isForFirstCycle();
             this.minStudents = proposalBean.getMinStudents();
             this.maxStudents = proposalBean.getMaxStudents();
         }
@@ -341,6 +354,13 @@ public class ThesisProposalBean {
             thesisProposal.setAcceptExternalColaborationTerms(acceptExternalColaborationTerms);
             thesisProposal.setAcceptEthicsAndDataProtection(acceptEthicsAndDataProtection);
             thesisProposal.setIsCapstone(isCapstone);
+            thesisProposal.setIsForFirstCycle(isForFirstCycle);
+            if (isForFirstCycle && hasSecondCycle()) {
+                throw new InvalidFirstCycleOptionForSelectedDegreesException();
+            }
+            if (!isForFirstCycle && hasNonSecondCycle()) {
+                throw new InvalidFirstCycleOptionForSelectedDegreesException();
+            }
             if (hasSecondCycle() && !isCapstone) {
                 thesisProposal.setMinStudents(1);
                 thesisProposal.setMaxStudents(1);
@@ -355,8 +375,16 @@ public class ThesisProposalBean {
             return configurations.stream()
                     .map(configuration -> configuration.getExecutionDegree())
                     .filter(executionDegree -> executionDegree != null)
-                    .flatMap(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream())
-                    .anyMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE);
+                    .anyMatch(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream()
+                            .anyMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE));
+        }
+
+        private boolean hasNonSecondCycle() {
+            return configurations.stream()
+                    .map(configuration -> configuration.getExecutionDegree())
+                    .filter(executionDegree -> executionDegree != null)
+                    .anyMatch(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream()
+                            .noneMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE));
         }
     }
 

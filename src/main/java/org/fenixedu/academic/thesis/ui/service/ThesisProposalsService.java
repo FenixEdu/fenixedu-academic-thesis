@@ -26,6 +26,7 @@ import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.academic.thesis.ui.exception.CannotEditUsedThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.IllegalParticipantTypeException;
+import org.fenixedu.academic.thesis.ui.exception.InvalidFirstCycleOptionForSelectedDegreesException;
 import org.fenixedu.academic.thesis.ui.exception.InvalidPercentageException;
 import org.fenixedu.academic.thesis.ui.exception.InvalidUserException;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
@@ -433,6 +434,13 @@ public class ThesisProposalsService {
         thesisProposal.setAcceptExternalColaborationTerms(thesisProposalBean.isAcceptExternalColaborationTerms());
         thesisProposal.setAcceptEthicsAndDataProtection(thesisProposalBean.isAcceptEthicsAndDataProtection());
         thesisProposal.setIsCapstone(thesisProposalBean.isCapstone());
+        thesisProposal.setIsForFirstCycle(thesisProposalBean.isForFirstCycle());
+        if (thesisProposal.getIsForFirstCycle() && hasSecondCycle(thesisProposal)) {
+            throw new InvalidFirstCycleOptionForSelectedDegreesException();
+        }
+        if (!thesisProposal.getIsForFirstCycle() && hasNonSecondCycle(thesisProposal)) {
+            throw new InvalidFirstCycleOptionForSelectedDegreesException();
+        }
         if (hasSecondCycle(thesisProposal) && !thesisProposal.getIsCapstone()) {
             thesisProposal.setMinStudents(1);
             thesisProposal.setMaxStudents(1);
@@ -444,8 +452,14 @@ public class ThesisProposalsService {
 
     private boolean hasSecondCycle(final ThesisProposal thesisProposal) {
         return thesisProposal.getExecutionDegreeSet().stream()
-                .flatMap(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream())
-                .anyMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE);
+                .anyMatch(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream()
+                    .anyMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE));
+    }
+
+    private boolean hasNonSecondCycle(final ThesisProposal thesisProposal) {
+        return thesisProposal.getExecutionDegreeSet().stream()
+                .anyMatch(executionDegree -> executionDegree.getDegreeType().getCycleTypes().stream()
+                        .noneMatch(cycleType -> cycleType == CycleType.SECOND_CYCLE));
     }
 
     @Atomic(mode = TxMode.WRITE)

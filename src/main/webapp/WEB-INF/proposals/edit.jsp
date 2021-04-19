@@ -58,6 +58,7 @@ ${portal.toolkit()}
 <spring:message code='label.externalColaboration' var='externalColaboration'/>
 <spring:message code='label.externalInstitution' var='externalInstitution'/>
 <spring:message code='label.isCapstone' var='isCapstone'/>
+<spring:message code='label.isForFirstCycle' var='isForFirstCycle'/>
 <spring:message code='label.numberStudents' var='numberStudents'/>
 <spring:message code='label.executionDegrees' var='executionDegrees'/>
 <spring:message code='label.participants' var='participants'/>
@@ -72,6 +73,17 @@ ${portal.toolkit()}
 <spring:message code='label.participant.external' var='external'/>
 <spring:message code='label.participant.external.add' var='addExternal'/>
 
+
+<div class="form-group">
+	<form:label for="thesisProposalIsForFirstCycle" path="forFirstCycle" class="col-sm-2 control-label">${isForFirstCycle}</form:label>
+	<div class="col-sm-10">
+		<form:radiobutton path = "forFirstCycle" value = "true" id="thesisProposalIsForFirstCycle" />
+		<spring:message code='label.isForFirstCycle.yes'/>
+		<span style="margin-left: 5px;">&nbsp;</span>
+		<form:radiobutton path = "forFirstCycle" value = "false"  />
+		<spring:message code='label.isForFirstCycle.no'/>
+	</div>
+</div>
 
 
 <div class="form-group">
