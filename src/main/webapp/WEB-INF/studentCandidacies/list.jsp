@@ -323,6 +323,13 @@ $(function(){
 		<% for (final Set<ThesisProposal> thesisProposals : ((Map<Registration, Set<ThesisProposal>>) request.getAttribute("proposalsByReg")).values()) { %>
 		<% for (final ThesisProposal thesisProposal : thesisProposals) { %>
 		if (tid == '<%= thesisProposal.getExternalId() %>') {
+			<% if (thesisProposal.getIsForFirstCycle()) { %>
+			$("#forFirstCycleYes").show();
+			$("#forFirstCycleNo").hide();
+			<% } else { %>
+			$("#forFirstCycleNo").show();
+			$("#forFirstCycleYes").hide();
+			<% } %>
 			$("#goals").html('<%= thesisProposal.getGoals().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
 			$("#requirements").html('<%= thesisProposal.getRequirements().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
 			$("#localization").html('<%= thesisProposal.getLocalization().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
@@ -459,6 +466,16 @@ $(function(){
 				<small class="explanation"><spring:message code="label.modal.proposals.details"/></small>
 			</div>
 			<div class="modal-body">
+				<div class="form-group">
+					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.isForFirstCycle'/></label>
+					<div class="col-sm-10">
+						<div class="information forFirstCycle">
+							<span id="forFirstCycleYes"><spring:message code='label.isForFirstCycle.yes'/></span>
+							<span id="forFirstCycleNo"><spring:message code='label.isForFirstCycle.no'/></span>
+						</div>
+					</div>
+				</div>
+
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.goals'/></label>
 					<div class="col-sm-10">

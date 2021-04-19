@@ -226,6 +226,7 @@ public class ThesisProposalsController {
                     thesisProposalBean.setAcceptExternalColaborationTerms(thesisProposal.getAcceptExternalColaborationTerms());
                     thesisProposalBean.setAcceptEthicsAndDataProtection(thesisProposal.getAcceptEthicsAndDataProtection());
                     thesisProposalBean.setCapstone(thesisProposal.getIsCapstone());
+                    thesisProposalBean.setForFirstCycle(thesisProposal.getIsForFirstCycle());
                     thesisProposalBean.setMinStudents(thesisProposal.getMinStudents());
                     thesisProposalBean.setMaxStudents(thesisProposal.getMaxStudents());
 
