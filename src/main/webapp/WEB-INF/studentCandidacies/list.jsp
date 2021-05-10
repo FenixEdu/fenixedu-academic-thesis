@@ -331,15 +331,15 @@ $(function(){
 			$("#forFirstCycleYes").hide();
 			<% } %>
 			$("#goals").html('<%= thesisProposal.getGoals().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
-			$("#requirements").html('<%= thesisProposal.getRequirements().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
-			$("#localization").html('<%= thesisProposal.getLocalization().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+			$("#requirements").html('<%= thesisProposal.getRequirements().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
+			$("#localization").html('<%= thesisProposal.getLocalization().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
 			<% if (thesisProposal.getExternalColaboration()) { %>
-			$("#externalInstitution").html('<%= thesisProposal.getExternalInstitution().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+			$("#externalInstitution").html('<%= thesisProposal.getExternalInstitution().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
 			$("#externalInstitutionBlock").show();
 			<% } else { %>
 			$("#externalInstitutionBlock").hide();
 			<% } %>
-			$("#observations").html('<%= thesisProposal.getObservations().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+			$("#observations").html('<%= thesisProposal.getObservations().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
 			$("#degrees").empty();
 			<% for (final ExecutionDegree executionDegree : thesisProposal.getExecutionDegreeSet()) { %>
 			$("#degrees").append('<li><%= executionDegree.getDegreeCurricularPlan().getDegree().getSigla() %></li>');
