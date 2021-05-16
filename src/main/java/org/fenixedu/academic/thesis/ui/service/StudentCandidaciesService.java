@@ -20,6 +20,7 @@ package org.fenixedu.academic.thesis.ui.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.DegreeCurricularPlan;
 import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.academic.domain.StudentCurricularPlan;
@@ -46,7 +47,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class StudentCandidaciesService {
@@ -129,6 +132,8 @@ public class StudentCandidaciesService {
                 .map(CurriculumModule::getDegreeCurricularPlanOfDegreeModule)
                 .filter(Objects::nonNull)
                 .map(DegreeCurricularPlan::getDegree)
+                .flatMap(degree -> Degree.CONNECTED_DEGREE_STREAM.apply(degree))
+                .distinct()
                 .flatMap(degree -> degree.getExecutionDegrees().stream())
                 .flatMap((ExecutionDegree execDegree) -> execDegree.getThesisProposalsConfigurationSet().stream())
                 .collect(Collectors.toSet());
