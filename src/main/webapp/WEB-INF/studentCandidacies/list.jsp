@@ -330,7 +330,7 @@ $(function(){
 			$("#forFirstCycleNo").show();
 			$("#forFirstCycleYes").hide();
 			<% } %>
-			$("#goals").html('<%= thesisProposal.getGoals().replace('\r', ' ').replaceAll("\n", "<br/>") %>');
+			$("#goals").html('<%= thesisProposal.getGoals().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
 			$("#requirements").html('<%= thesisProposal.getRequirements().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
 			$("#localization").html('<%= thesisProposal.getLocalization().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
 			<% if (thesisProposal.getExternalColaboration()) { %>
