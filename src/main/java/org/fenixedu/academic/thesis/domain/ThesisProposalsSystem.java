@@ -20,10 +20,10 @@ package org.fenixedu.academic.thesis.domain;
 
 import org.fenixedu.academic.domain.Degree;
 import org.fenixedu.academic.domain.DegreeHelper;
+import org.fenixedu.academic.domain.ExecutionDegree;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
@@ -73,6 +73,14 @@ public class ThesisProposalsSystem extends ThesisProposalsSystem_Base {
     public static boolean canManage(Degree degree, User user) {
         return DegreeHelper.getCanManageThesis(degree).isMember(user)
                 || ThesisProposalsSystem.getInstance().getCanManageThesisGroup().isMember(user);
+    }
+
+    public static boolean canManage(final ExecutionDegree executionDegree, final User user) {
+        return canManage(executionDegree.getDegree(), user)
+                || executionDegree.getCoordinatorsListSet().stream()
+                    .anyMatch(coordinator -> coordinator.getPerson().getUser() == user)
+                || executionDegree.getScientificCommissionMembersSet().stream()
+                    .anyMatch(member -> member.getPerson().getUser() == user);
     }
 
     public String generateProposalIdentifier() {

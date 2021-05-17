@@ -83,7 +83,7 @@ public class ConfigurationController {
         List<ThesisProposalsConfiguration> configurationsList =
                 configurationsSet
                         .stream()
-                        .filter((x) -> ThesisProposalsSystem.canManage(x.getExecutionDegree().getDegree(), Authenticate.getUser()))
+                        .filter((x) -> ThesisProposalsSystem.canManage(x.getExecutionDegree(), Authenticate.getUser()))
                         .collect(Collectors.toList());
         Collections.sort(configurationsList, ThesisProposalsConfiguration.COMPARATOR_BY_YEAR_AND_EXECUTION_DEGREE);
 
@@ -269,7 +269,7 @@ public class ConfigurationController {
         List<ExecutionDegree> executionDegreeList =
                 ExecutionDegree.getAllByExecutionYear(executionYear).stream()
                         .filter(executionDegree -> isFirstOrSecondCycle(executionDegree))
-                        .filter((x) -> ThesisProposalsSystem.canManage(x.getDegree(), Authenticate.getUser()))
+                        .filter((x) -> ThesisProposalsSystem.canManage(x, Authenticate.getUser()))
                         .collect(Collectors.toList());
 
         Collections.sort(executionDegreeList,
