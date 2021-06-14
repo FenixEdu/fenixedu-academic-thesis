@@ -26,6 +26,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalParticipant;
 import org.fenixedu.academic.thesis.domain.ThesisProposalParticipantType;
 import org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration;
 import org.fenixedu.academic.thesis.ui.exception.InvalidFirstCycleOptionForSelectedDegreesException;
+import org.fenixedu.academic.thesis.ui.exception.InvalidNumberOfCoordinators;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.ThesisProposalException;
 import org.fenixedu.academic.thesis.ui.exception.TotalParticipantPercentageException;
@@ -360,6 +361,9 @@ public class ThesisProposalBean {
             }
             if (!isForFirstCycle && hasNonSecondCycle()) {
                 throw new InvalidFirstCycleOptionForSelectedDegreesException();
+            }
+            if (!isCapstone && thesisProposal.getThesisProposalParticipantSet().size() > 2) {
+                throw new InvalidNumberOfCoordinators();
             }
             if (hasSecondCycle() && !isCapstone) {
                 thesisProposal.setMinStudents(1);

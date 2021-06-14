@@ -27,6 +27,7 @@ import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.academic.thesis.ui.exception.CannotEditUsedThesisProposalsException;
 import org.fenixedu.academic.thesis.ui.exception.IllegalParticipantTypeException;
 import org.fenixedu.academic.thesis.ui.exception.InvalidFirstCycleOptionForSelectedDegreesException;
+import org.fenixedu.academic.thesis.ui.exception.InvalidNumberOfCoordinators;
 import org.fenixedu.academic.thesis.ui.exception.InvalidPercentageException;
 import org.fenixedu.academic.thesis.ui.exception.InvalidUserException;
 import org.fenixedu.academic.thesis.ui.exception.MaxNumberThesisProposalsException;
@@ -440,6 +441,9 @@ public class ThesisProposalsService {
         }
         if (!thesisProposal.getIsForFirstCycle() && hasNonSecondCycle(thesisProposal)) {
             throw new InvalidFirstCycleOptionForSelectedDegreesException();
+        }
+        if (!thesisProposal.getIsCapstone() && thesisProposal.getThesisProposalParticipantSet().size() > 2) {
+            throw new InvalidNumberOfCoordinators();
         }
         if (hasSecondCycle(thesisProposal) && !thesisProposal.getIsCapstone()) {
             thesisProposal.setMinStudents(1);

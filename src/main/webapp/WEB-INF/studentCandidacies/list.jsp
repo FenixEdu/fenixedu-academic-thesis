@@ -93,14 +93,6 @@
 
 			}
 		} );
-		$('.existingCandidaciesTable').DataTable().on( 'draw', function () {
-			$(".detailsButton").on("click", function(evt){
-				var e = $(evt.target);
-				var tid = e.data('thesis');
-
-				$('#view').modal('show');
-			});
-		} );
 		// $('.dataTables_filter').remove();
 	});
 </script>
@@ -309,12 +301,6 @@ $(document).ready(function() {
 </style>
 
 <script type="text/javascript">
-jQuery(document).ready(function(){
-	jQuery('.detailsButton').on('click', function(event) {
-		$("#details" + $(this).data("thesis")).toggle('show');
-	});
-});
-
 function escapeHtml(unsafe) {
 	return unsafe
 			.replace(/&/g, "&amp;")
@@ -325,7 +311,7 @@ function escapeHtml(unsafe) {
 }
 
 $(function(){
-	$(".detailsButton").on("click", function(evt){
+	$(".existingCandidaciesTable tbody").on("click", ".detailsButton", function(evt){
 		var e = $(evt.target);
 		var tid = e.data('thesis');
 
