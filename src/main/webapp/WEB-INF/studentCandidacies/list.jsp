@@ -301,6 +301,15 @@ $(document).ready(function() {
 </style>
 
 <script type="text/javascript">
+function escapeHtml(unsafe) {
+	return unsafe
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#039;");
+}
+
 $(function(){
 	$(".existingCandidaciesTable tbody").on("click", ".detailsButton", function(evt){
 		var e = $(evt.target);
@@ -316,16 +325,16 @@ $(function(){
 			$("#forFirstCycleNo").show();
 			$("#forFirstCycleYes").hide();
 			<% } %>
-			$("#goals").html('<%= thesisProposal.getGoals().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
-			$("#requirements").html('<%= thesisProposal.getRequirements().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
-			$("#localization").html('<%= thesisProposal.getLocalization().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
+			$("#goals").html(escapeHtml('<%= thesisProposal.getGoals().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
+			$("#requirements").html(escapeHtml('<%= thesisProposal.getRequirements().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
+			$("#localization").html(escapeHtml('<%= thesisProposal.getLocalization().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
 			<% if (thesisProposal.getExternalColaboration()) { %>
-			$("#externalInstitution").html('<%= thesisProposal.getExternalInstitution().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
+			$("#externalInstitution").html(escapeHtml('<%= thesisProposal.getExternalInstitution().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
 			$("#externalInstitutionBlock").show();
 			<% } else { %>
 			$("#externalInstitutionBlock").hide();
 			<% } %>
-			$("#observations").html('<%= thesisProposal.getObservations().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "<br/>") %>');
+			$("#observations").html(escapeHtml('<%= thesisProposal.getObservations().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
 			$("#degrees").empty();
 			<% for (final ExecutionDegree executionDegree : thesisProposal.getExecutionDegreeSet()) { %>
 			$("#degrees").append('<li><%= executionDegree.getDegreeCurricularPlan().getDegree().getSigla() %></li>');
@@ -465,21 +474,21 @@ $(function(){
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.goals'/></label>
 					<div class="col-sm-10">
-						<div id="goals" class="information goals"></div>
+						<pre id="goals" class="information goals"></pre>
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.requirements'/></label>
 					<div class="col-sm-10">
-						<div id="requirements" class="information requirements"></div>
+						<pre id="requirements" class="information requirements"></pre>
 					</div>
 				</div>
 
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.localization'/></label>
 					<div class="col-sm-10">
-						<div id="localization" class="information localization"></div>
+						<pre id="localization" class="information localization"></pre>
 					</div>
 				</div>
 
@@ -513,7 +522,7 @@ $(function(){
 				<div class="form-group">
 					<label for="name" path="name" class="col-sm-2 control-label"><spring:message code='label.observations'/></label>
 					<div class="col-sm-10">
-						<div id="observations" class="information observations"></div>
+						<pre id="observations" class="information observations"></pre>
 					</div>
 				</div>
 
