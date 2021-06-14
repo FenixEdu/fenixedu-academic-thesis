@@ -45,6 +45,10 @@
 	.dataTables_filter input {
 		width: 400px !important;
 	}
+
+	.modal pre {
+		white-space: pre-wrap;
+	}
 </style>
 
 <script type="text/javascript">
