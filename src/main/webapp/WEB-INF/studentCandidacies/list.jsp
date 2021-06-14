@@ -45,6 +45,10 @@
 	.dataTables_filter input {
 		width: 400px !important;
 	}
+
+	.modal pre {
+		white-space: pre-wrap;
+	}
 </style>
 
 <script type="text/javascript">
@@ -311,7 +315,7 @@ function escapeHtml(unsafe) {
 }
 
 $(function(){
-	$(".existingCandidaciesTable tbody").on("click", ".detailsButton", function(evt){
+	$("#candidaciesTable tbody").on("click", ".detailsButton", function(evt){
 		var e = $(evt.target);
 		var tid = e.data('thesis');
 
