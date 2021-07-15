@@ -2,7 +2,9 @@
 <%@ page import="java.util.List" %>
 <%@ page import="org.fenixedu.academic.domain.ExecutionDegree" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="java.util.Set" %><%--
+<%@ page import="java.util.Set" %>
+<%@ page import="org.fenixedu.academic.thesis.domain.ThesisProposalsConfiguration" %>
+<%@ page import="org.fenixedu.academic.thesis.domain.StudentThesisCandidacy" %><%--
 
     Copyright © 2014 Instituto Superior Técnico
 
@@ -315,12 +317,50 @@ function escapeHtml(unsafe) {
 }
 
 $(function(){
-	$("#candidaciesTable tbody").on("click", ".detailsButton", function(evt){
+	$(".table tbody").on("click", ".detailsButton", function(evt){
 		var e = $(evt.target);
 		var tid = e.data('thesis');
 
 		<% for (final Set<ThesisProposal> thesisProposals : ((Map<Registration, Set<ThesisProposal>>) request.getAttribute("proposalsByReg")).values()) { %>
 		<% for (final ThesisProposal thesisProposal : thesisProposals) { %>
+		if (tid == '<%= thesisProposal.getExternalId() %>') {
+			<% if (thesisProposal.getIsForFirstCycle()) { %>
+			$("#forFirstCycleYes").show();
+			$("#forFirstCycleNo").hide();
+			<% } else { %>
+			$("#forFirstCycleNo").show();
+			$("#forFirstCycleYes").hide();
+			<% } %>
+			$("#goals").html(escapeHtml('<%= thesisProposal.getGoals().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
+			$("#requirements").html(escapeHtml('<%= thesisProposal.getRequirements().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
+			$("#localization").html(escapeHtml('<%= thesisProposal.getLocalization().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
+			<% if (thesisProposal.getExternalColaboration()) { %>
+			$("#externalInstitution").html(escapeHtml('<%= thesisProposal.getExternalInstitution().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
+			$("#externalInstitutionBlock").show();
+			<% } else { %>
+			$("#externalInstitutionBlock").hide();
+			<% } %>
+			$("#observations").html(escapeHtml('<%= thesisProposal.getObservations().replace('\r', ' ').replace('\'', '`').replaceAll("\n", "\\\\n") %>'));
+			$("#degrees").empty();
+			<% for (final ExecutionDegree executionDegree : thesisProposal.getExecutionDegreeSet()) { %>
+			$("#degrees").append('<li><%= executionDegree.getDegreeCurricularPlan().getDegree().getSigla() %></li>');
+			<% } %>
+			<% if (thesisProposal.getIsCapstone()) { %>
+			$("#capstoneYes").show();
+			$("#capstoneNo").hide();
+			<% } else { %>
+			$("#capstoneNo").show();
+			$("#capstoneYes").hide();
+			<% } %>
+			$("#minStudents").html('<%= thesisProposal.getMinStudents() %>');
+			$("#mxStudents").html('<%= thesisProposal.getMaxStudents() %>');
+		}
+		<% } %>
+		<% } %>
+
+		<% for (final List<StudentThesisCandidacy> thesisCandidacies : ((Map<ThesisProposalsConfiguration, List<StudentThesisCandidacy>>) request.getAttribute("candidaciesByConfig")).values()) { %>
+		<% for (final StudentThesisCandidacy thesisCandidacy : thesisCandidacies) { %>
+		<% ThesisProposal thesisProposal = thesisCandidacy.getThesisProposal(); %>
 		if (tid == '<%= thesisProposal.getExternalId() %>') {
 			<% if (thesisProposal.getIsForFirstCycle()) { %>
 			$("#forFirstCycleYes").show();
