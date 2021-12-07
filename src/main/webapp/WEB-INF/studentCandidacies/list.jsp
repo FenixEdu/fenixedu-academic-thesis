@@ -60,10 +60,10 @@
 			"paging": true,
 			"order": [[ 0, "asc" ]],
 			"columnDefs": [
-					{ "orderable": false, "targets": [5] },
+					{ "orderable": false, "targets": [6] },
 			],
 			initComplete: function () {
-				this.api().columns([3,4]).every( function () {
+				this.api().columns([1,4,5]).every( function () {
 					var column = this;
 					var select = $('<select><option value="">----</option></select>')
 							.appendTo( $(column.footer()).empty() )
@@ -195,6 +195,7 @@
 							<thead>
 								<tr>
 									<th><spring:message code='label.thesis.id' /></th>
+									<th><spring:message code='label.type' /></th>
 									<th><spring:message code='label.title' /></th>
 									<th><spring:message code='label.participants' /></th>
 									<th><spring:message code='label.thesisProposal.applicationCount' /></th>
@@ -216,6 +217,14 @@
 											<c:set var="anyAccepted" scope="session" value="true"/>
 											<td>${candidacy.thesisProposal.identifier}<span class="badge">	<spring:message code='label.proposal.attributed'/></span></td>
 										</c:if>
+										<td>
+											<c:if test="${candidacy.thesisProposal.isForFirstCycle}">
+												<span id="forFirstCycleYes"><spring:message code='label.isForFirstCycle.yes'/></span>
+											</c:if>
+											<c:if test="${!candidacy.thesisProposal.isForFirstCycle}">
+												<span id="forFirstCycleNo"><spring:message code='label.isForFirstCycle.no'/></span>
+											</c:if>
+										</td>
 							<td>${candidacy.thesisProposal.title}</td>
 							<td>
 								<c:forEach items="${candidacy.thesisProposal.getSortedParticipants()}" var="participant">
@@ -420,6 +429,7 @@ $(function(){
 					<thead>
 						<tr>
 							<th><spring:message code='label.thesis.id' /></th>
+							<th><spring:message code='label.type' /></th>
 							<th><spring:message code='label.title' /></th>
 							<th><spring:message code='label.participants' /></th>
 							<th><spring:message code='label.thesisProposal.applicationCount' /></th>
@@ -429,6 +439,7 @@ $(function(){
 					</thead>
 					<tfoot>
 						<tr>
+							<th style="width: 10%"></th>
 							<th style="width: 10%"></th>
 							<th style="width: 30%"></th>
 							<th></th>
@@ -443,6 +454,14 @@ $(function(){
 
 						<tr>
 							<td>${proposal.identifier}</td>
+							<td>
+								<c:if test="${proposal.isForFirstCycle}">
+									<span id="forFirstCycleYes"><spring:message code='label.isForFirstCycle.yes'/></span>
+								</c:if>
+								<c:if test="${!proposal.isForFirstCycle}">
+									<span id="forFirstCycleNo"><spring:message code='label.isForFirstCycle.no'/></span>
+								</c:if>
+							</td>
 							<td>${proposal.title}</td>
 							<td>
 								<c:forEach items="${proposal.getSortedParticipants()}" var="participant">
