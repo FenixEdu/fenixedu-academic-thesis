@@ -25,6 +25,7 @@ import org.fenixedu.academic.thesis.domain.ThesisProposalsSystem;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalBean;
 import org.fenixedu.academic.thesis.ui.bean.ThesisProposalParticipantBean;
 import org.fenixedu.academic.thesis.ui.exception.CannotEditUsedThesisProposalsException;
+import org.fenixedu.academic.thesis.ui.exception.ExceedsMaxStudentsForProposalException;
 import org.fenixedu.academic.thesis.ui.exception.IllegalParticipantTypeException;
 import org.fenixedu.academic.thesis.ui.exception.InvalidFirstCycleOptionForSelectedDegreesException;
 import org.fenixedu.academic.thesis.ui.exception.InvalidNumberOfCoordinators;
@@ -467,14 +468,24 @@ public class ThesisProposalsService {
     }
 
     @Atomic(mode = TxMode.WRITE)
-    public void accept(StudentThesisCandidacy studentThesisCandidacy) {
+    public void accept(StudentThesisCandidacy studentThesisCandidacy) throws ThesisProposalException {
         final ThesisProposal thesisProposal = studentThesisCandidacy.getThesisProposal();
 
-        for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
-            candidacy.setAcceptedByAdvisor(false);
+        if (thesisProposal.getMaxStudents() == 1) {
+            for (StudentThesisCandidacy candidacy : thesisProposal.getStudentThesisCandidacySet()) {
+                candidacy.setAcceptedByAdvisor(false);
+            }
         }
 
         studentThesisCandidacy.setAcceptedByAdvisor(true);
+
+        final long acceptCount = thesisProposal.getStudentThesisCandidacySet().stream()
+                .filter(c -> c.getAcceptedByAdvisor())
+                .count();
+        if (acceptCount > thesisProposal.getMaxStudents()) {
+            throw new ExceedsMaxStudentsForProposalException(acceptCount);
+        }
+
         createThesisForStudent(studentThesisCandidacy);
 
         int orderOfPreference = studentThesisCandidacy.getPreferenceNumber();
