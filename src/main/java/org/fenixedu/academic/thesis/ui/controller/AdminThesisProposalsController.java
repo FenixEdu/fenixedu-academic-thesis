@@ -194,8 +194,11 @@ public class AdminThesisProposalsController {
     @RequestMapping(method = RequestMethod.GET, value = "acceptCandidacy/{oid}")
     public String attributeProposal(Model model, @PathVariable("oid") StudentThesisCandidacy studentThesisCandidacy,
             @RequestParam ThesisProposalsConfiguration configuration) {
-        service.accept(studentThesisCandidacy);
-
+        try {
+            service.accept(studentThesisCandidacy);
+        } catch (ThesisProposalException exception) {
+            model.addAttribute("error", exception.getClass().getSimpleName());
+        }
         return "redirect:/admin-proposals/candidates?configuration=" + configuration.getExternalId();
     }
 
@@ -253,9 +256,13 @@ public class AdminThesisProposalsController {
     }
 
     @RequestMapping(value = "/accept/{studentThesisCandidacy}", method = RequestMethod.POST)
-    public String acceptStudentThesisCandidacy(
-            @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
-        service.accept(studentThesisCandidacy);
+    public String acceptStudentThesisCandidacy(Model model,
+                                               @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
+        try {
+            service.accept(studentThesisCandidacy);
+        } catch (ThesisProposalException exception) {
+            model.addAttribute("error", exception.getClass().getSimpleName());
+        }
         return "redirect:/admin-proposals/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 

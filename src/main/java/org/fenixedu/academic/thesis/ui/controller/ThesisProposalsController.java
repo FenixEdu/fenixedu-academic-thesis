@@ -281,9 +281,13 @@ public class ThesisProposalsController {
     }
 
     @RequestMapping(value = "/accept/{studentThesisCandidacy}", method = RequestMethod.POST)
-    public String acceptStudentThesisCandidacy(
+    public String acceptStudentThesisCandidacy(Model model,
             @PathVariable("studentThesisCandidacy") StudentThesisCandidacy studentThesisCandidacy) {
-        service.accept(studentThesisCandidacy);
+        try {
+            service.accept(studentThesisCandidacy);
+        } catch (ThesisProposalException exception) {
+            model.addAttribute("error", exception.getClass().getSimpleName());
+        }
         return "redirect:/" + getBaseView() + "/manage/" + studentThesisCandidacy.getThesisProposal().getExternalId();
     }
 
