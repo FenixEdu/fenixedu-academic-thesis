@@ -396,7 +396,7 @@ public class ThesisProposalsService {
                                 .collect(Collectors.toSet()).size();
 
                 if (!(isManager || isDegreeCoordinator) && configuration.getMaxThesisProposalsByUser() != -1
-                        && proposalsCount >= configuration.getMaxThesisProposalsByUser()) {
+                        && proposalsCount > configuration.getMaxThesisProposalsByUser()) {
                     throw new MaxNumberThesisProposalsException(participant);
                 }
 
